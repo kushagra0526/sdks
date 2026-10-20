@@ -17,6 +17,11 @@ import {
   disconnectAgent,
 } from "./agent-disconnect.js";
 import { enrollAgent } from "./agent-enroll.js";
+import {
+  publishResumeNote,
+  type ResumeNoteClear,
+  type ResumeNoteWrite,
+} from "./agent-resume-note.js";
 import { verificationReplySubmitted } from "./agent-setup.js";
 import { refreshStoredCliCredentials } from "./api-client.js";
 import { loadCliCredentials } from "./auth.js";
@@ -77,6 +82,8 @@ export type SessionRegisterResult = {
   name?: string;
   /** Whether that name is still the one this command generated. */
   nameIsDefault?: boolean;
+  /** The AGENT_RESUME note, on a run that found the session connected. */
+  resumeNote?: ResumeNoteWrite;
   detail: string;
 };
 
@@ -96,8 +103,13 @@ export type SessionEndResult = {
   runtime: MachineRuntime;
   session: string | null;
   address: string | null;
+  /** The AGENT_RESUME note, on an end that disconnected the agent. */
+  resumeNote?: ResumeNoteClear | "skipped";
   detail: string;
 };
+
+/** What a disconnect did to the AGENT_RESUME note, filled in when known. */
+type DisconnectReport = { resumeNote?: ResumeNoteClear | "skipped" };
 
 /** The repository (or directory) a session works in, for its default name. */
 export function workspaceName(cwd: string): string {
@@ -664,6 +676,7 @@ async function disconnectSessionAgent(
   env: Env,
   fetchImpl?: typeof fetch,
   enrollmentSettled = false,
+  report: DisconnectReport = {},
 ): Promise<DisconnectOutcome> {
   try {
     const current = loadConnectedAgentProfile(configDir, record.profile);
@@ -684,7 +697,7 @@ async function disconnectSessionAgent(
       try {
         // Rechecked under the locks `agent connect` also takes, so a
         // credential connected after the check above is never revoked.
-        await deps.disconnect({
+        const disconnected = await deps.disconnect({
           configDir,
           profileName: record.profile,
           fetch: fetchImpl,
@@ -694,6 +707,8 @@ async function disconnectSessionAgent(
             invitationHash: current.invitation_hash,
           },
         });
+        if (disconnected?.resumeNote)
+          report.resumeNote = disconnected.resumeNote;
       } catch (error) {
         if (!(error instanceof AgentCredentialChangedError)) throw error;
         const holder = loadConnectedAgentProfile(configDir, record.profile);
@@ -728,6 +743,7 @@ async function finishSessionDisconnect(
   env: Env,
   fetchImpl?: typeof fetch,
   enrollmentSettled = false,
+  report: DisconnectReport = {},
 ): Promise<DisconnectOutcome> {
   const outcome = await disconnectSessionAgent(
     configDir,
@@ -736,6 +752,7 @@ async function finishSessionDisconnect(
     env,
     fetchImpl,
     enrollmentSettled,
+    report,
   );
   // Compare-and-set: a concurrent attempt may already have confirmed the
   // disconnect, and "done" is never replaced by a weaker result.
@@ -769,6 +786,13 @@ export type SessionRegisterDependencies = SessionDisconnectDependencies & {
     value: string,
   ) => Promise<"created" | "already_present" | "failed" | string>;
   connectionState: (profile: ConnectedAgentProfile) => Promise<ConnectionState>;
+  /** Writes the AGENT_RESUME note; best effort. */
+  publishResumeNote: (
+    configDir: string,
+    profileName: string,
+    runtime: MachineRuntime,
+    sessionId: string,
+  ) => Promise<ResumeNoteWrite>;
   ompSession: (configDir: string) => string | null;
   now: () => Date;
 };
@@ -847,6 +871,14 @@ export async function registerSession(
         seedAgentInfoNote(configDir, profileName, value, options.fetch),
       connectionState: (profile) =>
         agentConnectionState(profile, options.fetch),
+      publishResumeNote: (configDir, profileName, runtime, sessionId) =>
+        publishResumeNote({
+          configDir,
+          profileName,
+          runtime,
+          sessionId,
+          fetch: options.fetch,
+        }),
       ompSession: ompProcessSession,
       ...DISCONNECT_DEFAULTS,
     },
@@ -1038,6 +1070,26 @@ export async function registerSession(
         (current) => (current ? { ...current, agentInfo: seeded } : current),
       );
     };
+    // The command that resumes this exact session, for whoever reads the
+    // agent's notes. Written on every start and resume, but sent only when
+    // it changed. A failure never fails the registration.
+    const finishResumeNote = async (): Promise<
+      { resumeNote: ResumeNoteWrite } | Record<string, never>
+    > => {
+      if (runtime === "omp") return {};
+      try {
+        return {
+          resumeNote: await deps.publishResumeNote(
+            options.configDir,
+            profileName,
+            runtime,
+            sessionId,
+          ),
+        };
+      } catch {
+        return { resumeNote: "failed" };
+      }
+    };
     // Runs on every start and resume without anyone naming the profile, so
     // it never binds this profile beside another one the session already
     // receives as (the owner may have removed these hooks on purpose).
@@ -1106,10 +1158,12 @@ export async function registerSession(
       if (state === "connected") {
         const hooked = installHook(existing);
         await finishAgentInfo();
+        const resumeNote = await finishResumeNote();
         return {
           ...withAddress,
           receiving: RECEIVING[runtime],
           status: "already_registered",
+          ...resumeNote,
           detail:
             hooked === "installed"
               ? "This session is already connected."
@@ -1226,7 +1280,11 @@ export async function registerSession(
     let hooked: HookOutcome = "installed";
     if (runtime === "claude" && submitted && status !== "owner_inactive")
       hooked = claudeHook(address);
-    if (status === "connected") await finishAgentInfo();
+    let resumeNote: Awaited<ReturnType<typeof finishResumeNote>> = {};
+    if (status === "connected") {
+      await finishAgentInfo();
+      resumeNote = await finishResumeNote();
+    }
     const withAddress = { ...known, address, receiving: RECEIVING[runtime] };
     // Every name this command records is generated, so the connection still
     // has a default name unless it was renamed while setup was pending.
@@ -1237,6 +1295,7 @@ export async function registerSession(
         status: "registered",
         name,
         nameIsDefault: name === record.name,
+        ...resumeNote,
         detail:
           hooked === "installed"
             ? `Connected as ${address}.`
@@ -1510,12 +1569,15 @@ export async function endSession(options: {
     }
     if (record.disconnect === "kept")
       return { ...known, status: "kept", detail: KEPT_DETAIL };
+    const report: DisconnectReport = {};
     const outcome = await finishSessionDisconnect(
       options.configDir,
       record,
       deps,
       env,
       options.fetch,
+      false,
+      report,
     );
     if (outcome === "released")
       return {
@@ -1528,6 +1590,7 @@ export async function endSession(options: {
       ? {
           ...known,
           status: "disconnected",
+          ...(report.resumeNote ? { resumeNote: report.resumeNote } : {}),
           detail: "This session's agent was disconnected.",
         }
       : {
