@@ -12,6 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { saveConnectedAgentProfile } from "../../src/oclif/connected-agent-profile.js";
 import { acquireListenLock } from "../../src/oclif/listen-state.js";
 import {
   clearConsumedPendingMail,
@@ -407,4 +408,110 @@ describe("pending notices for consumed replies", () => {
       expect(readPendingMail(configDir, profile, session)).toEqual([mail(1)]);
     },
   );
+});
+
+describe("pending mail in one thread", () => {
+  const thread = "44444444-4444-4444-8444-444444444444";
+  const other = "55555555-5555-4555-8555-555555555555";
+  const at = (n: number) =>
+    new Date(Date.parse("2026-10-01T00:00:00.000Z") + n * 60_000).toISOString();
+  const inThread = (n: number, extra: Partial<PendingMailNotice> = {}) =>
+    mail(n, {
+      thread_id: thread,
+      in_thread: true,
+      received_at: at(n),
+      ...extra,
+    });
+
+  it("keeps only the newest tick of a repeating message", async () => {
+    for (let n = 0; n < 24; n++)
+      await recordPendingMail(
+        configDir,
+        profile,
+        session,
+        inThread(n, { newer: 23 - n, interaction: "repeat.tick/1" }),
+      );
+    expect(
+      readPendingMail(configDir, profile, session).map((row) => row.email_id),
+    ).toEqual([id(23)]);
+  });
+
+  it("never drops ordinary mail when it is recorded, only when it is covered", async () => {
+    for (let n = 0; n < 3; n++)
+      await recordPendingMail(configDir, profile, session, inThread(n));
+    await recordPendingMail(
+      configDir,
+      profile,
+      session,
+      mail(9, { thread_id: other, in_thread: true, received_at: at(0) }),
+    );
+    expect(readPendingMail(configDir, profile, session)).toHaveLength(4);
+    // Reading the newest message in the thread covers the older ones there.
+    await clearReadPendingMail(configDir, profile, session, id(2));
+    expect(
+      readPendingMail(configDir, profile, session).map((row) => row.email_id),
+    ).toEqual([id(9)]);
+  });
+
+  it("treats reading or answering a middle message as covering only older ones", async () => {
+    for (let n = 0; n < 3; n++)
+      await recordPendingMail(configDir, profile, session, inThread(n));
+    await clearReadPendingMail(configDir, profile, session, id(1));
+    expect(
+      readPendingMail(configDir, profile, session).map((row) => row.email_id),
+    ).toEqual([id(2)]);
+  });
+
+  it("uses the email's own thread and time when it has no notice", async () => {
+    for (let n = 0; n < 3; n++)
+      await recordPendingMail(configDir, profile, session, inThread(n));
+    // An answer to a message newer than every notice, such as a reply sent
+    // after reading the thread elsewhere.
+    await clearReadPendingMail(configDir, profile, session, id(7), {
+      thread_id: thread.toUpperCase(),
+      received_at: at(7),
+    });
+    expect(readPendingMail(configDir, profile, session)).toEqual([]);
+  });
+
+  it("covers older mail when a wait consumes a newer reply that has no notice", async () => {
+    const connect = (name: string, address: string) =>
+      saveConnectedAgentProfile(configDir, name, {
+        version: 1,
+        auth_method: "agent_connection",
+        api_key: ["pconn", "fixture", name].join("_"),
+        api_base_url: "https://api.primitive.dev/v1",
+        org_id: "22222222-2222-4222-8222-222222222222",
+        agent_address: address,
+        owner_address: "owner@example.test",
+        invitation_hash: "a".repeat(64),
+        created_at: "2026-01-01T00:00:00.000Z",
+      });
+    connect(profile, "work@example.test");
+    mkdirSync(join(configDir, "agent-connections", "profiles", "other"), {
+      recursive: true,
+      mode: 0o700,
+    });
+    connect("other", "other@example.test");
+    for (let n = 0; n < 2; n++) {
+      await recordPendingMail(configDir, profile, session, inThread(n));
+      await recordPendingMail(configDir, "other", session, inThread(n));
+    }
+    // The wait consumed a newer reply the listener left to it unjournaled.
+    await clearConsumedPendingMail(configDir, `claude:${session}`, id(5), {
+      thread_id: thread,
+      received_at: at(5),
+      recipient: "work@example.test",
+    });
+    expect(readPendingMail(configDir, profile, session)).toEqual([]);
+    // Another address bound to the session did not receive that reply.
+    expect(readPendingMail(configDir, "other", session)).toHaveLength(2);
+  });
+
+  it("covers older mail when an exact reply is consumed by a wait", async () => {
+    for (let n = 0; n < 2; n++)
+      await recordPendingMail(configDir, profile, session, inThread(n));
+    await clearConsumedPendingMail(configDir, `claude:${session}`, id(1));
+    expect(readPendingMail(configDir, profile, session)).toEqual([]);
+  });
 });
