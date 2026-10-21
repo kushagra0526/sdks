@@ -8525,7 +8525,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "type": "object",
                 "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -8611,11 +8611,9 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "references",
                   "automation"
                 ]
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -9216,7 +9214,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
               },
               "headers": {
-                "anyOf": [
+                "allOf": [
                   {
                     "type": "object",
                     "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -9302,11 +9300,9 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                       "references",
                       "automation"
                     ]
-                  },
-                  {
-                    "type": "null"
                   }
                 ],
+                "nullable": true,
                 "description": "With `include=headers`: stored addressing and threading headers."
               },
               "attachments": {
@@ -18345,7 +18341,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "anyOf": [
+              "allOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -18431,27 +18427,23 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
-                },
-                {
-                  "type": "null"
                 }
               ],
+              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {
-              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "type": "array",
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "items": {
                 "type": "object",
+                "description": "Metadata for one submitted inline attachment.",
+                "additionalProperties": true,
                 "properties": {
                   "filename": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "content_type": {
@@ -18481,8 +18473,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "sha256",
                   "part_index",
                   "tar_path"
-                ],
-                "additionalProperties": {}
+                ]
               }
             },
             "truncated": {
@@ -19462,7 +19453,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "anyOf": [
+              "allOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -19548,27 +19539,23 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
-                },
-                {
-                  "type": "null"
                 }
               ],
+              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {
-              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "type": "array",
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "items": {
                 "type": "object",
+                "description": "Metadata for one submitted inline attachment.",
+                "additionalProperties": true,
                 "properties": {
                   "filename": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "content_type": {
@@ -19598,8 +19585,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "sha256",
                   "part_index",
                   "tar_path"
-                ],
-                "additionalProperties": {}
+                ]
               }
             },
             "truncated": {
@@ -20313,7 +20299,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "type": "object",
                 "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -20399,27 +20385,23 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "references",
                   "automation"
                 ]
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
-            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "type": "array",
+            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "items": {
               "type": "object",
+              "description": "Metadata for one submitted inline attachment.",
+              "additionalProperties": true,
               "properties": {
                 "filename": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
+                  "type": [
+                    "string",
+                    "null"
                   ]
                 },
                 "content_type": {
@@ -20449,8 +20431,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "sha256",
                 "part_index",
                 "tar_path"
-              ],
-              "additionalProperties": {}
+              ]
             }
           },
           "truncated": {
@@ -21178,7 +21159,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "anyOf": [
+              "allOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -21264,27 +21245,23 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
-                },
-                {
-                  "type": "null"
                 }
               ],
+              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {
-              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "type": "array",
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
               "items": {
                 "type": "object",
+                "description": "Metadata for one submitted inline attachment.",
+                "additionalProperties": true,
                 "properties": {
                   "filename": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "content_type": {
@@ -21314,8 +21291,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "sha256",
                   "part_index",
                   "tar_path"
-                ],
-                "additionalProperties": {}
+                ]
               }
             },
             "truncated": {

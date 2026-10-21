@@ -1905,7 +1905,7 @@ export type EmailSummary = {
     /**
      * With `include=headers`: stored addressing and threading headers.
      */
-    headers?: IncludedMessageHeaders | unknown;
+    headers?: IncludedMessageHeaders | null;
     /**
      * With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes.
      */
@@ -3148,12 +3148,12 @@ export type SentEmailSummary = {
     /**
      * With `include=headers`: stored addressing and threading headers.
      */
-    headers?: IncludedMessageHeaders | unknown;
+    headers?: IncludedMessageHeaders | null;
     /**
      * Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.
      */
     attachments?: Array<{
-        filename: string | unknown;
+        filename: string | null;
         content_type: string;
         size_bytes: number;
         sha256: string;

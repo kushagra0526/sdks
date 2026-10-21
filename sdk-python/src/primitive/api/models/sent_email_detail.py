@@ -1047,11 +1047,11 @@ class SentEmailDetail:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                headers_type_0 = IncludedMessageHeaders.from_dict(data)
+                headers_type_1 = IncludedMessageHeaders.from_dict(data)
 
 
 
-                return headers_type_0
+                return headers_type_1
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(IncludedMessageHeaders | None | Unset, data)

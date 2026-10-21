@@ -18263,14 +18263,12 @@
             "nullable": true
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -19890,31 +19888,25 @@
             "nullable": true
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
-            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "type": "array",
+            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "items": {
               "type": "object",
+              "description": "Metadata for one submitted inline attachment.",
+              "additionalProperties": true,
               "properties": {
                 "filename": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                  "type": "string",
+                  "nullable": true
                 },
                 "content_type": {
                   "type": "string"
@@ -19943,8 +19935,7 @@
                 "sha256",
                 "part_index",
                 "tar_path"
-              ],
-              "additionalProperties": {}
+              ]
             }
           },
           "truncated": {

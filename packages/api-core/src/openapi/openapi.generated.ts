@@ -18582,14 +18582,12 @@ export const openapiDocument: Record<string, unknown> = {
             "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -20423,30 +20421,26 @@ export const openapiDocument: Record<string, unknown> = {
             "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
           },
           "headers": {
-            "anyOf": [
+            "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
-              },
-              {
-                "type": "null"
               }
             ],
+            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
-            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "type": "array",
+            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
             "items": {
               "type": "object",
+              "description": "Metadata for one submitted inline attachment.",
+              "additionalProperties": true,
               "properties": {
                 "filename": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
+                  "type": [
+                    "string",
+                    "null"
                   ]
                 },
                 "content_type": {
@@ -20476,8 +20470,7 @@ export const openapiDocument: Record<string, unknown> = {
                 "sha256",
                 "part_index",
                 "tar_path"
-              ],
-              "additionalProperties": {}
+              ]
             }
           },
           "truncated": {

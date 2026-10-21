@@ -41814,6 +41814,7 @@ func (s *SentEmailSummary) SetTruncatedFields(val []SentEmailSummaryTruncatedFie
 	s.TruncatedFields = val
 }
 
+// Metadata for one submitted inline attachment.
 type SentEmailSummaryAttachmentsItem struct {
 	Filename        NilString `json:"filename"`
 	ContentType     string    `json:"content_type"`
