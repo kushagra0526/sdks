@@ -17,6 +17,10 @@ type AwaitReplyRes interface {
 	awaitReplyRes()
 }
 
+type CancelSentEmailByIdempotencyKeyRes interface {
+	cancelSentEmailByIdempotencyKeyRes()
+}
+
 type CancelSentEmailRes interface {
 	cancelSentEmailRes()
 }
@@ -181,12 +185,28 @@ type DownloadDomainZoneFileRes interface {
 	downloadDomainZoneFileRes()
 }
 
+type DownloadEmailAttachmentArchiveMemberRes interface {
+	downloadEmailAttachmentArchiveMemberRes()
+}
+
+type DownloadEmailAttachmentByFilenameRes interface {
+	downloadEmailAttachmentByFilenameRes()
+}
+
 type DownloadEmailAttachmentPartRes interface {
 	downloadEmailAttachmentPartRes()
 }
 
 type DownloadRawEmailRes interface {
 	downloadRawEmailRes()
+}
+
+type DownloadSentAttachmentArchiveMemberRes interface {
+	downloadSentAttachmentArchiveMemberRes()
+}
+
+type DownloadSentAttachmentByFilenameRes interface {
+	downloadSentAttachmentByFilenameRes()
 }
 
 type DownloadSentAttachmentPartRes interface {
@@ -325,6 +345,10 @@ type ListAgentNetworksRes interface {
 	listAgentNetworksRes()
 }
 
+type ListChangesRes interface {
+	listChangesRes()
+}
+
 type ListContactsRes interface {
 	listContactsRes()
 }
@@ -347,6 +371,10 @@ type ListDeliveriesRes interface {
 
 type ListDomainsRes interface {
 	listDomainsRes()
+}
+
+type ListEmailAttachmentArchiveMembersRes interface {
+	listEmailAttachmentArchiveMembersRes()
 }
 
 type ListEmailsRes interface {
@@ -395,6 +423,10 @@ type ListRepeatingSendsRes interface {
 
 type ListRoutesRes interface {
 	listRoutesRes()
+}
+
+type ListSentAttachmentArchiveMembersRes interface {
+	listSentAttachmentArchiveMembersRes()
 }
 
 type ListSentEmailsRes interface {

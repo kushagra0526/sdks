@@ -32,11 +32,26 @@ from .agent_signup_start_result import AgentSignupStartResult
 from .agent_signup_verify_result import AgentSignupVerifyResult
 from .agent_signup_verify_result_auth_method import AgentSignupVerifyResultAuthMethod
 from .agent_signup_verify_result_token_type import AgentSignupVerifyResultTokenType
+from .archive_member import ArchiveMember
+from .archive_members import ArchiveMembers
+from .archive_members_format import ArchiveMembersFormat
 from .await_reply_response_200 import AwaitReplyResponse200
 from .await_reply_result import AwaitReplyResult
 from .caller_identity import CallerIdentity
 from .caller_identity_member_address_type_0 import CallerIdentityMemberAddressType0
+from .cancel_sent_email_by_idempotency_key_body import CancelSentEmailByIdempotencyKeyBody
+from .cancel_sent_email_by_idempotency_key_response_200 import CancelSentEmailByIdempotencyKeyResponse200
 from .cancel_sent_email_response_200 import CancelSentEmailResponse200
+from .change import Change
+from .change_inbound_message import ChangeInboundMessage
+from .change_inbound_message_direction import ChangeInboundMessageDirection
+from .change_kind import ChangeKind
+from .change_outbound_message import ChangeOutboundMessage
+from .change_outbound_message_direction import ChangeOutboundMessageDirection
+from .change_page import ChangePage
+from .change_reason_type_1 import ChangeReasonType1
+from .change_reason_type_2_type_1 import ChangeReasonType2Type1
+from .change_reason_type_3_type_1 import ChangeReasonType3Type1
 from .check_default_network_contact_admission_response_200 import CheckDefaultNetworkContactAdmissionResponse200
 from .check_domain_dns_response_200 import CheckDomainDnsResponse200
 from .claim_agent_connection_body import ClaimAgentConnectionBody
@@ -216,11 +231,13 @@ from .email_search_result import EmailSearchResult
 from .email_search_result_direction import EmailSearchResultDirection
 from .email_status import EmailStatus
 from .email_summary import EmailSummary
+from .email_summary_attachments_item import EmailSummaryAttachmentsItem
 from .email_summary_automation_headers_type_0 import EmailSummaryAutomationHeadersType0
 from .email_summary_awaiting import EmailSummaryAwaiting
 from .email_summary_relay_type_0 import EmailSummaryRelayType0
 from .email_summary_repeat_type_0 import EmailSummaryRepeatType0
 from .email_summary_sender_member_type_0 import EmailSummarySenderMemberType0
+from .email_summary_truncated_fields_item import EmailSummaryTruncatedFieldsItem
 from .email_webhook_status_type_1 import EmailWebhookStatusType1
 from .email_webhook_status_type_2_type_1 import EmailWebhookStatusType2Type1
 from .email_webhook_status_type_3_type_1 import EmailWebhookStatusType3Type1
@@ -309,6 +326,8 @@ from .inbox_status_function_summary import InboxStatusFunctionSummary
 from .inbox_status_next_action import InboxStatusNextAction
 from .inbox_status_next_action_kind import InboxStatusNextActionKind
 from .inbox_status_recent_email_summary import InboxStatusRecentEmailSummary
+from .included_message_headers import IncludedMessageHeaders
+from .included_message_headers_automation_type_0 import IncludedMessageHeadersAutomationType0
 from .install_template_body import InstallTemplateBody
 from .install_template_body_secrets import InstallTemplateBodySecrets
 from .install_template_body_variables import InstallTemplateBodyVariables
@@ -330,6 +349,8 @@ from .list_agent_contacts_response_200 import ListAgentContactsResponse200
 from .list_agent_contacts_response_200_data_item import ListAgentContactsResponse200DataItem
 from .list_agent_contacts_response_200_meta import ListAgentContactsResponse200Meta
 from .list_agent_networks_response_200 import ListAgentNetworksResponse200
+from .list_changes_expand import ListChangesExpand
+from .list_changes_response_200 import ListChangesResponse200
 from .list_contacts_response_200 import ListContactsResponse200
 from .list_contacts_response_200_data_item import ListContactsResponse200DataItem
 from .list_contacts_response_200_meta import ListContactsResponse200Meta
@@ -339,9 +360,11 @@ from .list_default_network_members_response_200 import ListDefaultNetworkMembers
 from .list_deliveries_response_200 import ListDeliveriesResponse200
 from .list_deliveries_status import ListDeliveriesStatus
 from .list_domains_response_200 import ListDomainsResponse200
+from .list_email_attachment_archive_members_response_200 import ListEmailAttachmentArchiveMembersResponse200
 from .list_emails_automated import ListEmailsAutomated
 from .list_emails_awaiting import ListEmailsAwaiting
 from .list_emails_exclude_fyi import ListEmailsExcludeFyi
+from .list_emails_from_verified import ListEmailsFromVerified
 from .list_emails_response_200 import ListEmailsResponse200
 from .list_endpoints_response_200 import ListEndpointsResponse200
 from .list_envelope import ListEnvelope
@@ -359,6 +382,7 @@ from .list_registry_agents_response_200 import ListRegistryAgentsResponse200
 from .list_registry_requests_response_200 import ListRegistryRequestsResponse200
 from .list_repeating_sends_response_200 import ListRepeatingSendsResponse200
 from .list_routes_response_200 import ListRoutesResponse200
+from .list_sent_attachment_archive_members_response_200 import ListSentAttachmentArchiveMembersResponse200
 from .list_sent_emails_response_200 import ListSentEmailsResponse200
 from .list_templates_response_200 import ListTemplatesResponse200
 from .list_wake_authorizations_response_200 import ListWakeAuthorizationsResponse200
@@ -479,6 +503,7 @@ from .search_emails_automated import SearchEmailsAutomated
 from .search_emails_awaiting import SearchEmailsAwaiting
 from .search_emails_count import SearchEmailsCount
 from .search_emails_direction import SearchEmailsDirection
+from .search_emails_from_verified import SearchEmailsFromVerified
 from .search_emails_has_attachment import SearchEmailsHasAttachment
 from .search_emails_include_facets import SearchEmailsIncludeFacets
 from .search_emails_prefix import SearchEmailsPrefix
@@ -526,8 +551,10 @@ from .sent_email_detail_tags_type_0_item import SentEmailDetailTagsType0Item
 from .sent_email_reschedule_input import SentEmailRescheduleInput
 from .sent_email_status import SentEmailStatus
 from .sent_email_summary import SentEmailSummary
+from .sent_email_summary_attachments_item import SentEmailSummaryAttachmentsItem
 from .sent_email_summary_repeat_type_0 import SentEmailSummaryRepeatType0
 from .sent_email_summary_sender_member_type_0 import SentEmailSummarySenderMemberType0
+from .sent_email_summary_truncated_fields_item import SentEmailSummaryTruncatedFieldsItem
 from .set_function_route_response_200 import SetFunctionRouteResponse200
 from .set_function_secret_input import SetFunctionSecretInput
 from .set_function_secret_response_200 import SetFunctionSecretResponse200
@@ -697,11 +724,26 @@ __all__ = (
     "AgentSignupVerifyResult",
     "AgentSignupVerifyResultAuthMethod",
     "AgentSignupVerifyResultTokenType",
+    "ArchiveMember",
+    "ArchiveMembers",
+    "ArchiveMembersFormat",
     "AwaitReplyResponse200",
     "AwaitReplyResult",
     "CallerIdentity",
     "CallerIdentityMemberAddressType0",
+    "CancelSentEmailByIdempotencyKeyBody",
+    "CancelSentEmailByIdempotencyKeyResponse200",
     "CancelSentEmailResponse200",
+    "Change",
+    "ChangeInboundMessage",
+    "ChangeInboundMessageDirection",
+    "ChangeKind",
+    "ChangeOutboundMessage",
+    "ChangeOutboundMessageDirection",
+    "ChangePage",
+    "ChangeReasonType1",
+    "ChangeReasonType2Type1",
+    "ChangeReasonType3Type1",
     "CheckDefaultNetworkContactAdmissionResponse200",
     "CheckDomainDnsResponse200",
     "ClaimAgentConnectionBody",
@@ -881,11 +923,13 @@ __all__ = (
     "EmailSearchResultDirection",
     "EmailStatus",
     "EmailSummary",
+    "EmailSummaryAttachmentsItem",
     "EmailSummaryAutomationHeadersType0",
     "EmailSummaryAwaiting",
     "EmailSummaryRelayType0",
     "EmailSummaryRepeatType0",
     "EmailSummarySenderMemberType0",
+    "EmailSummaryTruncatedFieldsItem",
     "EmailWebhookStatusType1",
     "EmailWebhookStatusType2Type1",
     "EmailWebhookStatusType3Type1",
@@ -974,6 +1018,8 @@ __all__ = (
     "InboxStatusNextAction",
     "InboxStatusNextActionKind",
     "InboxStatusRecentEmailSummary",
+    "IncludedMessageHeaders",
+    "IncludedMessageHeadersAutomationType0",
     "InstallTemplateBody",
     "InstallTemplateBodySecrets",
     "InstallTemplateBodyVariables",
@@ -995,6 +1041,8 @@ __all__ = (
     "ListAgentContactsResponse200DataItem",
     "ListAgentContactsResponse200Meta",
     "ListAgentNetworksResponse200",
+    "ListChangesExpand",
+    "ListChangesResponse200",
     "ListContactsResponse200",
     "ListContactsResponse200DataItem",
     "ListContactsResponse200Meta",
@@ -1004,9 +1052,11 @@ __all__ = (
     "ListDeliveriesResponse200",
     "ListDeliveriesStatus",
     "ListDomainsResponse200",
+    "ListEmailAttachmentArchiveMembersResponse200",
     "ListEmailsAutomated",
     "ListEmailsAwaiting",
     "ListEmailsExcludeFyi",
+    "ListEmailsFromVerified",
     "ListEmailsResponse200",
     "ListEndpointsResponse200",
     "ListEnvelope",
@@ -1024,6 +1074,7 @@ __all__ = (
     "ListRegistryRequestsResponse200",
     "ListRepeatingSendsResponse200",
     "ListRoutesResponse200",
+    "ListSentAttachmentArchiveMembersResponse200",
     "ListSentEmailsResponse200",
     "ListTemplatesResponse200",
     "ListWakeAuthorizationsResponse200",
@@ -1144,6 +1195,7 @@ __all__ = (
     "SearchEmailsAwaiting",
     "SearchEmailsCount",
     "SearchEmailsDirection",
+    "SearchEmailsFromVerified",
     "SearchEmailsHasAttachment",
     "SearchEmailsIncludeFacets",
     "SearchEmailsPrefix",
@@ -1191,8 +1243,10 @@ __all__ = (
     "SentEmailRescheduleInput",
     "SentEmailStatus",
     "SentEmailSummary",
+    "SentEmailSummaryAttachmentsItem",
     "SentEmailSummaryRepeatType0",
     "SentEmailSummarySenderMemberType0",
+    "SentEmailSummaryTruncatedFieldsItem",
     "SetFunctionRouteResponse200",
     "SetFunctionSecretInput",
     "SetFunctionSecretResponse200",

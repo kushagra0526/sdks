@@ -54,6 +54,10 @@ import {
 } from "./commands/credits.js";
 import DoctorCommand from "./commands/doctor.js";
 import DomainsZoneFileCommand from "./commands/domains-zone-file.js";
+import {
+  EmailsAttachmentCommand,
+  EmailsAttachmentMembersCommand,
+} from "./commands/emails-attachment.js";
 import { createEmailsGetCommand } from "./commands/emails-get.js";
 import EmailsLatestCommand from "./commands/emails-latest.js";
 import EmailsWaitCommand from "./commands/emails-wait.js";
@@ -124,6 +128,7 @@ import RoutesUpdateCommand from "./commands/routes-update.js";
 import SearchCommand from "./commands/search.js";
 import SemanticSearchCommand from "./commands/semantic-search.js";
 import SendCommand from "./commands/send.js";
+import SentCancelCommand from "./commands/sent-cancel.js";
 import SentGetCommand from "./commands/sent-get.js";
 import SignalCommand from "./commands/signal.js";
 import {
@@ -422,6 +427,7 @@ export const CANONICAL_OPERATION_ALIASES: Record<string, string> = {
   "account:show": "account:get-account",
   "account:storage": "account:get-storage-stats",
   "account:webhook-secret": "account:get-webhook-secret",
+  "changes:list": "changes:list-changes",
   "agent:claim": "agent:start-agent-claim",
   "agent:claim-link": "agent:create-agent-claim-link",
   "agent:claim-verify": "agent:verify-agent-claim",
@@ -689,6 +695,11 @@ export const COMMANDS: Record<string, typeof Command> = {
   // inbound emails as a compact text table. emails:list-emails stays
   // available for the full JSON envelope + cursor pagination.
   "emails:latest": EmailsLatestCommand,
+  // `emails:attachment` downloads one attachment by its exact filename, and
+  // `emails:attachment-members` lists (or, with --member, fetches) the files
+  // inside a zip or tar attachment. The generated operations stay available.
+  "emails:attachment": EmailsAttachmentCommand,
+  "emails:attachment-members": EmailsAttachmentMembersCommand,
   // `emails:watch` and unscoped `emails:wait` poll the search API for matching
   // inbound mail. `watch` defaults to a human table; `wait` defaults to JSONL.
   "emails:watch": EmailsWatchCommand,
@@ -816,6 +827,9 @@ export const COMMANDS: Record<string, typeof Command> = {
   // uncertain send can reconcile it. `sending:get` and the operation id
   // stay generated.
   "sent:get": SentGetCommand,
+  // `sent:cancel` cancels a scheduled send by --id or --idempotency-key,
+  // one command over the two generated cancel operations.
+  "sent:cancel": SentCancelCommand,
   ...generatedCommandAliases,
   ...generatedCommands,
   // `functions:logs` is the human/agent-friendly log viewer: compact
