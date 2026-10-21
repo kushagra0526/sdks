@@ -684,7 +684,7 @@ export type PaginationMeta = {
 export type ErrorResponse = {
     success: boolean;
     error: {
-        code: 'unauthorized' | 'forbidden' | 'not_found' | 'validation_error' | 'rate_limit_exceeded' | 'internal_error' | 'conflict' | 'mx_conflict' | 'not_scheduled' | 'sent_email_deleted' | 'sent_email_not_settled' | 'sent_email_changed' | 'sent_email_cleanup_failed' | 'connection_not_revoked' | 'attachment_changed' | 'content_discarded' | 'attachment_limit_exceeded' | 'attachment_integrity_failed' | 'attachment_not_ready' | 'attachment_storage_unavailable' | 'outbound_disabled' | 'cannot_send_from_domain' | 'recipient_not_allowed' | 'outbound_key_missing' | 'outbound_unreachable' | 'outbound_key_invalid' | 'outbound_capacity_exhausted' | 'outbound_response_malformed' | 'outbound_relay_failed' | 'discard_not_enabled' | 'inbound_not_repliable' | 'search_timeout' | 'authorization_pending' | 'slow_down' | 'access_denied' | 'expired_token' | 'invalid_device_code' | 'invalid_signup_token' | 'invalid_verification_code' | 'email_delivery_failed' | 'clerk_signup_failed' | 'no_orgs_for_user' | 'org_not_accessible' | 'feature_disabled' | 'memory_conflict' | 'template_not_installable' | 'scaffold_only' | 'invalid_variables' | 'unknown_secrets' | 'missing_secrets' | 'no_inbound_domain' | 'domain_cannot_send' | 'address_taken' | 'route_cap_reached' | 'name_exhausted' | 'developer_usage_credit_exhausted' | 'no_payout_address' | 'ownership_proof_failed' | 'payment_verification_failed' | 'payment_declined' | 'challenge_expired' | 'settlement_failed' | 'pull_unavailable' | 'subscription_conflict' | 'subscription_limit' | 'subscription_disabled' | 'request_aborted' | 'event_content_unavailable' | 'event_preparation_failed' | 'subscription_unavailable' | 'stale_delivery' | 'idempotency_key_required' | 'repeat_unsupported' | 'repeat_recipient_external' | 'repeat_idle_requires_internal_recipient' | 'not_a_repeating_send' | 'repeat_stop_not_allowed' | 'idempotency_key_reused' | 'credit_code_invalid' | 'credit_code_already_redeemed' | 'credit_code_not_eligible' | 'credit_code_balance_cap' | 'rate_limited' | 'service_unavailable' | 'connection_domain_unavailable' | 'connection_address_unavailable' | 'connection_owner_address_invalid' | 'connection_invitation_unavailable' | 'agent_connection_scope_forbidden' | 'address_note_conflict' | 'address_not_controlled' | 'contact_conflict';
+        code: 'unauthorized' | 'forbidden' | 'not_found' | 'validation_error' | 'rate_limit_exceeded' | 'internal_error' | 'conflict' | 'mx_conflict' | 'not_scheduled' | 'sent_email_deleted' | 'sent_email_not_settled' | 'sent_email_changed' | 'sent_email_cleanup_failed' | 'connection_not_revoked' | 'attachment_changed' | 'content_discarded' | 'attachment_limit_exceeded' | 'attachment_integrity_failed' | 'attachment_not_ready' | 'attachment_storage_unavailable' | 'outbound_disabled' | 'cannot_send_from_domain' | 'recipient_not_allowed' | 'outbound_key_missing' | 'outbound_unreachable' | 'outbound_key_invalid' | 'outbound_capacity_exhausted' | 'outbound_response_malformed' | 'outbound_relay_failed' | 'discard_not_enabled' | 'inbound_not_repliable' | 'search_timeout' | 'authorization_pending' | 'slow_down' | 'access_denied' | 'expired_token' | 'invalid_device_code' | 'invalid_signup_token' | 'invalid_verification_code' | 'email_delivery_failed' | 'clerk_signup_failed' | 'no_orgs_for_user' | 'org_not_accessible' | 'feature_disabled' | 'memory_conflict' | 'template_not_installable' | 'scaffold_only' | 'invalid_variables' | 'unknown_secrets' | 'missing_secrets' | 'no_inbound_domain' | 'domain_cannot_send' | 'address_taken' | 'route_cap_reached' | 'name_exhausted' | 'developer_usage_credit_exhausted' | 'no_payout_address' | 'ownership_proof_failed' | 'payment_verification_failed' | 'payment_declined' | 'challenge_expired' | 'settlement_failed' | 'pull_unavailable' | 'subscription_conflict' | 'subscription_limit' | 'subscription_disabled' | 'request_aborted' | 'event_content_unavailable' | 'event_preparation_failed' | 'subscription_unavailable' | 'stale_delivery' | 'idempotency_key_required' | 'repeat_unsupported' | 'repeat_recipient_external' | 'repeat_idle_requires_internal_recipient' | 'not_a_repeating_send' | 'repeat_stop_not_allowed' | 'idempotency_key_reused' | 'credit_code_invalid' | 'credit_code_already_redeemed' | 'credit_code_not_eligible' | 'credit_code_balance_cap' | 'rate_limited' | 'service_unavailable' | 'connection_domain_unavailable' | 'connection_address_unavailable' | 'connection_owner_address_invalid' | 'connection_invitation_unavailable' | 'agent_connection_scope_forbidden' | 'address_note_conflict' | 'address_not_controlled' | 'contact_conflict' | 'sent_mail_search_unavailable';
         message: string;
         /**
          * Optional structured data that callers can inspect to recover
@@ -1907,9 +1907,10 @@ export type EmailSearchResult = EmailSummary & {
      */
     thread_id: string | null;
     /**
-     * Which side of the conversation the result is on: `inbound` for mail received by the organization, `outbound` for mail it sent. This endpoint currently returns received mail only, so every result is `inbound`.
+     * Which side of the conversation the result is on: `inbound` for mail received by the organization, `outbound` for mail it sent. Only `direction=outbound` or `direction=any` returns `outbound` results. Treat an unfamiliar value as one added after your client was built. An `outbound` result also carries `delivery_status`.
      */
     direction: 'inbound' | 'outbound';
+    delivery_status?: SentEmailStatus;
 };
 
 export type EmailSearchMeta = {
@@ -1933,6 +1934,14 @@ export type EmailSearchMeta = {
      * Sort mode used for the result page.
      */
     sort: 'relevance' | 'received_at_desc' | 'received_at_asc';
+    /**
+     * Present and `true` when a count was requested but did not fit the search time budget. The page in `data` and `meta.cursor` are still returned (the page may itself be partial, see `partial`); only `meta.total` is missing (null). Retry with narrower filters, or use `count=false` and `meta.cursor`.
+     */
+    total_unavailable?: boolean;
+    /**
+     * Present and `true` when the page stopped at the search time bound before it filled. This happens when the filters reject most of what the text matches, for example a one-letter `prefix` search with a `from` that matches little or nothing. `data` then holds fewer than `limit` results, possibly none, and `meta.cursor` continues the search after the last email examined. Every result returned is correct and in order; keep following `meta.cursor` until it is null to read the rest. A page shorter than `limit` is therefore not the end of the results: only a null `meta.cursor` is.
+     */
+    partial?: boolean;
 };
 
 export type EmailSearchFacetBucket = {
@@ -6972,6 +6981,10 @@ export type SearchEmailsData = {
          *
          */
         count?: 'true' | 'false';
+        /**
+         * Which mail to search: `inbound` (mail received by the organization, the default), `outbound` (mail it sent) or `any` (both, merged in date order). Each result carries `direction`. When sent mail is included, results are in date order only (`sort=relevance` is a `validation_error`), filters that describe received mail only (`status`, `spam_score_lt`, `spam_score_gte`, `awaiting`, `automated`, `reply_to_sent_email_id`, `from_verified`, and `status:`, `awaiting:`, `automated:`, `from_verified:` in `q`) are a `validation_error`, as is `include`, and `facets` are not computed. `meta.total` is computed on the first page only and is null on later pages. A `meta.cursor` continues the direction it was issued for: using it with another `direction` is a `validation_error`. Text search over sent mail (`q`, `subject` or `body`) answers 503 `sent_mail_search_unavailable` in an environment where sent-mail search is not enabled. An agent connection searches only the mail its own address sent. On a sent result, `received_at` is when the message was accepted for sending, `recipient` is its first To address, and fields that describe receiving (`spam_score`, `raw_size_bytes`, `webhook_status`) are null, as is `from_verified` (sent mail has no From-authentication verdict). A sent result carries its sending status (`queued`, `delivered`, `bounced` and so on) in `delivery_status`; its `status` stays in the received-mail vocabulary as the nearest reading of it: `pending` (queued, scheduled, deferred), `accepted` (handed off, outcome not confirmed), `completed` (delivered) or `rejected` (not delivered: failed, denied, bounced or canceled).
+         */
+        direction?: 'inbound' | 'outbound' | 'any';
     };
     url: '/emails/search';
 };
@@ -6989,6 +7002,10 @@ export type SearchEmailsErrors = {
      * Resource not found
      */
     404: ErrorResponse;
+    /**
+     * Sent-mail text search is not enabled in this environment (`sent_mail_search_unavailable`). Returned only for text terms (`q`, `subject` or `body`) with `direction=outbound` or `direction=any`; retry with `direction=inbound`, or without text terms.
+     */
+    503: ErrorResponse;
     /**
      * Search query timed out
      */

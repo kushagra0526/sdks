@@ -13,6 +13,7 @@ from ...models.error_response import ErrorResponse
 from ...models.search_emails_automated import SearchEmailsAutomated
 from ...models.search_emails_awaiting import SearchEmailsAwaiting
 from ...models.search_emails_count import SearchEmailsCount
+from ...models.search_emails_direction import SearchEmailsDirection
 from ...models.search_emails_has_attachment import SearchEmailsHasAttachment
 from ...models.search_emails_include_facets import SearchEmailsIncludeFacets
 from ...models.search_emails_prefix import SearchEmailsPrefix
@@ -51,6 +52,7 @@ def _get_kwargs(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    direction: SearchEmailsDirection | Unset = SearchEmailsDirection.INBOUND,
 
 ) -> dict[str, Any]:
     
@@ -156,6 +158,12 @@ def _get_kwargs(
 
     params["count"] = json_count
 
+    json_direction: str | Unset = UNSET
+    if not isinstance(direction, Unset):
+        json_direction = direction.value
+
+    params["direction"] = json_direction
+
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -199,6 +207,13 @@ def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Res
 
 
         return response_404
+
+    if response.status_code == 503:
+        response_503 = ErrorResponse.from_dict(response.json())
+
+
+
+        return response_503
 
     if response.status_code == 504:
         response_504 = ErrorResponse.from_dict(response.json())
@@ -248,6 +263,7 @@ def sync_detailed(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    direction: SearchEmailsDirection | Unset = SearchEmailsDirection.INBOUND,
 
 ) -> Response[ErrorResponse | SearchEmailsResponse200]:
     """ Search inbound emails
@@ -327,6 +343,7 @@ def sync_detailed(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        direction (SearchEmailsDirection | Unset):  Default: SearchEmailsDirection.INBOUND.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -361,6 +378,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+direction=direction,
 
     )
 
@@ -396,6 +414,7 @@ def sync(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    direction: SearchEmailsDirection | Unset = SearchEmailsDirection.INBOUND,
 
 ) -> ErrorResponse | SearchEmailsResponse200 | None:
     """ Search inbound emails
@@ -475,6 +494,7 @@ def sync(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        direction (SearchEmailsDirection | Unset):  Default: SearchEmailsDirection.INBOUND.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -510,6 +530,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+direction=direction,
 
     ).parsed
 
@@ -539,6 +560,7 @@ async def asyncio_detailed(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    direction: SearchEmailsDirection | Unset = SearchEmailsDirection.INBOUND,
 
 ) -> Response[ErrorResponse | SearchEmailsResponse200]:
     """ Search inbound emails
@@ -618,6 +640,7 @@ async def asyncio_detailed(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        direction (SearchEmailsDirection | Unset):  Default: SearchEmailsDirection.INBOUND.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -652,6 +675,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+direction=direction,
 
     )
 
@@ -687,6 +711,7 @@ async def asyncio(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    direction: SearchEmailsDirection | Unset = SearchEmailsDirection.INBOUND,
 
 ) -> ErrorResponse | SearchEmailsResponse200 | None:
     """ Search inbound emails
@@ -766,6 +791,7 @@ async def asyncio(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        direction (SearchEmailsDirection | Unset):  Default: SearchEmailsDirection.INBOUND.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -801,5 +827,6 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+direction=direction,
 
     )).parsed
