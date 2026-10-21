@@ -85,6 +85,10 @@ export const openapiDocument: Record<string, unknown> = {
       "description": "Conversation threads spanning received and sent emails"
     },
     {
+      "name": "Changes",
+      "description": "One replayable feed of what changed, to keep local snapshots current"
+    },
+    {
       "name": "Endpoints",
       "description": "Manage webhook endpoints that receive email events"
     },
@@ -2034,6 +2038,19 @@ export const openapiDocument: Record<string, unknown> = {
             "description": "Only return emails whose `automated` has this value.\n`awaiting=you&automated=false` lists mail from people that is\nwaiting on your reply. Combines with every other filter and with\nboth `cursor` and `since`. An inbound email is `automated` when any of these holds, decided once\nwhen it arrives: `null_envelope_sender` (an empty MAIL FROM, a bounce);\n`no_identifiable_sender` (no address in the envelope or From);\n`own_address` (a sender address is exactly one of the addresses the\nmail was delivered to; sharing a domain with the recipient is not\nenough, so a colleague or another agent in the organization is not\nautomated);\n`mailer_daemon` (mailer-daemon@ or postmaster@ on any domain);\n`auto_submitted` (Auto-Submitted with any keyword but `no`, an\nempty one included);\n`precedence` (Precedence bulk, list, junk or auto_reply);\n`list_unsubscribe` (List-Unsubscribe present); `list_id` (List-Id\npresent); `auto_response_suppress` (X-Auto-Response-Suppress asks\nfor no automatic reply: All, OOF or AutoReply);\n`failed_recipients` (X-Failed-Recipients present, a bounce);\n`report` (a delivery, feedback or disposition report). Mail\nPrimitive's own automatic responders decline to answer is always\n`automated`. The header rules only see headers captured at ingest, so\nolder mail may lack them. This is loop and noise protection, not\nsender authentication.\n"
           },
           {
+            "name": "from_verified",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Only return emails whose `from_verified` (the From domain was authenticated on arrival; see the field) has this value. Combines with every other filter and with both `cursor` and `since`."
+          },
+          {
             "name": "recipient",
             "in": "query",
             "required": false,
@@ -2109,7 +2126,7 @@ export const openapiDocument: Record<string, unknown> = {
               "type": "string",
               "maxLength": 500
             },
-            "description": "Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `\"quoted phrase\"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`, `header:`, `has-header:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR \"past due\"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`\"OR\"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes. `header:Name=Value` matches mail whose header `Name` has exactly `Value` (name and value case-insensitive, the whole value, quote the term for a value with spaces: `header:\"List-Id=Team news <news.example.com>\"`); `has-header:Name` matches mail that carries header `Name` with any value. Neither can be an `OR` alternative. Header filters read a stored copy of each message's headers: for received mail every header except trace and signature headers (`Received`, `DKIM-Signature`, `ARC-*`, `Authentication-Results` and similar) and credential-like names (a word such as `auth`, `token`, `key`, `secret`, `cookie`, `session`, `bearer`, `jwt` or `hmac`, including joined forms such as `AuthToken` or `SessionId`), at most 100 headers and 16 KiB per message, each value cut to 1024 bytes; for sent mail the `headers` the request set. A filter on a header that is never stored is a `validation_error`. Mail stored before header search was available has no stored headers and is not matched."
+            "description": "Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `\"quoted phrase\"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`, `header:`, `has-header:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR \"past due\"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`\"OR\"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes. Supports `from_verified:true` and `from_verified:false` to filter on the `from_verified` field. `header:Name=Value` matches mail whose header `Name` has exactly `Value` (name and value case-insensitive, the whole value, quote the term for a value with spaces: `header:\"List-Id=Team news <news.example.com>\"`); `has-header:Name` matches mail that carries header `Name` with any value. Neither can be an `OR` alternative. Header filters read a stored copy of each message's headers: for received mail every header except trace and signature headers (`Received`, `DKIM-Signature`, `ARC-*`, `Authentication-Results` and similar) and credential-like names (a word such as `auth`, `token`, `key`, `secret`, `cookie`, `session`, `bearer`, `jwt` or `hmac`, including joined forms such as `AuthToken` or `SessionId`), at most 100 headers and 16 KiB per message, each value cut to 1024 bytes; for sent mail the `headers` the request set. A filter on a header that is never stored is a `validation_error`. Mail stored before header search was available has no stored headers and is not matched."
           },
           {
             "name": "from",
@@ -2244,6 +2261,19 @@ export const openapiDocument: Record<string, unknown> = {
               ]
             },
             "description": "Only return emails whose `automated` has this value. Also\navailable in `q` as `automated:true` or `automated:false`. An inbound email is `automated` when any of these holds, decided once\nwhen it arrives: `null_envelope_sender` (an empty MAIL FROM, a bounce);\n`no_identifiable_sender` (no address in the envelope or From);\n`own_address` (a sender address is exactly one of the addresses the\nmail was delivered to; sharing a domain with the recipient is not\nenough, so a colleague or another agent in the organization is not\nautomated);\n`mailer_daemon` (mailer-daemon@ or postmaster@ on any domain);\n`auto_submitted` (Auto-Submitted with any keyword but `no`, an\nempty one included);\n`precedence` (Precedence bulk, list, junk or auto_reply);\n`list_unsubscribe` (List-Unsubscribe present); `list_id` (List-Id\npresent); `auto_response_suppress` (X-Auto-Response-Suppress asks\nfor no automatic reply: All, OOF or AutoReply);\n`failed_recipients` (X-Failed-Recipients present, a bounce);\n`report` (a delivery, feedback or disposition report). Mail\nPrimitive's own automatic responders decline to answer is always\n`automated`. The header rules only see headers captured at ingest, so\nolder mail may lack them. This is loop and noise protection, not\nsender authentication.\n"
+          },
+          {
+            "name": "from_verified",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Only return emails whose `from_verified` (the From domain was authenticated on arrival; see the field) has this value. Also available in `q` as `from_verified:true` or `from_verified:false`."
           },
           {
             "name": "sort",
@@ -7857,6 +7887,330 @@ export const openapiDocument: Record<string, unknown> = {
           },
           "429": {
             "description": "Rate limit exceeded",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "rate_limit_exceeded",
+                    "message": "Rate limit exceeded"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/changes": {
+      "get": {
+        "operationId": "listChanges",
+        "summary": "Long-poll what changed",
+        "description": "One feed of small invalidations (ids and kinds) for everything an app keeps a snapshot of: inbound mail, sent mail, the member's conversation read state, the agent directory and presence, and the credential's own access. Non-consumptive and replayable: any number of devices can read the same cursor independently.\n\nStart with `since=start` (or no `since`): it returns an empty page whose `next_cursor` is a baseline. Take it BEFORE the initial list reads; every change that commits after it is delivered, including ones those reads already reflect. Then call with `since=<next_cursor>&wait=20` in a loop. Changes come oldest first in commit order, at least once: a write that commits late is never skipped, because positions are assigned at commit.\n\nEvery change is scoped to what this credential's full reads would show: a connected agent sees only its own mail, its own sends and sends it provably received; mail held for sender authentication is announced only when released; read state reaches only the member it belongs to; agent changes reach members and agents allowed to view the network; organization API keys receive no agent changes. Function credentials cannot call this.\n\nChanges are kept 7 days. A cursor answers 410 `cursor_expired` only when changes after it were pruned (an idle cursor stays valid); rebuild the snapshots from `since=start`.",
+        "tags": [
+          "Changes"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "description": "`start` (the default) for a baseline, otherwise the previous `next_cursor`, unchanged."
+          },
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 25,
+              "default": 0
+            },
+            "description": "Seconds to hold a caught-up request open. It returns as soon as a change this credential can see commits, else an empty page at the deadline. Ignored for a baseline request."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Maximum changes in one page."
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "message"
+              ]
+            },
+            "description": "`message` adds `message` to every change: the current list row of the message a message change names, so a reader needs no follow-up read. Ignored for a baseline request."
+          },
+          {
+            "name": "address",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Up to 20 email addresses, comma-separated (or the parameter repeated). Keeps only the message changes whose message is to or from one of them, matched case-insensitively. Inbound mail matches on the address it was delivered to, the envelope sender and the From header address; sent mail on the From address and the To and Cc addresses, and Bcc only for a credential that can read the sender side. Deletions, thread, agent and access changes are never filtered, because a deleted message's addresses can no longer be read: ignore a deletion for an id you do not hold. The cursor still moves past every change the filter drops, so a filtered page can be empty with a new cursor."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of changes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChangePage"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`validation_error` for a bad parameter, or `invalid_cursor` for a cursor that is malformed or belongs to another organization. Rebuild from `since=start`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Invalid or missing API key"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "410": {
+            "description": "`cursor_expired`: changes after this cursor were pruned. `error.details.retention_seconds` is the window. Rebuild the snapshots from `since=start`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. The `ratelimit-*` headers describe the limiter that rejected this request, with its own limit and window, not the API budget that successful responses report. A limiter that reports only a wait sends `Retry-After` alone.",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Seconds to wait before retrying"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "rate_limit_exceeded",
+                    "message": "Rate limit exceeded"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sent-emails/cancel": {
+      "post": {
+        "operationId": "cancelSentEmailByIdempotencyKey",
+        "summary": "Cancel a scheduled send by idempotency key",
+        "description": "Cancels the still-scheduled send created with this `Idempotency-Key` (matched exactly), as `POST /sent-emails/{id}/cancel` does, and releases the key. 404 `not_found`: no send this credential can act on was created with the key. 409 `not_scheduled`: the send holding the key is no longer scheduled; `error.details` names its `sent_email_id` and `status` (`canceled` if already canceled). Pass `created_before` on a retry so it cannot reach a newer send that reused the released key. A connected agent can cancel any scheduled send from its own address, whoever created it, and no other.",
+        "tags": [
+          "Sending"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "idempotency_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "pattern": "^[\\x21-\\x7e]+$",
+                    "description": "The `Idempotency-Key` the send was created with."
+                  },
+                  "created_before": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Only consider sends created at or before this instant, such as when you first asked to cancel."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Canceled sent-email detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessEnvelope"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SentEmailDetail"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "validation_error",
+                    "message": "Invalid domain format"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Invalid or missing API key"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "not_found",
+                    "message": "Resource not found"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`not_scheduled`: `error.details` carries the `sent_email_id` and current `status` of the send holding the key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. The `ratelimit-*` headers describe the limiter that rejected this request, with its own limit and window, not the API budget that successful responses report. A limiter that reports only a wait sends `Retry-After` alone.",
             "headers": {
               "Retry-After": {
                 "schema": {
@@ -18253,6 +18607,198 @@ export const openapiDocument: Record<string, unknown> = {
           "scopes"
         ]
       },
+      "Change": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One invalidation: what changed, by id, never its content. Every field is present; fields that do not apply to the kind are null. Apply idempotently: a change can repeat.",
+        "required": [
+          "kind",
+          "email_id",
+          "sent_email_id",
+          "thread_id",
+          "status",
+          "agent_address",
+          "reason",
+          "changed_at"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "email.visible",
+              "email.updated",
+              "email.deleted",
+              "sent_email.created",
+              "sent_email.updated",
+              "sent_email.deleted",
+              "thread.read_state_changed",
+              "thread.mute_changed",
+              "agent.changed",
+              "access.changed"
+            ],
+            "description": "`email.visible`: an inbound email became visible to this credential (arrived, or its sender-authentication hold was released). `email.updated`: something a list row or conversation shows changed. `email.deleted`: gone, or withdrawn from view. `sent_email.created` / `sent_email.updated`: a send appeared or changed; `status` is its current status, and several changes between two reads collapse into one entry. Created is a hint (first committed after the cursor): treat both as upsert, including `sent_email.updated` for an id you have not seen. `sent_email.deleted`: the send was deleted. `thread.read_state_changed`: the signed-in member's read cursor for `thread_id` moved, on any device. `thread.mute_changed`: `thread_id` was muted or unmuted for an address this credential reads, which changes the `muted` flag and `exclude_muted` results of its mail. `agent.changed`: an agent in the directory changed (connected, disconnected, renamed, hidden, listed, presence extended, receiver live). `access.changed`: this credential's own access changed; rebuild every snapshot from `since=start`."
+          },
+          "email_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "email.* kinds."
+          },
+          "sent_email_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "sent_email.* kinds."
+          },
+          "thread_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "The conversation, when known. Null for a connected agent reading a send, or its deletion, that it received but did not send, matching what GET /sent-emails withholds. Inbound mail is announced when it becomes visible, which can be before its conversation is resolved, so `email.visible` can carry null; resolving or changing the conversation is always announced afterwards as `email.updated` with the `thread_id`."
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "sent_email.created and sent_email.updated: the send's current status."
+          },
+          "agent_address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "agent.changed: the agent's address."
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "membership",
+              "agent_connection",
+              null
+            ],
+            "description": "access.changed: `membership` (the member's role or membership) or `agent_connection` (this agent connection's status, owner or generation)."
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The commit position in microsecond UTC form. Orders the feed; not a business timestamp."
+          },
+          "message": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChangeMessage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Present only when the request sets `expand=message`. For `email.visible`, `email.updated`, `sent_email.created`, `sent_email.updated`: the message as it reads at the time of this response (not at the time of the change), exactly as the list endpoints return it, marked by `direction`. Null for every other kind, and when the message is no longer readable by this credential (deleted, or withdrawn from view after the change)."
+          }
+        }
+      },
+      "ChangePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "changes",
+          "next_cursor",
+          "has_more",
+          "baseline"
+        ],
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Change"
+            },
+            "description": "Oldest first, in commit order."
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Always present. Send it unchanged as `since` next time, and store it only after applying the page. It is exactly the `since` you sent when nothing at all happened after it; it moves past changes this credential cannot see, so the page can be empty with a new cursor."
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "More changes are already pending: call again at once, without waiting."
+          },
+          "baseline": {
+            "type": "boolean",
+            "description": "True only for a `since=start` request, whose page is always empty."
+          }
+        }
+      },
+      "ChangeMessage": {
+        "description": "A message inlined by `expand=message`. `direction` `inbound` is a GET /emails row; `outbound` is a GET /sent-emails row.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ChangeInboundMessage"
+          },
+          {
+            "$ref": "#/components/schemas/ChangeOutboundMessage"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "direction",
+          "mapping": {
+            "inbound": "#/components/schemas/ChangeInboundMessage",
+            "outbound": "#/components/schemas/ChangeOutboundMessage"
+          }
+        }
+      },
+      "ChangeInboundMessage": {
+        "description": "An inbound message inlined by `expand=message`, as GET /emails returns it.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "direction"
+            ],
+            "properties": {
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ChangeOutboundMessage": {
+        "description": "A sent message inlined by `expand=message`, as GET /sent-emails returns it.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SentEmailSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "direction"
+            ],
+            "properties": {
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "EmailSummary": {
         "type": "object",
         "properties": {
@@ -18389,6 +18935,20 @@ export const openapiDocument: Record<string, unknown> = {
               "type": "string"
             },
             "description": "Why `automated` is true, in rule order; empty when it is false.\nCurrent values: `null_envelope_sender`, `no_identifiable_sender`,\n`own_address`, `mailer_daemon`, `auto_submitted`, `precedence`,\n`list_unsubscribe`, `list_id`, `auto_response_suppress`,\n`failed_recipients`, `report`. Treat an unfamiliar value as a\nreason added after your client was built.\n"
+          },
+          "from_verified": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "True when the From header address, `from_header_email`, passed DMARC for its domain on arrival (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the envelope: `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the envelope sender, which can differ. It proves the domain, not the mailbox. False with no From header address, when authentication failed or was not attempted (a delivery between Primitive mailboxes counts only when it passed DMARC too), and for mail stored before the verdict was recorded. Null on sent rows in search results. Not a spam or safety judgement."
+          },
+          "from_header_email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The From header address, lowercased, that `from_verified` is about; null when the message had none. Unlike `sender` it is never the envelope address."
           },
           "repeat": {
             "type": [
@@ -18977,6 +19537,17 @@ export const openapiDocument: Record<string, unknown> = {
               "type": "string"
             },
             "description": "Why `automated` is true, in rule order; empty when it is false.\nCurrent values: `null_envelope_sender`, `no_identifiable_sender`,\n`own_address`, `mailer_daemon`, `auto_submitted`, `precedence`,\n`list_unsubscribe`, `list_id`, `auto_response_suppress`,\n`failed_recipients`, `report`. Treat an unfamiliar value as a\nreason added after your client was built.\n"
+          },
+          "from_verified": {
+            "type": "boolean",
+            "description": "Whether the From header domain was authenticated when the message arrived. See EmailSummary.from_verified."
+          },
+          "from_header_email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The From header address, lowercased, that `from_verified` is about; null when the message had none. Unlike `sender` it is never the envelope address."
           },
           "repeat": {
             "type": [

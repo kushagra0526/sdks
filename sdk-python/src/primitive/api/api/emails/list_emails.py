@@ -13,6 +13,7 @@ from ...models.error_response import ErrorResponse
 from ...models.list_emails_automated import ListEmailsAutomated
 from ...models.list_emails_awaiting import ListEmailsAwaiting
 from ...models.list_emails_exclude_fyi import ListEmailsExcludeFyi
+from ...models.list_emails_from_verified import ListEmailsFromVerified
 from ...models.list_emails_response_200 import ListEmailsResponse200
 from ...types import UNSET, Unset
 from typing import cast
@@ -34,6 +35,7 @@ def _get_kwargs(
     wait: int | Unset = UNSET,
     awaiting: ListEmailsAwaiting | Unset = UNSET,
     automated: ListEmailsAutomated | Unset = UNSET,
+    from_verified: ListEmailsFromVerified | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
 
@@ -86,6 +88,12 @@ def _get_kwargs(
         json_automated = automated.value
 
     params["automated"] = json_automated
+
+    json_from_verified: str | Unset = UNSET
+    if not isinstance(from_verified, Unset):
+        json_from_verified = from_verified.value
+
+    params["from_verified"] = json_from_verified
 
     params["recipient"] = recipient
 
@@ -161,6 +169,7 @@ def sync_detailed(
     wait: int | Unset = UNSET,
     awaiting: ListEmailsAwaiting | Unset = UNSET,
     automated: ListEmailsAutomated | Unset = UNSET,
+    from_verified: ListEmailsFromVerified | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
 
@@ -221,6 +230,7 @@ def sync_detailed(
         wait (int | Unset):
         awaiting (ListEmailsAwaiting | Unset):
         automated (ListEmailsAutomated | Unset):
+        from_verified (ListEmailsFromVerified | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
 
@@ -245,6 +255,7 @@ since=since,
 wait=wait,
 awaiting=awaiting,
 automated=automated,
+from_verified=from_verified,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
 
@@ -270,6 +281,7 @@ def sync(
     wait: int | Unset = UNSET,
     awaiting: ListEmailsAwaiting | Unset = UNSET,
     automated: ListEmailsAutomated | Unset = UNSET,
+    from_verified: ListEmailsFromVerified | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
 
@@ -330,6 +342,7 @@ def sync(
         wait (int | Unset):
         awaiting (ListEmailsAwaiting | Unset):
         automated (ListEmailsAutomated | Unset):
+        from_verified (ListEmailsFromVerified | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
 
@@ -355,6 +368,7 @@ since=since,
 wait=wait,
 awaiting=awaiting,
 automated=automated,
+from_verified=from_verified,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
 
@@ -374,6 +388,7 @@ async def asyncio_detailed(
     wait: int | Unset = UNSET,
     awaiting: ListEmailsAwaiting | Unset = UNSET,
     automated: ListEmailsAutomated | Unset = UNSET,
+    from_verified: ListEmailsFromVerified | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
 
@@ -434,6 +449,7 @@ async def asyncio_detailed(
         wait (int | Unset):
         awaiting (ListEmailsAwaiting | Unset):
         automated (ListEmailsAutomated | Unset):
+        from_verified (ListEmailsFromVerified | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
 
@@ -458,6 +474,7 @@ since=since,
 wait=wait,
 awaiting=awaiting,
 automated=automated,
+from_verified=from_verified,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
 
@@ -483,6 +500,7 @@ async def asyncio(
     wait: int | Unset = UNSET,
     awaiting: ListEmailsAwaiting | Unset = UNSET,
     automated: ListEmailsAutomated | Unset = UNSET,
+    from_verified: ListEmailsFromVerified | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
 
@@ -543,6 +561,7 @@ async def asyncio(
         wait (int | Unset):
         awaiting (ListEmailsAwaiting | Unset):
         automated (ListEmailsAutomated | Unset):
+        from_verified (ListEmailsFromVerified | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
 
@@ -568,6 +587,7 @@ since=since,
 wait=wait,
 awaiting=awaiting,
 automated=automated,
+from_verified=from_verified,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
 

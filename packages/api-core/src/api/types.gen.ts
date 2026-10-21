@@ -1691,6 +1691,90 @@ export type DomainDnsHealthCheck = {
     error?: string;
 };
 
+/**
+ * One invalidation: what changed, by id, never its content. Every field is present; fields that do not apply to the kind are null. Apply idempotently: a change can repeat.
+ */
+export type Change = {
+    /**
+     * `email.visible`: an inbound email became visible to this credential (arrived, or its sender-authentication hold was released). `email.updated`: something a list row or conversation shows changed. `email.deleted`: gone, or withdrawn from view. `sent_email.created` / `sent_email.updated`: a send appeared or changed; `status` is its current status, and several changes between two reads collapse into one entry. Created is a hint (first committed after the cursor): treat both as upsert, including `sent_email.updated` for an id you have not seen. `sent_email.deleted`: the send was deleted. `thread.read_state_changed`: the signed-in member's read cursor for `thread_id` moved, on any device. `thread.mute_changed`: `thread_id` was muted or unmuted for an address this credential reads, which changes the `muted` flag and `exclude_muted` results of its mail. `agent.changed`: an agent in the directory changed (connected, disconnected, renamed, hidden, listed, presence extended, receiver live). `access.changed`: this credential's own access changed; rebuild every snapshot from `since=start`.
+     */
+    kind: 'email.visible' | 'email.updated' | 'email.deleted' | 'sent_email.created' | 'sent_email.updated' | 'sent_email.deleted' | 'thread.read_state_changed' | 'thread.mute_changed' | 'agent.changed' | 'access.changed';
+    /**
+     * email.* kinds.
+     */
+    email_id: string | null;
+    /**
+     * sent_email.* kinds.
+     */
+    sent_email_id: string | null;
+    /**
+     * The conversation, when known. Null for a connected agent reading a send, or its deletion, that it received but did not send, matching what GET /sent-emails withholds. Inbound mail is announced when it becomes visible, which can be before its conversation is resolved, so `email.visible` can carry null; resolving or changing the conversation is always announced afterwards as `email.updated` with the `thread_id`.
+     */
+    thread_id: string | null;
+    /**
+     * sent_email.created and sent_email.updated: the send's current status.
+     */
+    status: string | null;
+    /**
+     * agent.changed: the agent's address.
+     */
+    agent_address: string | null;
+    /**
+     * access.changed: `membership` (the member's role or membership) or `agent_connection` (this agent connection's status, owner or generation).
+     */
+    reason: 'membership' | 'agent_connection' | null;
+    /**
+     * The commit position in microsecond UTC form. Orders the feed; not a business timestamp.
+     */
+    changed_at: string;
+    /**
+     * Present only when the request sets `expand=message`. For `email.visible`, `email.updated`, `sent_email.created`, `sent_email.updated`: the message as it reads at the time of this response (not at the time of the change), exactly as the list endpoints return it, marked by `direction`. Null for every other kind, and when the message is no longer readable by this credential (deleted, or withdrawn from view after the change).
+     */
+    message?: ChangeMessage | unknown;
+};
+
+export type ChangePage = {
+    /**
+     * Oldest first, in commit order.
+     */
+    changes: Array<Change>;
+    /**
+     * Always present. Send it unchanged as `since` next time, and store it only after applying the page. It is exactly the `since` you sent when nothing at all happened after it; it moves past changes this credential cannot see, so the page can be empty with a new cursor.
+     */
+    next_cursor: string;
+    /**
+     * More changes are already pending: call again at once, without waiting.
+     */
+    has_more: boolean;
+    /**
+     * True only for a `since=start` request, whose page is always empty.
+     */
+    baseline: boolean;
+};
+
+/**
+ * A message inlined by `expand=message`. `direction` `inbound` is a GET /emails row; `outbound` is a GET /sent-emails row.
+ */
+export type ChangeMessage = ({
+    direction: 'inbound';
+} & ChangeInboundMessage) | ({
+    direction: 'outbound';
+} & ChangeOutboundMessage);
+
+/**
+ * An inbound message inlined by `expand=message`, as GET /emails returns it.
+ */
+export type ChangeInboundMessage = EmailSummary & {
+    direction: 'inbound';
+};
+
+/**
+ * A sent message inlined by `expand=message`, as GET /sent-emails returns it.
+ */
+export type ChangeOutboundMessage = SentEmailSummary & {
+    direction: 'outbound';
+};
+
 export type EmailSummary = {
     id: string;
     message_id?: string | null;
@@ -1814,6 +1898,14 @@ export type EmailSummary = {
      *
      */
     automated_reasons: Array<string>;
+    /**
+     * True when the From header address, `from_header_email`, passed DMARC for its domain on arrival (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the envelope: `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the envelope sender, which can differ. It proves the domain, not the mailbox. False with no From header address, when authentication failed or was not attempted (a delivery between Primitive mailboxes counts only when it passed DMARC too), and for mail stored before the verdict was recorded. Null on sent rows in search results. Not a spam or safety judgement.
+     */
+    from_verified?: boolean | null;
+    /**
+     * The From header address, lowercased, that `from_verified` is about; null when the message had none. Unlike `sender` it is never the envelope address.
+     */
+    from_header_email?: string | null;
     /**
      * Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own records, never from the message content. Null on every other message and on servers that predate repeating sends.
      */
@@ -2230,6 +2322,14 @@ export type EmailDetail = {
      *
      */
     automated_reasons: Array<string>;
+    /**
+     * Whether the From header domain was authenticated when the message arrived. See EmailSummary.from_verified.
+     */
+    from_verified?: boolean;
+    /**
+     * The From header address, lowercased, that `from_verified` is about; null when the message had none. Unlike `sender` it is never the envelope address.
+     */
+    from_header_email?: string | null;
     /**
      * Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own records, never from the message content. Null on every other message and on servers that predate repeating sends.
      */
@@ -6775,6 +6875,10 @@ export type ListEmailsData = {
          */
         automated?: 'true' | 'false';
         /**
+         * Only return emails whose `from_verified` (the From domain was authenticated on arrival; see the field) has this value. Combines with every other filter and with both `cursor` and `since`.
+         */
+        from_verified?: 'true' | 'false';
+        /**
          * Exact case-insensitive delivered recipient mailbox, applied before pagination. Combines with existing filters and cursors; does not search message text.
          */
         recipient?: string;
@@ -6815,7 +6919,7 @@ export type SearchEmailsData = {
     path?: never;
     query?: {
         /**
-         * Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `"quoted phrase"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`, `header:`, `has-header:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR "past due"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`"OR"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes. `header:Name=Value` matches mail whose header `Name` has exactly `Value` (name and value case-insensitive, the whole value, quote the term for a value with spaces: `header:"List-Id=Team news <news.example.com>"`); `has-header:Name` matches mail that carries header `Name` with any value. Neither can be an `OR` alternative. Header filters read a stored copy of each message's headers: for received mail every header except trace and signature headers (`Received`, `DKIM-Signature`, `ARC-*`, `Authentication-Results` and similar) and credential-like names (a word such as `auth`, `token`, `key`, `secret`, `cookie`, `session`, `bearer`, `jwt` or `hmac`, including joined forms such as `AuthToken` or `SessionId`), at most 100 headers and 16 KiB per message, each value cut to 1024 bytes; for sent mail the `headers` the request set. A filter on a header that is never stored is a `validation_error`. Mail stored before header search was available has no stored headers and is not matched.
+         * Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `"quoted phrase"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`, `header:`, `has-header:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR "past due"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`"OR"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes. Supports `from_verified:true` and `from_verified:false` to filter on the `from_verified` field. `header:Name=Value` matches mail whose header `Name` has exactly `Value` (name and value case-insensitive, the whole value, quote the term for a value with spaces: `header:"List-Id=Team news <news.example.com>"`); `has-header:Name` matches mail that carries header `Name` with any value. Neither can be an `OR` alternative. Header filters read a stored copy of each message's headers: for received mail every header except trace and signature headers (`Received`, `DKIM-Signature`, `ARC-*`, `Authentication-Results` and similar) and credential-like names (a word such as `auth`, `token`, `key`, `secret`, `cookie`, `session`, `bearer`, `jwt` or `hmac`, including joined forms such as `AuthToken` or `SessionId`), at most 100 headers and 16 KiB per message, each value cut to 1024 bytes; for sent mail the `headers` the request set. A filter on a header that is never stored is a `validation_error`. Mail stored before header search was available has no stored headers and is not matched.
          */
         q?: string;
         /**
@@ -6930,6 +7034,10 @@ export type SearchEmailsData = {
          *
          */
         automated?: 'true' | 'false';
+        /**
+         * Only return emails whose `from_verified` (the From domain was authenticated on arrival; see the field) has this value. Also available in `q` as `from_verified:true` or `from_verified:false`.
+         */
+        from_verified?: 'true' | 'false';
         /**
          * Sort mode. Defaults to relevance when a text query is present,
          * otherwise `received_at_desc`.
@@ -9986,6 +10094,118 @@ export type AgentConnectionSetupResponses = {
 };
 
 export type AgentConnectionSetupResponse = AgentConnectionSetupResponses[keyof AgentConnectionSetupResponses];
+
+export type ListChangesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * `start` (the default) for a baseline, otherwise the previous `next_cursor`, unchanged.
+         */
+        since?: string;
+        /**
+         * Seconds to hold a caught-up request open. It returns as soon as a change this credential can see commits, else an empty page at the deadline. Ignored for a baseline request.
+         */
+        wait?: number;
+        /**
+         * Maximum changes in one page.
+         */
+        limit?: number;
+        /**
+         * `message` adds `message` to every change: the current list row of the message a message change names, so a reader needs no follow-up read. Ignored for a baseline request.
+         */
+        expand?: 'message';
+        /**
+         * Up to 20 email addresses, comma-separated (or the parameter repeated). Keeps only the message changes whose message is to or from one of them, matched case-insensitively. Inbound mail matches on the address it was delivered to, the envelope sender and the From header address; sent mail on the From address and the To and Cc addresses, and Bcc only for a credential that can read the sender side. Deletions, thread, agent and access changes are never filtered, because a deleted message's addresses can no longer be read: ignore a deletion for an id you do not hold. The cursor still moves past every change the filter drops, so a filtered page can be empty with a new cursor.
+         */
+        address?: string;
+    };
+    url: '/changes';
+};
+
+export type ListChangesErrors = {
+    /**
+     * `validation_error` for a bad parameter, or `invalid_cursor` for a cursor that is malformed or belongs to another organization. Rebuild from `since=start`.
+     */
+    400: ErrorResponse;
+    /**
+     * Invalid or missing API key
+     */
+    401: ErrorResponse;
+    /**
+     * `cursor_expired`: changes after this cursor were pruned. `error.details.retention_seconds` is the window. Rebuild the snapshots from `since=start`.
+     */
+    410: ErrorResponse;
+    /**
+     * Rate limit exceeded. The `ratelimit-*` headers describe the limiter that rejected this request, with its own limit and window, not the API budget that successful responses report. A limiter that reports only a wait sends `Retry-After` alone.
+     */
+    429: ErrorResponse;
+};
+
+export type ListChangesError = ListChangesErrors[keyof ListChangesErrors];
+
+export type ListChangesResponses = {
+    /**
+     * A page of changes
+     */
+    200: SuccessEnvelope & {
+        data?: ChangePage;
+    };
+};
+
+export type ListChangesResponse = ListChangesResponses[keyof ListChangesResponses];
+
+export type CancelSentEmailByIdempotencyKeyData = {
+    body: {
+        /**
+         * The `Idempotency-Key` the send was created with.
+         */
+        idempotency_key: string;
+        /**
+         * Only consider sends created at or before this instant, such as when you first asked to cancel.
+         */
+        created_before?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/sent-emails/cancel';
+};
+
+export type CancelSentEmailByIdempotencyKeyErrors = {
+    /**
+     * Invalid request parameters
+     */
+    400: ErrorResponse;
+    /**
+     * Invalid or missing API key
+     */
+    401: ErrorResponse;
+    /**
+     * Resource not found
+     */
+    404: ErrorResponse;
+    /**
+     * `not_scheduled`: `error.details` carries the `sent_email_id` and current `status` of the send holding the key.
+     */
+    409: ErrorResponse;
+    /**
+     * Rate limit exceeded. The `ratelimit-*` headers describe the limiter that rejected this request, with its own limit and window, not the API budget that successful responses report. A limiter that reports only a wait sends `Retry-After` alone.
+     */
+    429: ErrorResponse;
+};
+
+export type CancelSentEmailByIdempotencyKeyError = CancelSentEmailByIdempotencyKeyErrors[keyof CancelSentEmailByIdempotencyKeyErrors];
+
+export type CancelSentEmailByIdempotencyKeyResponses = {
+    /**
+     * Canceled sent-email detail
+     */
+    200: SuccessEnvelope & {
+        data?: SentEmailDetail;
+    };
+};
+
+export type CancelSentEmailByIdempotencyKeyResponse = CancelSentEmailByIdempotencyKeyResponses[keyof CancelSentEmailByIdempotencyKeyResponses];
 
 export type CancelSentEmailData = {
     body?: never;

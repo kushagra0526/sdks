@@ -169,6 +169,15 @@ class EmailSummary:
                 declared none, and on messages received before these headers
                 were captured, so a null value is not evidence that a person
                 sent the message.
+            from_verified (bool | None | Unset): True when the From header address, `from_header_email`, passed DMARC for
+                its domain on arrival (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the
+                envelope: `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the envelope
+                sender, which can differ. It proves the domain, not the mailbox. False with no From header address, when
+                authentication failed or was not attempted (a delivery between Primitive mailboxes counts only when it passed
+                DMARC too), and for mail stored before the verdict was recorded. Null on sent rows in search results. Not a spam
+                or safety judgement.
+            from_header_email (None | str | Unset): The From header address, lowercased, that `from_verified` is about; null
+                when the message had none. Unlike `sender` it is never the envelope address.
             repeat (EmailSummaryRepeatType0 | None | Unset): Set when Primitive sent this message as part of a repeating
                 send. Resolved from Primitive's own records, never from the message content. Null on every other message and on
                 servers that predate repeating sends.
@@ -232,6 +241,8 @@ class EmailSummary:
     thread_id: None | Unset | UUID = UNSET
     presence_control: None | PresenceControlType0 | Unset = UNSET
     automation_headers: EmailSummaryAutomationHeadersType0 | None | Unset = UNSET
+    from_verified: bool | None | Unset = UNSET
+    from_header_email: None | str | Unset = UNSET
     repeat: EmailSummaryRepeatType0 | None | Unset = UNSET
     sender_member: EmailSummarySenderMemberType0 | None | Unset = UNSET
     fyi: bool | Unset = UNSET
@@ -360,6 +371,18 @@ class EmailSummary:
         else:
             automation_headers = self.automation_headers
 
+        from_verified: bool | None | Unset
+        if isinstance(self.from_verified, Unset):
+            from_verified = UNSET
+        else:
+            from_verified = self.from_verified
+
+        from_header_email: None | str | Unset
+        if isinstance(self.from_header_email, Unset):
+            from_header_email = UNSET
+        else:
+            from_header_email = self.from_header_email
+
         repeat: dict[str, Any] | None | Unset
         if isinstance(self.repeat, Unset):
             repeat = UNSET
@@ -440,6 +463,10 @@ class EmailSummary:
             field_dict["presence_control"] = presence_control
         if automation_headers is not UNSET:
             field_dict["automation_headers"] = automation_headers
+        if from_verified is not UNSET:
+            field_dict["from_verified"] = from_verified
+        if from_header_email is not UNSET:
+            field_dict["from_header_email"] = from_header_email
         if repeat is not UNSET:
             field_dict["repeat"] = repeat
         if sender_member is not UNSET:
@@ -707,6 +734,26 @@ class EmailSummary:
         automation_headers = _parse_automation_headers(d.pop("automation_headers", UNSET))
 
 
+        def _parse_from_verified(data: object) -> bool | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(bool | None | Unset, data)
+
+        from_verified = _parse_from_verified(d.pop("from_verified", UNSET))
+
+
+        def _parse_from_header_email(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        from_header_email = _parse_from_header_email(d.pop("from_header_email", UNSET))
+
+
         def _parse_repeat(data: object) -> EmailSummaryRepeatType0 | None | Unset:
             if data is None:
                 return data
@@ -817,6 +864,8 @@ class EmailSummary:
             thread_id=thread_id,
             presence_control=presence_control,
             automation_headers=automation_headers,
+            from_verified=from_verified,
+            from_header_email=from_header_email,
             repeat=repeat,
             sender_member=sender_member,
             fyi=fyi,

@@ -36,7 +36,19 @@ from .await_reply_response_200 import AwaitReplyResponse200
 from .await_reply_result import AwaitReplyResult
 from .caller_identity import CallerIdentity
 from .caller_identity_member_address_type_0 import CallerIdentityMemberAddressType0
+from .cancel_sent_email_by_idempotency_key_body import CancelSentEmailByIdempotencyKeyBody
+from .cancel_sent_email_by_idempotency_key_response_200 import CancelSentEmailByIdempotencyKeyResponse200
 from .cancel_sent_email_response_200 import CancelSentEmailResponse200
+from .change import Change
+from .change_inbound_message import ChangeInboundMessage
+from .change_inbound_message_direction import ChangeInboundMessageDirection
+from .change_kind import ChangeKind
+from .change_outbound_message import ChangeOutboundMessage
+from .change_outbound_message_direction import ChangeOutboundMessageDirection
+from .change_page import ChangePage
+from .change_reason_type_1 import ChangeReasonType1
+from .change_reason_type_2_type_1 import ChangeReasonType2Type1
+from .change_reason_type_3_type_1 import ChangeReasonType3Type1
 from .check_default_network_contact_admission_response_200 import CheckDefaultNetworkContactAdmissionResponse200
 from .check_domain_dns_response_200 import CheckDomainDnsResponse200
 from .claim_agent_connection_body import ClaimAgentConnectionBody
@@ -330,6 +342,8 @@ from .list_agent_contacts_response_200 import ListAgentContactsResponse200
 from .list_agent_contacts_response_200_data_item import ListAgentContactsResponse200DataItem
 from .list_agent_contacts_response_200_meta import ListAgentContactsResponse200Meta
 from .list_agent_networks_response_200 import ListAgentNetworksResponse200
+from .list_changes_expand import ListChangesExpand
+from .list_changes_response_200 import ListChangesResponse200
 from .list_contacts_response_200 import ListContactsResponse200
 from .list_contacts_response_200_data_item import ListContactsResponse200DataItem
 from .list_contacts_response_200_meta import ListContactsResponse200Meta
@@ -342,6 +356,7 @@ from .list_domains_response_200 import ListDomainsResponse200
 from .list_emails_automated import ListEmailsAutomated
 from .list_emails_awaiting import ListEmailsAwaiting
 from .list_emails_exclude_fyi import ListEmailsExcludeFyi
+from .list_emails_from_verified import ListEmailsFromVerified
 from .list_emails_response_200 import ListEmailsResponse200
 from .list_endpoints_response_200 import ListEndpointsResponse200
 from .list_envelope import ListEnvelope
@@ -479,6 +494,7 @@ from .search_emails_automated import SearchEmailsAutomated
 from .search_emails_awaiting import SearchEmailsAwaiting
 from .search_emails_count import SearchEmailsCount
 from .search_emails_direction import SearchEmailsDirection
+from .search_emails_from_verified import SearchEmailsFromVerified
 from .search_emails_has_attachment import SearchEmailsHasAttachment
 from .search_emails_include_facets import SearchEmailsIncludeFacets
 from .search_emails_prefix import SearchEmailsPrefix
@@ -701,7 +717,19 @@ __all__ = (
     "AwaitReplyResult",
     "CallerIdentity",
     "CallerIdentityMemberAddressType0",
+    "CancelSentEmailByIdempotencyKeyBody",
+    "CancelSentEmailByIdempotencyKeyResponse200",
     "CancelSentEmailResponse200",
+    "Change",
+    "ChangeInboundMessage",
+    "ChangeInboundMessageDirection",
+    "ChangeKind",
+    "ChangeOutboundMessage",
+    "ChangeOutboundMessageDirection",
+    "ChangePage",
+    "ChangeReasonType1",
+    "ChangeReasonType2Type1",
+    "ChangeReasonType3Type1",
     "CheckDefaultNetworkContactAdmissionResponse200",
     "CheckDomainDnsResponse200",
     "ClaimAgentConnectionBody",
@@ -995,6 +1023,8 @@ __all__ = (
     "ListAgentContactsResponse200DataItem",
     "ListAgentContactsResponse200Meta",
     "ListAgentNetworksResponse200",
+    "ListChangesExpand",
+    "ListChangesResponse200",
     "ListContactsResponse200",
     "ListContactsResponse200DataItem",
     "ListContactsResponse200Meta",
@@ -1007,6 +1037,7 @@ __all__ = (
     "ListEmailsAutomated",
     "ListEmailsAwaiting",
     "ListEmailsExcludeFyi",
+    "ListEmailsFromVerified",
     "ListEmailsResponse200",
     "ListEndpointsResponse200",
     "ListEnvelope",
@@ -1144,6 +1175,7 @@ __all__ = (
     "SearchEmailsAwaiting",
     "SearchEmailsCount",
     "SearchEmailsDirection",
+    "SearchEmailsFromVerified",
     "SearchEmailsHasAttachment",
     "SearchEmailsIncludeFacets",
     "SearchEmailsPrefix",

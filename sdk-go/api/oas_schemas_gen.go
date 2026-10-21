@@ -2232,6 +2232,77 @@ type CancelSentEmailBadRequest ErrorResponse
 
 func (*CancelSentEmailBadRequest) cancelSentEmailRes() {}
 
+type CancelSentEmailByIdempotencyKeyBadRequest ErrorResponse
+
+func (*CancelSentEmailByIdempotencyKeyBadRequest) cancelSentEmailByIdempotencyKeyRes() {}
+
+type CancelSentEmailByIdempotencyKeyConflict ErrorResponse
+
+func (*CancelSentEmailByIdempotencyKeyConflict) cancelSentEmailByIdempotencyKeyRes() {}
+
+type CancelSentEmailByIdempotencyKeyNotFound ErrorResponse
+
+func (*CancelSentEmailByIdempotencyKeyNotFound) cancelSentEmailByIdempotencyKeyRes() {}
+
+// Merged schema.
+type CancelSentEmailByIdempotencyKeyOK struct {
+	Success bool            `json:"success"`
+	Data    SentEmailDetail `json:"data"`
+}
+
+// GetSuccess returns the value of Success.
+func (s *CancelSentEmailByIdempotencyKeyOK) GetSuccess() bool {
+	return s.Success
+}
+
+// GetData returns the value of Data.
+func (s *CancelSentEmailByIdempotencyKeyOK) GetData() SentEmailDetail {
+	return s.Data
+}
+
+// SetSuccess sets the value of Success.
+func (s *CancelSentEmailByIdempotencyKeyOK) SetSuccess(val bool) {
+	s.Success = val
+}
+
+// SetData sets the value of Data.
+func (s *CancelSentEmailByIdempotencyKeyOK) SetData(val SentEmailDetail) {
+	s.Data = val
+}
+
+func (*CancelSentEmailByIdempotencyKeyOK) cancelSentEmailByIdempotencyKeyRes() {}
+
+type CancelSentEmailByIdempotencyKeyReq struct {
+	// The `Idempotency-Key` the send was created with.
+	IdempotencyKey string `json:"idempotency_key"`
+	// Only consider sends created at or before this instant, such as when you first asked to cancel.
+	CreatedBefore OptDateTime `json:"created_before"`
+}
+
+// GetIdempotencyKey returns the value of IdempotencyKey.
+func (s *CancelSentEmailByIdempotencyKeyReq) GetIdempotencyKey() string {
+	return s.IdempotencyKey
+}
+
+// GetCreatedBefore returns the value of CreatedBefore.
+func (s *CancelSentEmailByIdempotencyKeyReq) GetCreatedBefore() OptDateTime {
+	return s.CreatedBefore
+}
+
+// SetIdempotencyKey sets the value of IdempotencyKey.
+func (s *CancelSentEmailByIdempotencyKeyReq) SetIdempotencyKey(val string) {
+	s.IdempotencyKey = val
+}
+
+// SetCreatedBefore sets the value of CreatedBefore.
+func (s *CancelSentEmailByIdempotencyKeyReq) SetCreatedBefore(val OptDateTime) {
+	s.CreatedBefore = val
+}
+
+type CancelSentEmailByIdempotencyKeyUnauthorized ErrorResponse
+
+func (*CancelSentEmailByIdempotencyKeyUnauthorized) cancelSentEmailByIdempotencyKeyRes() {}
+
 type CancelSentEmailConflict ErrorResponse
 
 func (*CancelSentEmailConflict) cancelSentEmailRes() {}
@@ -2271,6 +2342,1910 @@ func (*CancelSentEmailOK) cancelSentEmailRes() {}
 type CancelSentEmailUnauthorized ErrorResponse
 
 func (*CancelSentEmailUnauthorized) cancelSentEmailRes() {}
+
+// One invalidation: what changed, by id, never its content. Every field is present; fields that do
+// not apply to the kind are null. Apply idempotently: a change can repeat.
+// Ref: #/components/schemas/Change
+type Change struct {
+	// `email.visible`: an inbound email became visible to this credential (arrived, or its
+	// sender-authentication hold was released). `email.updated`: something a list row or conversation
+	// shows changed. `email.deleted`: gone, or withdrawn from view. `sent_email.created` / `sent_email.
+	// updated`: a send appeared or changed; `status` is its current status, and several changes between
+	// two reads collapse into one entry. Created is a hint (first committed after the cursor): treat
+	// both as upsert, including `sent_email.updated` for an id you have not seen. `sent_email.deleted`:
+	// the send was deleted. `thread.read_state_changed`: the signed-in member's read cursor for
+	// `thread_id` moved, on any device. `thread.mute_changed`: `thread_id` was muted or unmuted for an
+	// address this credential reads, which changes the `muted` flag and `exclude_muted` results of its
+	// mail. `agent.changed`: an agent in the directory changed (connected, disconnected, renamed, hidden,
+	//  listed, presence extended, receiver live). `access.changed`: this credential's own access changed;
+	//  rebuild every snapshot from `since=start`.
+	Kind ChangeKind `json:"kind"`
+	// Email.* kinds.
+	EmailID NilUUID `json:"email_id"`
+	// Sent_email.* kinds.
+	SentEmailID NilUUID `json:"sent_email_id"`
+	// The conversation, when known. Null for a connected agent reading a send, or its deletion, that it
+	// received but did not send, matching what GET /sent-emails withholds. Inbound mail is announced
+	// when it becomes visible, which can be before its conversation is resolved, so `email.visible` can
+	// carry null; resolving or changing the conversation is always announced afterwards as `email.
+	// updated` with the `thread_id`.
+	ThreadID NilUUID `json:"thread_id"`
+	// Sent_email.created and sent_email.updated: the send's current status.
+	Status NilString `json:"status"`
+	// Agent.changed: the agent's address.
+	AgentAddress NilString `json:"agent_address"`
+	// Access.changed: `membership` (the member's role or membership) or `agent_connection` (this agent
+	// connection's status, owner or generation).
+	Reason NilChangeReason `json:"reason"`
+	// The commit position in microsecond UTC form. Orders the feed; not a business timestamp.
+	ChangedAt time.Time `json:"changed_at"`
+	// Present only when the request sets `expand=message`. For `email.visible`, `email.updated`,
+	// `sent_email.created`, `sent_email.updated`: the message as it reads at the time of this response
+	// (not at the time of the change), exactly as the list endpoints return it, marked by `direction`.
+	// Null for every other kind, and when the message is no longer readable by this credential (deleted,
+	// or withdrawn from view after the change).
+	Message OptNilChangeMessage `json:"message"`
+}
+
+// GetKind returns the value of Kind.
+func (s *Change) GetKind() ChangeKind {
+	return s.Kind
+}
+
+// GetEmailID returns the value of EmailID.
+func (s *Change) GetEmailID() NilUUID {
+	return s.EmailID
+}
+
+// GetSentEmailID returns the value of SentEmailID.
+func (s *Change) GetSentEmailID() NilUUID {
+	return s.SentEmailID
+}
+
+// GetThreadID returns the value of ThreadID.
+func (s *Change) GetThreadID() NilUUID {
+	return s.ThreadID
+}
+
+// GetStatus returns the value of Status.
+func (s *Change) GetStatus() NilString {
+	return s.Status
+}
+
+// GetAgentAddress returns the value of AgentAddress.
+func (s *Change) GetAgentAddress() NilString {
+	return s.AgentAddress
+}
+
+// GetReason returns the value of Reason.
+func (s *Change) GetReason() NilChangeReason {
+	return s.Reason
+}
+
+// GetChangedAt returns the value of ChangedAt.
+func (s *Change) GetChangedAt() time.Time {
+	return s.ChangedAt
+}
+
+// GetMessage returns the value of Message.
+func (s *Change) GetMessage() OptNilChangeMessage {
+	return s.Message
+}
+
+// SetKind sets the value of Kind.
+func (s *Change) SetKind(val ChangeKind) {
+	s.Kind = val
+}
+
+// SetEmailID sets the value of EmailID.
+func (s *Change) SetEmailID(val NilUUID) {
+	s.EmailID = val
+}
+
+// SetSentEmailID sets the value of SentEmailID.
+func (s *Change) SetSentEmailID(val NilUUID) {
+	s.SentEmailID = val
+}
+
+// SetThreadID sets the value of ThreadID.
+func (s *Change) SetThreadID(val NilUUID) {
+	s.ThreadID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Change) SetStatus(val NilString) {
+	s.Status = val
+}
+
+// SetAgentAddress sets the value of AgentAddress.
+func (s *Change) SetAgentAddress(val NilString) {
+	s.AgentAddress = val
+}
+
+// SetReason sets the value of Reason.
+func (s *Change) SetReason(val NilChangeReason) {
+	s.Reason = val
+}
+
+// SetChangedAt sets the value of ChangedAt.
+func (s *Change) SetChangedAt(val time.Time) {
+	s.ChangedAt = val
+}
+
+// SetMessage sets the value of Message.
+func (s *Change) SetMessage(val OptNilChangeMessage) {
+	s.Message = val
+}
+
+// Merged schema.
+// Ref: #/components/schemas/ChangeInboundMessage
+type ChangeInboundMessage struct {
+	ID        uuid.UUID    `json:"id"`
+	MessageID OptNilString `json:"message_id"`
+	DomainID  OptNilUUID   `json:"domain_id"`
+	OrgID     OptNilUUID   `json:"org_id"`
+	Status    EmailStatus  `json:"status"`
+	// SMTP envelope sender (return-path) the inbound mail server
+	// accepted. For most legitimate mail this equals the bare
+	// address in the From header; for mailing lists, bounce
+	// handlers, and forwarders it is typically the bounce address
+	// rather than the human-visible sender.
+	// For the parsed From-header value (with display name handling
+	// and a sender-fallback when the header is unparseable), GET
+	// the email by id and use `from_email`.
+	Sender              string                   `json:"sender"`
+	Recipient           string                   `json:"recipient"`
+	Subject             OptNilString             `json:"subject"`
+	Domain              string                   `json:"domain"`
+	SpamScore           OptNilFloat64            `json:"spam_score"`
+	CreatedAt           time.Time                `json:"created_at"`
+	ReceivedAt          time.Time                `json:"received_at"`
+	RawSizeBytes        OptNilInt                `json:"raw_size_bytes"`
+	WebhookStatus       OptNilEmailWebhookStatus `json:"webhook_status"`
+	WebhookAttemptCount int                      `json:"webhook_attempt_count"`
+	// Conversation thread this message belongs to. Fetch
+	// `/threads/{thread_id}` for the full ordered thread. NULL on
+	// messages received before threading was enabled.
+	ThreadID        OptNilUUID                                `json:"thread_id"`
+	PresenceControl OptNilChangeInboundMessagePresenceControl `json:"presence_control"`
+	// What the message declared about being automated, verbatim:
+	// `List-Unsubscribe` (RFC 2369/8058), `List-Id` (RFC 2919),
+	// `Precedence`, and `Auto-Submitted` (RFC 3834). Null or absent when the message
+	// declared none, and on messages received before these headers
+	// were captured, so a null value is not evidence that a person
+	// sent the message.
+	AutomationHeaders OptNilChangeInboundMessageAutomationHeaders `json:"automation_headers"`
+	// Number of replies recorded against this email: sends whose
+	// `in_reply_to_email_id` is this email, the same linkage that populates
+	// `EmailDetail.replies`, excluding sends that never went out (status
+	// `gate_denied`, `agent_failed`, `canceled`). Queued and scheduled
+	// replies count. Under an agent connection, only the replies that agent
+	// can see in `EmailDetail.replies`. Unlike `awaiting`, this counts
+	// replies to this one email, not to the thread.
+	ReplyCount int `json:"reply_count"`
+	// `created_at` of the latest reply counted in `reply_count`, or
+	// null when `reply_count` is 0.
+	LastRepliedAt NilDateTime `json:"last_replied_at"`
+	// Whose turn it is in this email's conversation. A send counts as a
+	// reply unless its status is `gate_denied`, `agent_failed`, `canceled`
+	// (queued and scheduled replies count: they are committed to go). For
+	// an email with a `thread_id`: `them` when the thread's latest counted
+	// outbound send (by send `created_at`, including any counted reply to
+	// this email itself) is at or after the thread's latest inbound message
+	// (by `received_at`); otherwise `you`. For an email with no
+	// `thread_id`: `them` when it has at least one counted reply
+	// (`reply_count > 0` for an API key), otherwise `you`. It is a
+	// thread-level fact: every email in a thread carries the same value, and
+	// it reflects sends made by any credential in the organization,
+	// including other agent connections. It changes without a new inbound
+	// message, for example when a reply is sent, a queued reply fails, a
+	// scheduled reply is canceled, or a message is deleted, and is always
+	// current when read.
+	Awaiting ChangeInboundMessageAwaiting `json:"awaiting"`
+	// Whether the message was sent by a machine rather than a person.
+	// An inbound email is `automated` when any of these holds, decided once
+	// when it arrives: `null_envelope_sender` (an empty MAIL FROM, a bounce);
+	// `no_identifiable_sender` (no address in the envelope or From);
+	// `own_address` (a sender address is exactly one of the addresses the
+	// mail was delivered to; sharing a domain with the recipient is not
+	// enough, so a colleague or another agent in the organization is not
+	// automated);
+	// `mailer_daemon` (mailer-daemon@ or postmaster@ on any domain);
+	// `auto_submitted` (Auto-Submitted with any keyword but `no`, an
+	// empty one included);
+	// `precedence` (Precedence bulk, list, junk or auto_reply);
+	// `list_unsubscribe` (List-Unsubscribe present); `list_id` (List-Id
+	// present); `auto_response_suppress` (X-Auto-Response-Suppress asks
+	// for no automatic reply: All, OOF or AutoReply);
+	// `failed_recipients` (X-Failed-Recipients present, a bounce);
+	// `report` (a delivery, feedback or disposition report). Mail
+	// Primitive's own automatic responders decline to answer is always
+	// `automated`. The header rules only see headers captured at ingest, so
+	// older mail may lack them. This is loop and noise protection, not
+	// sender authentication.
+	Automated bool `json:"automated"`
+	// Why `automated` is true, in rule order; empty when it is false.
+	// Current values: `null_envelope_sender`, `no_identifiable_sender`,
+	// `own_address`, `mailer_daemon`, `auto_submitted`, `precedence`,
+	// `list_unsubscribe`, `list_id`, `auto_response_suppress`,
+	// `failed_recipients`, `report`. Treat an unfamiliar value as a
+	// reason added after your client was built.
+	AutomatedReasons []string `json:"automated_reasons"`
+	// True when the From header address, `from_header_email`, passed DMARC for its domain on arrival
+	// (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the envelope:
+	// `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the
+	// envelope sender, which can differ. It proves the domain, not the mailbox. False with no From
+	// header address, when authentication failed or was not attempted (a delivery between Primitive
+	// mailboxes counts only when it passed DMARC too), and for mail stored before the verdict was
+	// recorded. Null on sent rows in search results. Not a spam or safety judgement.
+	FromVerified OptNilBool `json:"from_verified"`
+	// The From header address, lowercased, that `from_verified` is about; null when the message had none.
+	//  Unlike `sender` it is never the envelope address.
+	FromHeaderEmail OptNilString `json:"from_header_email"`
+	// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
+	// records, never from the message content. Null on every other message and on servers that predate
+	// repeating sends.
+	Repeat OptNilChangeInboundMessageRepeat `json:"repeat"`
+	// Verified human authorship, projected only within the member organization. Historical attribution
+	// is not current sending or owner authority.
+	SenderMember OptNilChangeInboundMessageSenderMember `json:"sender_member"`
+	// True when the email is an informational signal (an acknowledgement, read, working or typing
+	// signal) and nothing else, so it needs no answer, not even another informational reply. Never true
+	// for mail from the reader's owner. Older servers omit it.
+	Fyi OptBool `json:"fyi"`
+	// How to place this email in a timeline without downloading it: `status`, `card`, `none` or
+	// `pending`. Not declared as a closed enum so that a value added later does not fail decoding.
+	// Decided once by the server from the message's authoritative `interaction.json` part, and only when
+	// a passing DKIM signature covering From and Content-Type authenticates the From that wrote it; the
+	// `X-Primitive-Interaction` header is never used, so an unsigned or forged message is always `none`.
+	// `status`: a pure status signal (`read`, `working`, `typing`, or an `ack` in the strict signal
+	// shape), shown as a property of the message it is about rather than as a row. `card`: an
+	// interaction that renders as its own timeline item (for example `ack-request`, `x402.payment`,
+	// `wake.dispatch`, `primitive.contact`, `repeat.tick`, `repeat.stop`). `none`: ordinary mail,
+	// including any interaction kind not listed. `pending`: the email has not finished processing; read
+	// it again later. Email processed before the field existed is `none`. Treat an unfamiliar value as
+	// `none`. Older servers omit it.
+	InteractionHint OptString `json:"interaction_hint"`
+	// The `<protocol>/<version>` that `interaction_hint` was decided from (for example `repeat.tick/1`
+	// or `read/1`) when `interaction_hint` is `status` or `card`; null otherwise.
+	InteractionKind OptNilString `json:"interaction_kind"`
+	// UNVERIFIED early signal for the `pending` window: true when the raw message carries an
+	// `X-Primitive-Interaction` header or a MIME part named `interaction.json`, recorded before any
+	// signature is checked. Use it only to decide, while `interaction_hint` is `pending`, whether to
+	// show a placeholder instead of the raw text. It is never evidence of an interaction: anyone can set
+	// that header or name a part that way, so it must not grant trust or select an interaction kind.
+	// Ignore it once `interaction_hint` is anything other than `pending`.
+	InteractionCandidate OptBool `json:"interaction_candidate"`
+	// Set when the message reached Primitive through a Primitive mail relay. Null for other mail. The
+	// field may be absent; treat a missing value the same as null.
+	Relay OptNilChangeInboundMessageRelay `json:"relay"`
+	// Display name from the `From:` header, decoded for display:
+	// RFC 2047 encoded words are decoded in their declared charset
+	// and folded lines are joined (e.g. `Dana Rúiz` for
+	// `=?UTF-8?Q?Dana_R=C3=BAiz?= <dana@example.com>`). Null when
+	// the header carries no display name, and may be absent; treat
+	// a missing value the same as null.
+	// For display only: the sender chooses this name freely, so
+	// identify the sender by `from_email`, never by this name.
+	FromName  OptNilString                  `json:"from_name"`
+	Direction ChangeInboundMessageDirection `json:"direction"`
+}
+
+// GetID returns the value of ID.
+func (s *ChangeInboundMessage) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetMessageID returns the value of MessageID.
+func (s *ChangeInboundMessage) GetMessageID() OptNilString {
+	return s.MessageID
+}
+
+// GetDomainID returns the value of DomainID.
+func (s *ChangeInboundMessage) GetDomainID() OptNilUUID {
+	return s.DomainID
+}
+
+// GetOrgID returns the value of OrgID.
+func (s *ChangeInboundMessage) GetOrgID() OptNilUUID {
+	return s.OrgID
+}
+
+// GetStatus returns the value of Status.
+func (s *ChangeInboundMessage) GetStatus() EmailStatus {
+	return s.Status
+}
+
+// GetSender returns the value of Sender.
+func (s *ChangeInboundMessage) GetSender() string {
+	return s.Sender
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *ChangeInboundMessage) GetRecipient() string {
+	return s.Recipient
+}
+
+// GetSubject returns the value of Subject.
+func (s *ChangeInboundMessage) GetSubject() OptNilString {
+	return s.Subject
+}
+
+// GetDomain returns the value of Domain.
+func (s *ChangeInboundMessage) GetDomain() string {
+	return s.Domain
+}
+
+// GetSpamScore returns the value of SpamScore.
+func (s *ChangeInboundMessage) GetSpamScore() OptNilFloat64 {
+	return s.SpamScore
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ChangeInboundMessage) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetReceivedAt returns the value of ReceivedAt.
+func (s *ChangeInboundMessage) GetReceivedAt() time.Time {
+	return s.ReceivedAt
+}
+
+// GetRawSizeBytes returns the value of RawSizeBytes.
+func (s *ChangeInboundMessage) GetRawSizeBytes() OptNilInt {
+	return s.RawSizeBytes
+}
+
+// GetWebhookStatus returns the value of WebhookStatus.
+func (s *ChangeInboundMessage) GetWebhookStatus() OptNilEmailWebhookStatus {
+	return s.WebhookStatus
+}
+
+// GetWebhookAttemptCount returns the value of WebhookAttemptCount.
+func (s *ChangeInboundMessage) GetWebhookAttemptCount() int {
+	return s.WebhookAttemptCount
+}
+
+// GetThreadID returns the value of ThreadID.
+func (s *ChangeInboundMessage) GetThreadID() OptNilUUID {
+	return s.ThreadID
+}
+
+// GetPresenceControl returns the value of PresenceControl.
+func (s *ChangeInboundMessage) GetPresenceControl() OptNilChangeInboundMessagePresenceControl {
+	return s.PresenceControl
+}
+
+// GetAutomationHeaders returns the value of AutomationHeaders.
+func (s *ChangeInboundMessage) GetAutomationHeaders() OptNilChangeInboundMessageAutomationHeaders {
+	return s.AutomationHeaders
+}
+
+// GetReplyCount returns the value of ReplyCount.
+func (s *ChangeInboundMessage) GetReplyCount() int {
+	return s.ReplyCount
+}
+
+// GetLastRepliedAt returns the value of LastRepliedAt.
+func (s *ChangeInboundMessage) GetLastRepliedAt() NilDateTime {
+	return s.LastRepliedAt
+}
+
+// GetAwaiting returns the value of Awaiting.
+func (s *ChangeInboundMessage) GetAwaiting() ChangeInboundMessageAwaiting {
+	return s.Awaiting
+}
+
+// GetAutomated returns the value of Automated.
+func (s *ChangeInboundMessage) GetAutomated() bool {
+	return s.Automated
+}
+
+// GetAutomatedReasons returns the value of AutomatedReasons.
+func (s *ChangeInboundMessage) GetAutomatedReasons() []string {
+	return s.AutomatedReasons
+}
+
+// GetFromVerified returns the value of FromVerified.
+func (s *ChangeInboundMessage) GetFromVerified() OptNilBool {
+	return s.FromVerified
+}
+
+// GetFromHeaderEmail returns the value of FromHeaderEmail.
+func (s *ChangeInboundMessage) GetFromHeaderEmail() OptNilString {
+	return s.FromHeaderEmail
+}
+
+// GetRepeat returns the value of Repeat.
+func (s *ChangeInboundMessage) GetRepeat() OptNilChangeInboundMessageRepeat {
+	return s.Repeat
+}
+
+// GetSenderMember returns the value of SenderMember.
+func (s *ChangeInboundMessage) GetSenderMember() OptNilChangeInboundMessageSenderMember {
+	return s.SenderMember
+}
+
+// GetFyi returns the value of Fyi.
+func (s *ChangeInboundMessage) GetFyi() OptBool {
+	return s.Fyi
+}
+
+// GetInteractionHint returns the value of InteractionHint.
+func (s *ChangeInboundMessage) GetInteractionHint() OptString {
+	return s.InteractionHint
+}
+
+// GetInteractionKind returns the value of InteractionKind.
+func (s *ChangeInboundMessage) GetInteractionKind() OptNilString {
+	return s.InteractionKind
+}
+
+// GetInteractionCandidate returns the value of InteractionCandidate.
+func (s *ChangeInboundMessage) GetInteractionCandidate() OptBool {
+	return s.InteractionCandidate
+}
+
+// GetRelay returns the value of Relay.
+func (s *ChangeInboundMessage) GetRelay() OptNilChangeInboundMessageRelay {
+	return s.Relay
+}
+
+// GetFromName returns the value of FromName.
+func (s *ChangeInboundMessage) GetFromName() OptNilString {
+	return s.FromName
+}
+
+// GetDirection returns the value of Direction.
+func (s *ChangeInboundMessage) GetDirection() ChangeInboundMessageDirection {
+	return s.Direction
+}
+
+// SetID sets the value of ID.
+func (s *ChangeInboundMessage) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetMessageID sets the value of MessageID.
+func (s *ChangeInboundMessage) SetMessageID(val OptNilString) {
+	s.MessageID = val
+}
+
+// SetDomainID sets the value of DomainID.
+func (s *ChangeInboundMessage) SetDomainID(val OptNilUUID) {
+	s.DomainID = val
+}
+
+// SetOrgID sets the value of OrgID.
+func (s *ChangeInboundMessage) SetOrgID(val OptNilUUID) {
+	s.OrgID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ChangeInboundMessage) SetStatus(val EmailStatus) {
+	s.Status = val
+}
+
+// SetSender sets the value of Sender.
+func (s *ChangeInboundMessage) SetSender(val string) {
+	s.Sender = val
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *ChangeInboundMessage) SetRecipient(val string) {
+	s.Recipient = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *ChangeInboundMessage) SetSubject(val OptNilString) {
+	s.Subject = val
+}
+
+// SetDomain sets the value of Domain.
+func (s *ChangeInboundMessage) SetDomain(val string) {
+	s.Domain = val
+}
+
+// SetSpamScore sets the value of SpamScore.
+func (s *ChangeInboundMessage) SetSpamScore(val OptNilFloat64) {
+	s.SpamScore = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ChangeInboundMessage) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetReceivedAt sets the value of ReceivedAt.
+func (s *ChangeInboundMessage) SetReceivedAt(val time.Time) {
+	s.ReceivedAt = val
+}
+
+// SetRawSizeBytes sets the value of RawSizeBytes.
+func (s *ChangeInboundMessage) SetRawSizeBytes(val OptNilInt) {
+	s.RawSizeBytes = val
+}
+
+// SetWebhookStatus sets the value of WebhookStatus.
+func (s *ChangeInboundMessage) SetWebhookStatus(val OptNilEmailWebhookStatus) {
+	s.WebhookStatus = val
+}
+
+// SetWebhookAttemptCount sets the value of WebhookAttemptCount.
+func (s *ChangeInboundMessage) SetWebhookAttemptCount(val int) {
+	s.WebhookAttemptCount = val
+}
+
+// SetThreadID sets the value of ThreadID.
+func (s *ChangeInboundMessage) SetThreadID(val OptNilUUID) {
+	s.ThreadID = val
+}
+
+// SetPresenceControl sets the value of PresenceControl.
+func (s *ChangeInboundMessage) SetPresenceControl(val OptNilChangeInboundMessagePresenceControl) {
+	s.PresenceControl = val
+}
+
+// SetAutomationHeaders sets the value of AutomationHeaders.
+func (s *ChangeInboundMessage) SetAutomationHeaders(val OptNilChangeInboundMessageAutomationHeaders) {
+	s.AutomationHeaders = val
+}
+
+// SetReplyCount sets the value of ReplyCount.
+func (s *ChangeInboundMessage) SetReplyCount(val int) {
+	s.ReplyCount = val
+}
+
+// SetLastRepliedAt sets the value of LastRepliedAt.
+func (s *ChangeInboundMessage) SetLastRepliedAt(val NilDateTime) {
+	s.LastRepliedAt = val
+}
+
+// SetAwaiting sets the value of Awaiting.
+func (s *ChangeInboundMessage) SetAwaiting(val ChangeInboundMessageAwaiting) {
+	s.Awaiting = val
+}
+
+// SetAutomated sets the value of Automated.
+func (s *ChangeInboundMessage) SetAutomated(val bool) {
+	s.Automated = val
+}
+
+// SetAutomatedReasons sets the value of AutomatedReasons.
+func (s *ChangeInboundMessage) SetAutomatedReasons(val []string) {
+	s.AutomatedReasons = val
+}
+
+// SetFromVerified sets the value of FromVerified.
+func (s *ChangeInboundMessage) SetFromVerified(val OptNilBool) {
+	s.FromVerified = val
+}
+
+// SetFromHeaderEmail sets the value of FromHeaderEmail.
+func (s *ChangeInboundMessage) SetFromHeaderEmail(val OptNilString) {
+	s.FromHeaderEmail = val
+}
+
+// SetRepeat sets the value of Repeat.
+func (s *ChangeInboundMessage) SetRepeat(val OptNilChangeInboundMessageRepeat) {
+	s.Repeat = val
+}
+
+// SetSenderMember sets the value of SenderMember.
+func (s *ChangeInboundMessage) SetSenderMember(val OptNilChangeInboundMessageSenderMember) {
+	s.SenderMember = val
+}
+
+// SetFyi sets the value of Fyi.
+func (s *ChangeInboundMessage) SetFyi(val OptBool) {
+	s.Fyi = val
+}
+
+// SetInteractionHint sets the value of InteractionHint.
+func (s *ChangeInboundMessage) SetInteractionHint(val OptString) {
+	s.InteractionHint = val
+}
+
+// SetInteractionKind sets the value of InteractionKind.
+func (s *ChangeInboundMessage) SetInteractionKind(val OptNilString) {
+	s.InteractionKind = val
+}
+
+// SetInteractionCandidate sets the value of InteractionCandidate.
+func (s *ChangeInboundMessage) SetInteractionCandidate(val OptBool) {
+	s.InteractionCandidate = val
+}
+
+// SetRelay sets the value of Relay.
+func (s *ChangeInboundMessage) SetRelay(val OptNilChangeInboundMessageRelay) {
+	s.Relay = val
+}
+
+// SetFromName sets the value of FromName.
+func (s *ChangeInboundMessage) SetFromName(val OptNilString) {
+	s.FromName = val
+}
+
+// SetDirection sets the value of Direction.
+func (s *ChangeInboundMessage) SetDirection(val ChangeInboundMessageDirection) {
+	s.Direction = val
+}
+
+// What the message declared about being automated, verbatim:
+// `List-Unsubscribe` (RFC 2369/8058), `List-Id` (RFC 2919),
+// `Precedence`, and `Auto-Submitted` (RFC 3834). Null or absent when the message
+// declared none, and on messages received before these headers
+// were captured, so a null value is not evidence that a person
+// sent the message.
+type ChangeInboundMessageAutomationHeaders struct {
+	ListUnsubscribe OptString `json:"list_unsubscribe"`
+	ListID          OptString `json:"list_id"`
+	Precedence      OptString `json:"precedence"`
+	AutoSubmitted   OptString `json:"auto_submitted"`
+	AdditionalProps ChangeInboundMessageAutomationHeadersAdditional
+}
+
+// GetListUnsubscribe returns the value of ListUnsubscribe.
+func (s *ChangeInboundMessageAutomationHeaders) GetListUnsubscribe() OptString {
+	return s.ListUnsubscribe
+}
+
+// GetListID returns the value of ListID.
+func (s *ChangeInboundMessageAutomationHeaders) GetListID() OptString {
+	return s.ListID
+}
+
+// GetPrecedence returns the value of Precedence.
+func (s *ChangeInboundMessageAutomationHeaders) GetPrecedence() OptString {
+	return s.Precedence
+}
+
+// GetAutoSubmitted returns the value of AutoSubmitted.
+func (s *ChangeInboundMessageAutomationHeaders) GetAutoSubmitted() OptString {
+	return s.AutoSubmitted
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *ChangeInboundMessageAutomationHeaders) GetAdditionalProps() ChangeInboundMessageAutomationHeadersAdditional {
+	return s.AdditionalProps
+}
+
+// SetListUnsubscribe sets the value of ListUnsubscribe.
+func (s *ChangeInboundMessageAutomationHeaders) SetListUnsubscribe(val OptString) {
+	s.ListUnsubscribe = val
+}
+
+// SetListID sets the value of ListID.
+func (s *ChangeInboundMessageAutomationHeaders) SetListID(val OptString) {
+	s.ListID = val
+}
+
+// SetPrecedence sets the value of Precedence.
+func (s *ChangeInboundMessageAutomationHeaders) SetPrecedence(val OptString) {
+	s.Precedence = val
+}
+
+// SetAutoSubmitted sets the value of AutoSubmitted.
+func (s *ChangeInboundMessageAutomationHeaders) SetAutoSubmitted(val OptString) {
+	s.AutoSubmitted = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *ChangeInboundMessageAutomationHeaders) SetAdditionalProps(val ChangeInboundMessageAutomationHeadersAdditional) {
+	s.AdditionalProps = val
+}
+
+type ChangeInboundMessageAutomationHeadersAdditional map[string]jx.Raw
+
+func (s *ChangeInboundMessageAutomationHeadersAdditional) init() ChangeInboundMessageAutomationHeadersAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Whose turn it is in this email's conversation. A send counts as a
+// reply unless its status is `gate_denied`, `agent_failed`, `canceled`
+// (queued and scheduled replies count: they are committed to go). For
+// an email with a `thread_id`: `them` when the thread's latest counted
+// outbound send (by send `created_at`, including any counted reply to
+// this email itself) is at or after the thread's latest inbound message
+// (by `received_at`); otherwise `you`. For an email with no
+// `thread_id`: `them` when it has at least one counted reply
+// (`reply_count > 0` for an API key), otherwise `you`. It is a
+// thread-level fact: every email in a thread carries the same value, and
+// it reflects sends made by any credential in the organization,
+// including other agent connections. It changes without a new inbound
+// message, for example when a reply is sent, a queued reply fails, a
+// scheduled reply is canceled, or a message is deleted, and is always
+// current when read.
+type ChangeInboundMessageAwaiting string
+
+const (
+	ChangeInboundMessageAwaitingYou  ChangeInboundMessageAwaiting = "you"
+	ChangeInboundMessageAwaitingThem ChangeInboundMessageAwaiting = "them"
+)
+
+// AllValues returns all ChangeInboundMessageAwaiting values.
+func (ChangeInboundMessageAwaiting) AllValues() []ChangeInboundMessageAwaiting {
+	return []ChangeInboundMessageAwaiting{
+		ChangeInboundMessageAwaitingYou,
+		ChangeInboundMessageAwaitingThem,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeInboundMessageAwaiting) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeInboundMessageAwaitingYou:
+		return []byte(s), nil
+	case ChangeInboundMessageAwaitingThem:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeInboundMessageAwaiting) UnmarshalText(data []byte) error {
+	switch ChangeInboundMessageAwaiting(data) {
+	case ChangeInboundMessageAwaitingYou:
+		*s = ChangeInboundMessageAwaitingYou
+		return nil
+	case ChangeInboundMessageAwaitingThem:
+		*s = ChangeInboundMessageAwaitingThem
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ChangeInboundMessageDirection string
+
+const (
+	ChangeInboundMessageDirectionInbound ChangeInboundMessageDirection = "inbound"
+)
+
+// AllValues returns all ChangeInboundMessageDirection values.
+func (ChangeInboundMessageDirection) AllValues() []ChangeInboundMessageDirection {
+	return []ChangeInboundMessageDirection{
+		ChangeInboundMessageDirectionInbound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeInboundMessageDirection) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeInboundMessageDirectionInbound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeInboundMessageDirection) UnmarshalText(data []byte) error {
+	switch ChangeInboundMessageDirection(data) {
+	case ChangeInboundMessageDirectionInbound:
+		*s = ChangeInboundMessageDirectionInbound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ChangeInboundMessagePresenceControl struct {
+	Status     ChangeInboundMessagePresenceControlStatus `json:"status"`
+	ValidForMs int                                       `json:"valid_for_ms"`
+}
+
+// GetStatus returns the value of Status.
+func (s *ChangeInboundMessagePresenceControl) GetStatus() ChangeInboundMessagePresenceControlStatus {
+	return s.Status
+}
+
+// GetValidForMs returns the value of ValidForMs.
+func (s *ChangeInboundMessagePresenceControl) GetValidForMs() int {
+	return s.ValidForMs
+}
+
+// SetStatus sets the value of Status.
+func (s *ChangeInboundMessagePresenceControl) SetStatus(val ChangeInboundMessagePresenceControlStatus) {
+	s.Status = val
+}
+
+// SetValidForMs sets the value of ValidForMs.
+func (s *ChangeInboundMessagePresenceControl) SetValidForMs(val int) {
+	s.ValidForMs = val
+}
+
+type ChangeInboundMessagePresenceControlStatus string
+
+const (
+	ChangeInboundMessagePresenceControlStatusVerified ChangeInboundMessagePresenceControlStatus = "verified"
+	ChangeInboundMessagePresenceControlStatusPending  ChangeInboundMessagePresenceControlStatus = "pending"
+	ChangeInboundMessagePresenceControlStatusRejected ChangeInboundMessagePresenceControlStatus = "rejected"
+)
+
+// AllValues returns all ChangeInboundMessagePresenceControlStatus values.
+func (ChangeInboundMessagePresenceControlStatus) AllValues() []ChangeInboundMessagePresenceControlStatus {
+	return []ChangeInboundMessagePresenceControlStatus{
+		ChangeInboundMessagePresenceControlStatusVerified,
+		ChangeInboundMessagePresenceControlStatusPending,
+		ChangeInboundMessagePresenceControlStatusRejected,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeInboundMessagePresenceControlStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeInboundMessagePresenceControlStatusVerified:
+		return []byte(s), nil
+	case ChangeInboundMessagePresenceControlStatusPending:
+		return []byte(s), nil
+	case ChangeInboundMessagePresenceControlStatusRejected:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeInboundMessagePresenceControlStatus) UnmarshalText(data []byte) error {
+	switch ChangeInboundMessagePresenceControlStatus(data) {
+	case ChangeInboundMessagePresenceControlStatusVerified:
+		*s = ChangeInboundMessagePresenceControlStatusVerified
+		return nil
+	case ChangeInboundMessagePresenceControlStatusPending:
+		*s = ChangeInboundMessagePresenceControlStatusPending
+		return nil
+	case ChangeInboundMessagePresenceControlStatusRejected:
+		*s = ChangeInboundMessagePresenceControlStatusRejected
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Set when the message reached Primitive through a Primitive mail relay. Null for other mail. The
+// field may be absent; treat a missing value the same as null.
+type ChangeInboundMessageRelay struct {
+	// The relay hostname the domain's MX record points at.
+	Hostname string `json:"hostname"`
+	// How the message arrived. Currently always `mail_relay`. Treat an unfamiliar value as one added
+	// after your client was built.
+	Via string `json:"via"`
+}
+
+// GetHostname returns the value of Hostname.
+func (s *ChangeInboundMessageRelay) GetHostname() string {
+	return s.Hostname
+}
+
+// GetVia returns the value of Via.
+func (s *ChangeInboundMessageRelay) GetVia() string {
+	return s.Via
+}
+
+// SetHostname sets the value of Hostname.
+func (s *ChangeInboundMessageRelay) SetHostname(val string) {
+	s.Hostname = val
+}
+
+// SetVia sets the value of Via.
+func (s *ChangeInboundMessageRelay) SetVia(val string) {
+	s.Via = val
+}
+
+// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
+// records, never from the message content. Null on every other message and on servers that predate
+// repeating sends.
+type ChangeInboundMessageRepeat struct {
+	RepeatID uuid.UUID `json:"repeat_id"`
+	Sequence int       `json:"sequence"`
+}
+
+// GetRepeatID returns the value of RepeatID.
+func (s *ChangeInboundMessageRepeat) GetRepeatID() uuid.UUID {
+	return s.RepeatID
+}
+
+// GetSequence returns the value of Sequence.
+func (s *ChangeInboundMessageRepeat) GetSequence() int {
+	return s.Sequence
+}
+
+// SetRepeatID sets the value of RepeatID.
+func (s *ChangeInboundMessageRepeat) SetRepeatID(val uuid.UUID) {
+	s.RepeatID = val
+}
+
+// SetSequence sets the value of Sequence.
+func (s *ChangeInboundMessageRepeat) SetSequence(val int) {
+	s.Sequence = val
+}
+
+// Verified human authorship, projected only within the member organization. Historical attribution
+// is not current sending or owner authority.
+type ChangeInboundMessageSenderMember struct {
+	Address string    `json:"address"`
+	UserID  string    `json:"user_id"`
+	Name    NilString `json:"name"`
+}
+
+// GetAddress returns the value of Address.
+func (s *ChangeInboundMessageSenderMember) GetAddress() string {
+	return s.Address
+}
+
+// GetUserID returns the value of UserID.
+func (s *ChangeInboundMessageSenderMember) GetUserID() string {
+	return s.UserID
+}
+
+// GetName returns the value of Name.
+func (s *ChangeInboundMessageSenderMember) GetName() NilString {
+	return s.Name
+}
+
+// SetAddress sets the value of Address.
+func (s *ChangeInboundMessageSenderMember) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetUserID sets the value of UserID.
+func (s *ChangeInboundMessageSenderMember) SetUserID(val string) {
+	s.UserID = val
+}
+
+// SetName sets the value of Name.
+func (s *ChangeInboundMessageSenderMember) SetName(val NilString) {
+	s.Name = val
+}
+
+// `email.visible`: an inbound email became visible to this credential (arrived, or its
+// sender-authentication hold was released). `email.updated`: something a list row or conversation
+// shows changed. `email.deleted`: gone, or withdrawn from view. `sent_email.created` / `sent_email.
+// updated`: a send appeared or changed; `status` is its current status, and several changes between
+// two reads collapse into one entry. Created is a hint (first committed after the cursor): treat
+// both as upsert, including `sent_email.updated` for an id you have not seen. `sent_email.deleted`:
+// the send was deleted. `thread.read_state_changed`: the signed-in member's read cursor for
+// `thread_id` moved, on any device. `thread.mute_changed`: `thread_id` was muted or unmuted for an
+// address this credential reads, which changes the `muted` flag and `exclude_muted` results of its
+// mail. `agent.changed`: an agent in the directory changed (connected, disconnected, renamed, hidden,
+//
+//	listed, presence extended, receiver live). `access.changed`: this credential's own access changed;
+//	rebuild every snapshot from `since=start`.
+type ChangeKind string
+
+const (
+	ChangeKindEmailVisible           ChangeKind = "email.visible"
+	ChangeKindEmailUpdated           ChangeKind = "email.updated"
+	ChangeKindEmailDeleted           ChangeKind = "email.deleted"
+	ChangeKindSentEmailCreated       ChangeKind = "sent_email.created"
+	ChangeKindSentEmailUpdated       ChangeKind = "sent_email.updated"
+	ChangeKindSentEmailDeleted       ChangeKind = "sent_email.deleted"
+	ChangeKindThreadReadStateChanged ChangeKind = "thread.read_state_changed"
+	ChangeKindThreadMuteChanged      ChangeKind = "thread.mute_changed"
+	ChangeKindAgentChanged           ChangeKind = "agent.changed"
+	ChangeKindAccessChanged          ChangeKind = "access.changed"
+)
+
+// AllValues returns all ChangeKind values.
+func (ChangeKind) AllValues() []ChangeKind {
+	return []ChangeKind{
+		ChangeKindEmailVisible,
+		ChangeKindEmailUpdated,
+		ChangeKindEmailDeleted,
+		ChangeKindSentEmailCreated,
+		ChangeKindSentEmailUpdated,
+		ChangeKindSentEmailDeleted,
+		ChangeKindThreadReadStateChanged,
+		ChangeKindThreadMuteChanged,
+		ChangeKindAgentChanged,
+		ChangeKindAccessChanged,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeKind) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeKindEmailVisible:
+		return []byte(s), nil
+	case ChangeKindEmailUpdated:
+		return []byte(s), nil
+	case ChangeKindEmailDeleted:
+		return []byte(s), nil
+	case ChangeKindSentEmailCreated:
+		return []byte(s), nil
+	case ChangeKindSentEmailUpdated:
+		return []byte(s), nil
+	case ChangeKindSentEmailDeleted:
+		return []byte(s), nil
+	case ChangeKindThreadReadStateChanged:
+		return []byte(s), nil
+	case ChangeKindThreadMuteChanged:
+		return []byte(s), nil
+	case ChangeKindAgentChanged:
+		return []byte(s), nil
+	case ChangeKindAccessChanged:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeKind) UnmarshalText(data []byte) error {
+	switch ChangeKind(data) {
+	case ChangeKindEmailVisible:
+		*s = ChangeKindEmailVisible
+		return nil
+	case ChangeKindEmailUpdated:
+		*s = ChangeKindEmailUpdated
+		return nil
+	case ChangeKindEmailDeleted:
+		*s = ChangeKindEmailDeleted
+		return nil
+	case ChangeKindSentEmailCreated:
+		*s = ChangeKindSentEmailCreated
+		return nil
+	case ChangeKindSentEmailUpdated:
+		*s = ChangeKindSentEmailUpdated
+		return nil
+	case ChangeKindSentEmailDeleted:
+		*s = ChangeKindSentEmailDeleted
+		return nil
+	case ChangeKindThreadReadStateChanged:
+		*s = ChangeKindThreadReadStateChanged
+		return nil
+	case ChangeKindThreadMuteChanged:
+		*s = ChangeKindThreadMuteChanged
+		return nil
+	case ChangeKindAgentChanged:
+		*s = ChangeKindAgentChanged
+		return nil
+	case ChangeKindAccessChanged:
+		*s = ChangeKindAccessChanged
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// A message inlined by `expand=message`. `direction` `inbound` is a GET /emails row; `outbound` is a
+// GET /sent-emails row.
+// Ref: #/components/schemas/ChangeMessage
+// ChangeMessage represents sum type.
+type ChangeMessage struct {
+	Type                  ChangeMessageType // switch on this field
+	ChangeInboundMessage  ChangeInboundMessage
+	ChangeOutboundMessage ChangeOutboundMessage
+}
+
+// ChangeMessageType is oneOf type of ChangeMessage.
+type ChangeMessageType string
+
+// Possible values for ChangeMessageType.
+const (
+	ChangeInboundMessageChangeMessage  ChangeMessageType = "inbound"
+	ChangeOutboundMessageChangeMessage ChangeMessageType = "outbound"
+)
+
+// IsChangeInboundMessage reports whether ChangeMessage is ChangeInboundMessage.
+func (s ChangeMessage) IsChangeInboundMessage() bool {
+	return s.Type == ChangeInboundMessageChangeMessage
+}
+
+// IsChangeOutboundMessage reports whether ChangeMessage is ChangeOutboundMessage.
+func (s ChangeMessage) IsChangeOutboundMessage() bool {
+	return s.Type == ChangeOutboundMessageChangeMessage
+}
+
+// SetChangeInboundMessage sets ChangeMessage to ChangeInboundMessage.
+func (s *ChangeMessage) SetChangeInboundMessage(v ChangeInboundMessage) {
+	s.Type = ChangeInboundMessageChangeMessage
+	s.ChangeInboundMessage = v
+}
+
+// GetChangeInboundMessage returns ChangeInboundMessage and true boolean if ChangeMessage is ChangeInboundMessage.
+func (s ChangeMessage) GetChangeInboundMessage() (v ChangeInboundMessage, ok bool) {
+	if !s.IsChangeInboundMessage() {
+		return v, false
+	}
+	return s.ChangeInboundMessage, true
+}
+
+// NewChangeInboundMessageChangeMessage returns new ChangeMessage from ChangeInboundMessage.
+func NewChangeInboundMessageChangeMessage(v ChangeInboundMessage) ChangeMessage {
+	var s ChangeMessage
+	s.SetChangeInboundMessage(v)
+	return s
+}
+
+// SetChangeOutboundMessage sets ChangeMessage to ChangeOutboundMessage.
+func (s *ChangeMessage) SetChangeOutboundMessage(v ChangeOutboundMessage) {
+	s.Type = ChangeOutboundMessageChangeMessage
+	s.ChangeOutboundMessage = v
+}
+
+// GetChangeOutboundMessage returns ChangeOutboundMessage and true boolean if ChangeMessage is ChangeOutboundMessage.
+func (s ChangeMessage) GetChangeOutboundMessage() (v ChangeOutboundMessage, ok bool) {
+	if !s.IsChangeOutboundMessage() {
+		return v, false
+	}
+	return s.ChangeOutboundMessage, true
+}
+
+// NewChangeOutboundMessageChangeMessage returns new ChangeMessage from ChangeOutboundMessage.
+func NewChangeOutboundMessageChangeMessage(v ChangeOutboundMessage) ChangeMessage {
+	var s ChangeMessage
+	s.SetChangeOutboundMessage(v)
+	return s
+}
+
+// Merged schema.
+// Ref: #/components/schemas/ChangeOutboundMessage
+type ChangeOutboundMessage struct {
+	ID     uuid.UUID       `json:"id"`
+	Status SentEmailStatus `json:"status"`
+	// Timestamp of the most recent status transition.
+	// Polling clients should treat `status='queued'` AND
+	// `status_changed_at` older than 5 minutes as
+	// "stuck-queued" (the post-tx UPDATE failed and the
+	// actual delivery state is recoverable from on-box logs
+	// via `queue_id` when populated, or `request_id`).
+	StatusChangedAt time.Time `json:"status_changed_at"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	// Effective idempotency key used for this send. If the
+	// caller passed the `Idempotency-Key` header, this is
+	// that value; otherwise it's a server-derived hash of
+	// the canonical request payload.
+	ClientIdempotencyKey OptNilString `json:"client_idempotency_key"`
+	// Stable hash of the canonical send payload.
+	ContentHash string `json:"content_hash"`
+	// Raw `From:` header as sent on the wire, including any
+	// display name (e.g. `"Acme Support" <agent@acme.test>`).
+	FromHeader string `json:"from_header"`
+	// Bare email address parsed from `from_header`.
+	FromAddress string `json:"from_address"`
+	// Raw `To:` header as sent on the wire, including any
+	// display name.
+	ToHeader string `json:"to_header"`
+	// Bare email address parsed from `to_header`.
+	ToAddress string `json:"to_address"`
+	// Every recipient of the send, To, Cc and Bcc together, each address counted once: the size of
+	// `to_addresses`, `cc` and `bcc` combined without duplicates. On a mail relay send `bcc` lists every
+	// hidden recipient. Null when the request uses an address-bound agent connection key whose address
+	// is not the sender, because the count would reveal Bcc recipients. The `sent_email` object of the
+	// `sent_email.*` webhook events carries the same field.
+	RecipientCount OptNilInt `json:"recipient_count"`
+	Subject        string    `json:"subject"`
+	// Total UTF-8 byte length of `body_text` + `body_html`.
+	// Surfaced on the list endpoint so callers can see "this
+	// row has a 4MB body" without fetching it.
+	BodySizeBytes int `json:"body_size_bytes"`
+	// Timestamp at which the bodies were discarded by an
+	// entitlement-driven retention policy. Null when bodies
+	// are still present. The detail endpoint returns
+	// null-valued `body_text`/`body_html` for discarded rows.
+	ContentDiscardedAt OptNilDateTime `json:"content_discarded_at"`
+	// Wire-level Message-ID assigned to the outbound message
+	// (RFC 5322). Null on rows that never reached signing
+	// (queued, gate_denied, agent_failed before signing).
+	MessageID OptNilString `json:"message_id"`
+	// Wire-level In-Reply-To header value, when this send
+	// was a reply.
+	InReplyTo OptNilString `json:"in_reply_to"`
+	// Wire-level References header value, when this send
+	// was a reply.
+	EmailReferences OptNilString `json:"email_references"`
+	// Reference to the inbound `emails.id` that this send
+	// replied to, when known. Populated when the caller used
+	// /emails/{id}/reply or when /send-mail's `in_reply_to`
+	// matched a stored inbound message_id in the same org.
+	InReplyToEmailID OptNilUUID `json:"in_reply_to_email_id"`
+	// Conversation thread this send belongs to. A reply inherits
+	// the thread of the inbound it answers; a fresh send starts a
+	// new thread. Fetch `/threads/{thread_id}` for the full
+	// ordered thread (inbound + outbound interleaved). NULL on
+	// gate-denied sends and on sends created before threading was
+	// enabled.
+	ThreadID OptNilUUID `json:"thread_id"`
+	// Message identifier assigned by Primitive's outbound
+	// relay once the agent accepts the message. Null on
+	// queued, gate_denied, and agent_failed rows.
+	QueueID OptNilString `json:"queue_id"`
+	// Receiver's 3-digit SMTP code (e.g. 250, 550, 451).
+	// Populated on terminal delivery statuses; may be null
+	// on a deferred where the agent never got an SMTP-level
+	// response (TCP refused, DNS failed, TLS handshake
+	// failed). `smtp_response_text` still carries Postfix's
+	// descriptive text in those cases.
+	SMTPResponseCode OptNilInt `json:"smtp_response_code"`
+	// Free-form text portion of the receiver's SMTP
+	// response. The most useful debugging signal on a
+	// `bounced` or `deferred` row.
+	SMTPResponseText OptNilString `json:"smtp_response_text"`
+	// RFC 3463 enhanced status code (e.g. `5.1.1` for "Bad
+	// destination mailbox address"). Distinct from
+	// `smtp_response_code`: the basic 3-digit code is coarse
+	// (550 = "permanent failure"), the enhanced code is
+	// finer-grained.
+	SMTPEnhancedStatusCode OptNilString `json:"smtp_enhanced_status_code"`
+	// DKIM selector used to sign the outbound message.
+	// Public DNS data; useful for diagnosing why a downstream
+	// verifier rejected the signature.
+	DkimSelector OptNilString `json:"dkim_selector"`
+	// DKIM signing domain.
+	DkimDomain OptNilString `json:"dkim_domain"`
+	// Stable public error code on `agent_failed` rows. The
+	// agent's internal codes are remapped to a stable public
+	// taxonomy (see `publicAgentError` in the server) so this
+	// field is safe to branch on across agent versions.
+	ErrorCode OptNilString `json:"error_code"`
+	// Free-form error message accompanying `error_code`.
+	ErrorMessage OptNilString `json:"error_message"`
+	// Gate-denial detail on `gate_denied` rows. Mirrors the
+	// synchronous /send-mail 403 contract so a caller's
+	// GateDenial handler is the same across live denies and
+	// historical lookups. Null on every other status.
+	Gates OptNilGateDenialArray `json:"gates"`
+	// Server-issued request identifier from the original
+	// /send-mail call. Surfaced as the `X-Request-Id`
+	// response header on the live send and recorded here
+	// for support escalation.
+	RequestID OptNilString `json:"request_id"`
+	// Requested execution time for a scheduled send. Kept
+	// after execution as the historical schedule; null on
+	// ordinary immediate sends.
+	ScheduledAt OptNilDateTime `json:"scheduled_at"`
+	// When a scheduled send was canceled. Null unless the row
+	// reached the `canceled` status.
+	CanceledAt      OptNilDateTime                             `json:"canceled_at"`
+	PresenceControl OptNilChangeOutboundMessagePresenceControl `json:"presence_control"`
+	// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
+	// records, never from the message content. Null on every other message and on servers that predate
+	// repeating sends.
+	Repeat OptNilChangeOutboundMessageRepeat `json:"repeat"`
+	// Verified human authorship, projected only within the member organization. Historical attribution
+	// is not current sending or owner authority.
+	SenderMember OptNilChangeOutboundMessageSenderMember `json:"sender_member"`
+	Direction    ChangeOutboundMessageDirection          `json:"direction"`
+}
+
+// GetID returns the value of ID.
+func (s *ChangeOutboundMessage) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *ChangeOutboundMessage) GetStatus() SentEmailStatus {
+	return s.Status
+}
+
+// GetStatusChangedAt returns the value of StatusChangedAt.
+func (s *ChangeOutboundMessage) GetStatusChangedAt() time.Time {
+	return s.StatusChangedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ChangeOutboundMessage) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *ChangeOutboundMessage) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetClientIdempotencyKey returns the value of ClientIdempotencyKey.
+func (s *ChangeOutboundMessage) GetClientIdempotencyKey() OptNilString {
+	return s.ClientIdempotencyKey
+}
+
+// GetContentHash returns the value of ContentHash.
+func (s *ChangeOutboundMessage) GetContentHash() string {
+	return s.ContentHash
+}
+
+// GetFromHeader returns the value of FromHeader.
+func (s *ChangeOutboundMessage) GetFromHeader() string {
+	return s.FromHeader
+}
+
+// GetFromAddress returns the value of FromAddress.
+func (s *ChangeOutboundMessage) GetFromAddress() string {
+	return s.FromAddress
+}
+
+// GetToHeader returns the value of ToHeader.
+func (s *ChangeOutboundMessage) GetToHeader() string {
+	return s.ToHeader
+}
+
+// GetToAddress returns the value of ToAddress.
+func (s *ChangeOutboundMessage) GetToAddress() string {
+	return s.ToAddress
+}
+
+// GetRecipientCount returns the value of RecipientCount.
+func (s *ChangeOutboundMessage) GetRecipientCount() OptNilInt {
+	return s.RecipientCount
+}
+
+// GetSubject returns the value of Subject.
+func (s *ChangeOutboundMessage) GetSubject() string {
+	return s.Subject
+}
+
+// GetBodySizeBytes returns the value of BodySizeBytes.
+func (s *ChangeOutboundMessage) GetBodySizeBytes() int {
+	return s.BodySizeBytes
+}
+
+// GetContentDiscardedAt returns the value of ContentDiscardedAt.
+func (s *ChangeOutboundMessage) GetContentDiscardedAt() OptNilDateTime {
+	return s.ContentDiscardedAt
+}
+
+// GetMessageID returns the value of MessageID.
+func (s *ChangeOutboundMessage) GetMessageID() OptNilString {
+	return s.MessageID
+}
+
+// GetInReplyTo returns the value of InReplyTo.
+func (s *ChangeOutboundMessage) GetInReplyTo() OptNilString {
+	return s.InReplyTo
+}
+
+// GetEmailReferences returns the value of EmailReferences.
+func (s *ChangeOutboundMessage) GetEmailReferences() OptNilString {
+	return s.EmailReferences
+}
+
+// GetInReplyToEmailID returns the value of InReplyToEmailID.
+func (s *ChangeOutboundMessage) GetInReplyToEmailID() OptNilUUID {
+	return s.InReplyToEmailID
+}
+
+// GetThreadID returns the value of ThreadID.
+func (s *ChangeOutboundMessage) GetThreadID() OptNilUUID {
+	return s.ThreadID
+}
+
+// GetQueueID returns the value of QueueID.
+func (s *ChangeOutboundMessage) GetQueueID() OptNilString {
+	return s.QueueID
+}
+
+// GetSMTPResponseCode returns the value of SMTPResponseCode.
+func (s *ChangeOutboundMessage) GetSMTPResponseCode() OptNilInt {
+	return s.SMTPResponseCode
+}
+
+// GetSMTPResponseText returns the value of SMTPResponseText.
+func (s *ChangeOutboundMessage) GetSMTPResponseText() OptNilString {
+	return s.SMTPResponseText
+}
+
+// GetSMTPEnhancedStatusCode returns the value of SMTPEnhancedStatusCode.
+func (s *ChangeOutboundMessage) GetSMTPEnhancedStatusCode() OptNilString {
+	return s.SMTPEnhancedStatusCode
+}
+
+// GetDkimSelector returns the value of DkimSelector.
+func (s *ChangeOutboundMessage) GetDkimSelector() OptNilString {
+	return s.DkimSelector
+}
+
+// GetDkimDomain returns the value of DkimDomain.
+func (s *ChangeOutboundMessage) GetDkimDomain() OptNilString {
+	return s.DkimDomain
+}
+
+// GetErrorCode returns the value of ErrorCode.
+func (s *ChangeOutboundMessage) GetErrorCode() OptNilString {
+	return s.ErrorCode
+}
+
+// GetErrorMessage returns the value of ErrorMessage.
+func (s *ChangeOutboundMessage) GetErrorMessage() OptNilString {
+	return s.ErrorMessage
+}
+
+// GetGates returns the value of Gates.
+func (s *ChangeOutboundMessage) GetGates() OptNilGateDenialArray {
+	return s.Gates
+}
+
+// GetRequestID returns the value of RequestID.
+func (s *ChangeOutboundMessage) GetRequestID() OptNilString {
+	return s.RequestID
+}
+
+// GetScheduledAt returns the value of ScheduledAt.
+func (s *ChangeOutboundMessage) GetScheduledAt() OptNilDateTime {
+	return s.ScheduledAt
+}
+
+// GetCanceledAt returns the value of CanceledAt.
+func (s *ChangeOutboundMessage) GetCanceledAt() OptNilDateTime {
+	return s.CanceledAt
+}
+
+// GetPresenceControl returns the value of PresenceControl.
+func (s *ChangeOutboundMessage) GetPresenceControl() OptNilChangeOutboundMessagePresenceControl {
+	return s.PresenceControl
+}
+
+// GetRepeat returns the value of Repeat.
+func (s *ChangeOutboundMessage) GetRepeat() OptNilChangeOutboundMessageRepeat {
+	return s.Repeat
+}
+
+// GetSenderMember returns the value of SenderMember.
+func (s *ChangeOutboundMessage) GetSenderMember() OptNilChangeOutboundMessageSenderMember {
+	return s.SenderMember
+}
+
+// GetDirection returns the value of Direction.
+func (s *ChangeOutboundMessage) GetDirection() ChangeOutboundMessageDirection {
+	return s.Direction
+}
+
+// SetID sets the value of ID.
+func (s *ChangeOutboundMessage) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ChangeOutboundMessage) SetStatus(val SentEmailStatus) {
+	s.Status = val
+}
+
+// SetStatusChangedAt sets the value of StatusChangedAt.
+func (s *ChangeOutboundMessage) SetStatusChangedAt(val time.Time) {
+	s.StatusChangedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ChangeOutboundMessage) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *ChangeOutboundMessage) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetClientIdempotencyKey sets the value of ClientIdempotencyKey.
+func (s *ChangeOutboundMessage) SetClientIdempotencyKey(val OptNilString) {
+	s.ClientIdempotencyKey = val
+}
+
+// SetContentHash sets the value of ContentHash.
+func (s *ChangeOutboundMessage) SetContentHash(val string) {
+	s.ContentHash = val
+}
+
+// SetFromHeader sets the value of FromHeader.
+func (s *ChangeOutboundMessage) SetFromHeader(val string) {
+	s.FromHeader = val
+}
+
+// SetFromAddress sets the value of FromAddress.
+func (s *ChangeOutboundMessage) SetFromAddress(val string) {
+	s.FromAddress = val
+}
+
+// SetToHeader sets the value of ToHeader.
+func (s *ChangeOutboundMessage) SetToHeader(val string) {
+	s.ToHeader = val
+}
+
+// SetToAddress sets the value of ToAddress.
+func (s *ChangeOutboundMessage) SetToAddress(val string) {
+	s.ToAddress = val
+}
+
+// SetRecipientCount sets the value of RecipientCount.
+func (s *ChangeOutboundMessage) SetRecipientCount(val OptNilInt) {
+	s.RecipientCount = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *ChangeOutboundMessage) SetSubject(val string) {
+	s.Subject = val
+}
+
+// SetBodySizeBytes sets the value of BodySizeBytes.
+func (s *ChangeOutboundMessage) SetBodySizeBytes(val int) {
+	s.BodySizeBytes = val
+}
+
+// SetContentDiscardedAt sets the value of ContentDiscardedAt.
+func (s *ChangeOutboundMessage) SetContentDiscardedAt(val OptNilDateTime) {
+	s.ContentDiscardedAt = val
+}
+
+// SetMessageID sets the value of MessageID.
+func (s *ChangeOutboundMessage) SetMessageID(val OptNilString) {
+	s.MessageID = val
+}
+
+// SetInReplyTo sets the value of InReplyTo.
+func (s *ChangeOutboundMessage) SetInReplyTo(val OptNilString) {
+	s.InReplyTo = val
+}
+
+// SetEmailReferences sets the value of EmailReferences.
+func (s *ChangeOutboundMessage) SetEmailReferences(val OptNilString) {
+	s.EmailReferences = val
+}
+
+// SetInReplyToEmailID sets the value of InReplyToEmailID.
+func (s *ChangeOutboundMessage) SetInReplyToEmailID(val OptNilUUID) {
+	s.InReplyToEmailID = val
+}
+
+// SetThreadID sets the value of ThreadID.
+func (s *ChangeOutboundMessage) SetThreadID(val OptNilUUID) {
+	s.ThreadID = val
+}
+
+// SetQueueID sets the value of QueueID.
+func (s *ChangeOutboundMessage) SetQueueID(val OptNilString) {
+	s.QueueID = val
+}
+
+// SetSMTPResponseCode sets the value of SMTPResponseCode.
+func (s *ChangeOutboundMessage) SetSMTPResponseCode(val OptNilInt) {
+	s.SMTPResponseCode = val
+}
+
+// SetSMTPResponseText sets the value of SMTPResponseText.
+func (s *ChangeOutboundMessage) SetSMTPResponseText(val OptNilString) {
+	s.SMTPResponseText = val
+}
+
+// SetSMTPEnhancedStatusCode sets the value of SMTPEnhancedStatusCode.
+func (s *ChangeOutboundMessage) SetSMTPEnhancedStatusCode(val OptNilString) {
+	s.SMTPEnhancedStatusCode = val
+}
+
+// SetDkimSelector sets the value of DkimSelector.
+func (s *ChangeOutboundMessage) SetDkimSelector(val OptNilString) {
+	s.DkimSelector = val
+}
+
+// SetDkimDomain sets the value of DkimDomain.
+func (s *ChangeOutboundMessage) SetDkimDomain(val OptNilString) {
+	s.DkimDomain = val
+}
+
+// SetErrorCode sets the value of ErrorCode.
+func (s *ChangeOutboundMessage) SetErrorCode(val OptNilString) {
+	s.ErrorCode = val
+}
+
+// SetErrorMessage sets the value of ErrorMessage.
+func (s *ChangeOutboundMessage) SetErrorMessage(val OptNilString) {
+	s.ErrorMessage = val
+}
+
+// SetGates sets the value of Gates.
+func (s *ChangeOutboundMessage) SetGates(val OptNilGateDenialArray) {
+	s.Gates = val
+}
+
+// SetRequestID sets the value of RequestID.
+func (s *ChangeOutboundMessage) SetRequestID(val OptNilString) {
+	s.RequestID = val
+}
+
+// SetScheduledAt sets the value of ScheduledAt.
+func (s *ChangeOutboundMessage) SetScheduledAt(val OptNilDateTime) {
+	s.ScheduledAt = val
+}
+
+// SetCanceledAt sets the value of CanceledAt.
+func (s *ChangeOutboundMessage) SetCanceledAt(val OptNilDateTime) {
+	s.CanceledAt = val
+}
+
+// SetPresenceControl sets the value of PresenceControl.
+func (s *ChangeOutboundMessage) SetPresenceControl(val OptNilChangeOutboundMessagePresenceControl) {
+	s.PresenceControl = val
+}
+
+// SetRepeat sets the value of Repeat.
+func (s *ChangeOutboundMessage) SetRepeat(val OptNilChangeOutboundMessageRepeat) {
+	s.Repeat = val
+}
+
+// SetSenderMember sets the value of SenderMember.
+func (s *ChangeOutboundMessage) SetSenderMember(val OptNilChangeOutboundMessageSenderMember) {
+	s.SenderMember = val
+}
+
+// SetDirection sets the value of Direction.
+func (s *ChangeOutboundMessage) SetDirection(val ChangeOutboundMessageDirection) {
+	s.Direction = val
+}
+
+type ChangeOutboundMessageDirection string
+
+const (
+	ChangeOutboundMessageDirectionOutbound ChangeOutboundMessageDirection = "outbound"
+)
+
+// AllValues returns all ChangeOutboundMessageDirection values.
+func (ChangeOutboundMessageDirection) AllValues() []ChangeOutboundMessageDirection {
+	return []ChangeOutboundMessageDirection{
+		ChangeOutboundMessageDirectionOutbound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeOutboundMessageDirection) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeOutboundMessageDirectionOutbound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeOutboundMessageDirection) UnmarshalText(data []byte) error {
+	switch ChangeOutboundMessageDirection(data) {
+	case ChangeOutboundMessageDirectionOutbound:
+		*s = ChangeOutboundMessageDirectionOutbound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ChangeOutboundMessagePresenceControl struct {
+	Status     ChangeOutboundMessagePresenceControlStatus `json:"status"`
+	ValidForMs int                                        `json:"valid_for_ms"`
+}
+
+// GetStatus returns the value of Status.
+func (s *ChangeOutboundMessagePresenceControl) GetStatus() ChangeOutboundMessagePresenceControlStatus {
+	return s.Status
+}
+
+// GetValidForMs returns the value of ValidForMs.
+func (s *ChangeOutboundMessagePresenceControl) GetValidForMs() int {
+	return s.ValidForMs
+}
+
+// SetStatus sets the value of Status.
+func (s *ChangeOutboundMessagePresenceControl) SetStatus(val ChangeOutboundMessagePresenceControlStatus) {
+	s.Status = val
+}
+
+// SetValidForMs sets the value of ValidForMs.
+func (s *ChangeOutboundMessagePresenceControl) SetValidForMs(val int) {
+	s.ValidForMs = val
+}
+
+type ChangeOutboundMessagePresenceControlStatus string
+
+const (
+	ChangeOutboundMessagePresenceControlStatusVerified ChangeOutboundMessagePresenceControlStatus = "verified"
+	ChangeOutboundMessagePresenceControlStatusPending  ChangeOutboundMessagePresenceControlStatus = "pending"
+	ChangeOutboundMessagePresenceControlStatusRejected ChangeOutboundMessagePresenceControlStatus = "rejected"
+)
+
+// AllValues returns all ChangeOutboundMessagePresenceControlStatus values.
+func (ChangeOutboundMessagePresenceControlStatus) AllValues() []ChangeOutboundMessagePresenceControlStatus {
+	return []ChangeOutboundMessagePresenceControlStatus{
+		ChangeOutboundMessagePresenceControlStatusVerified,
+		ChangeOutboundMessagePresenceControlStatusPending,
+		ChangeOutboundMessagePresenceControlStatusRejected,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeOutboundMessagePresenceControlStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeOutboundMessagePresenceControlStatusVerified:
+		return []byte(s), nil
+	case ChangeOutboundMessagePresenceControlStatusPending:
+		return []byte(s), nil
+	case ChangeOutboundMessagePresenceControlStatusRejected:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeOutboundMessagePresenceControlStatus) UnmarshalText(data []byte) error {
+	switch ChangeOutboundMessagePresenceControlStatus(data) {
+	case ChangeOutboundMessagePresenceControlStatusVerified:
+		*s = ChangeOutboundMessagePresenceControlStatusVerified
+		return nil
+	case ChangeOutboundMessagePresenceControlStatusPending:
+		*s = ChangeOutboundMessagePresenceControlStatusPending
+		return nil
+	case ChangeOutboundMessagePresenceControlStatusRejected:
+		*s = ChangeOutboundMessagePresenceControlStatusRejected
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
+// records, never from the message content. Null on every other message and on servers that predate
+// repeating sends.
+type ChangeOutboundMessageRepeat struct {
+	RepeatID uuid.UUID `json:"repeat_id"`
+	Sequence int       `json:"sequence"`
+}
+
+// GetRepeatID returns the value of RepeatID.
+func (s *ChangeOutboundMessageRepeat) GetRepeatID() uuid.UUID {
+	return s.RepeatID
+}
+
+// GetSequence returns the value of Sequence.
+func (s *ChangeOutboundMessageRepeat) GetSequence() int {
+	return s.Sequence
+}
+
+// SetRepeatID sets the value of RepeatID.
+func (s *ChangeOutboundMessageRepeat) SetRepeatID(val uuid.UUID) {
+	s.RepeatID = val
+}
+
+// SetSequence sets the value of Sequence.
+func (s *ChangeOutboundMessageRepeat) SetSequence(val int) {
+	s.Sequence = val
+}
+
+// Verified human authorship, projected only within the member organization. Historical attribution
+// is not current sending or owner authority.
+type ChangeOutboundMessageSenderMember struct {
+	Address string    `json:"address"`
+	UserID  string    `json:"user_id"`
+	Name    NilString `json:"name"`
+}
+
+// GetAddress returns the value of Address.
+func (s *ChangeOutboundMessageSenderMember) GetAddress() string {
+	return s.Address
+}
+
+// GetUserID returns the value of UserID.
+func (s *ChangeOutboundMessageSenderMember) GetUserID() string {
+	return s.UserID
+}
+
+// GetName returns the value of Name.
+func (s *ChangeOutboundMessageSenderMember) GetName() NilString {
+	return s.Name
+}
+
+// SetAddress sets the value of Address.
+func (s *ChangeOutboundMessageSenderMember) SetAddress(val string) {
+	s.Address = val
+}
+
+// SetUserID sets the value of UserID.
+func (s *ChangeOutboundMessageSenderMember) SetUserID(val string) {
+	s.UserID = val
+}
+
+// SetName sets the value of Name.
+func (s *ChangeOutboundMessageSenderMember) SetName(val NilString) {
+	s.Name = val
+}
+
+// Ref: #/components/schemas/ChangePage
+type ChangePage struct {
+	// Oldest first, in commit order.
+	Changes []Change `json:"changes"`
+	// Always present. Send it unchanged as `since` next time, and store it only after applying the page.
+	// It is exactly the `since` you sent when nothing at all happened after it; it moves past changes
+	// this credential cannot see, so the page can be empty with a new cursor.
+	NextCursor string `json:"next_cursor"`
+	// More changes are already pending: call again at once, without waiting.
+	HasMore bool `json:"has_more"`
+	// True only for a `since=start` request, whose page is always empty.
+	Baseline bool `json:"baseline"`
+}
+
+// GetChanges returns the value of Changes.
+func (s *ChangePage) GetChanges() []Change {
+	return s.Changes
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *ChangePage) GetNextCursor() string {
+	return s.NextCursor
+}
+
+// GetHasMore returns the value of HasMore.
+func (s *ChangePage) GetHasMore() bool {
+	return s.HasMore
+}
+
+// GetBaseline returns the value of Baseline.
+func (s *ChangePage) GetBaseline() bool {
+	return s.Baseline
+}
+
+// SetChanges sets the value of Changes.
+func (s *ChangePage) SetChanges(val []Change) {
+	s.Changes = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *ChangePage) SetNextCursor(val string) {
+	s.NextCursor = val
+}
+
+// SetHasMore sets the value of HasMore.
+func (s *ChangePage) SetHasMore(val bool) {
+	s.HasMore = val
+}
+
+// SetBaseline sets the value of Baseline.
+func (s *ChangePage) SetBaseline(val bool) {
+	s.Baseline = val
+}
+
+// Access.changed: `membership` (the member's role or membership) or `agent_connection` (this agent
+// connection's status, owner or generation).
+type ChangeReason string
+
+const (
+	ChangeReasonMembership      ChangeReason = "membership"
+	ChangeReasonAgentConnection ChangeReason = "agent_connection"
+)
+
+// AllValues returns all ChangeReason values.
+func (ChangeReason) AllValues() []ChangeReason {
+	return []ChangeReason{
+		ChangeReasonMembership,
+		ChangeReasonAgentConnection,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ChangeReason) MarshalText() ([]byte, error) {
+	switch s {
+	case ChangeReasonMembership:
+		return []byte(s), nil
+	case ChangeReasonAgentConnection:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ChangeReason) UnmarshalText(data []byte) error {
+	switch ChangeReason(data) {
+	case ChangeReasonMembership:
+		*s = ChangeReasonMembership
+		return nil
+	case ChangeReasonAgentConnection:
+		*s = ChangeReasonAgentConnection
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type CheckDefaultNetworkContactAdmissionForbidden ErrorResponse
 
@@ -11357,6 +13332,12 @@ type EmailDetail struct {
 	// `failed_recipients`, `report`. Treat an unfamiliar value as a
 	// reason added after your client was built.
 	AutomatedReasons []string `json:"automated_reasons"`
+	// Whether the From header domain was authenticated when the message arrived. See EmailSummary.
+	// from_verified.
+	FromVerified OptBool `json:"from_verified"`
+	// The From header address, lowercased, that `from_verified` is about; null when the message had none.
+	//  Unlike `sender` it is never the envelope address.
+	FromHeaderEmail OptNilString `json:"from_header_email"`
 	// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
 	// records, never from the message content. Null on every other message and on servers that predate
 	// repeating sends.
@@ -11626,6 +13607,16 @@ func (s *EmailDetail) GetAutomatedReasons() []string {
 	return s.AutomatedReasons
 }
 
+// GetFromVerified returns the value of FromVerified.
+func (s *EmailDetail) GetFromVerified() OptBool {
+	return s.FromVerified
+}
+
+// GetFromHeaderEmail returns the value of FromHeaderEmail.
+func (s *EmailDetail) GetFromHeaderEmail() OptNilString {
+	return s.FromHeaderEmail
+}
+
 // GetRepeat returns the value of Repeat.
 func (s *EmailDetail) GetRepeat() OptNilEmailDetailRepeat {
 	return s.Repeat
@@ -11889,6 +13880,16 @@ func (s *EmailDetail) SetAutomated(val bool) {
 // SetAutomatedReasons sets the value of AutomatedReasons.
 func (s *EmailDetail) SetAutomatedReasons(val []string) {
 	s.AutomatedReasons = val
+}
+
+// SetFromVerified sets the value of FromVerified.
+func (s *EmailDetail) SetFromVerified(val OptBool) {
+	s.FromVerified = val
+}
+
+// SetFromHeaderEmail sets the value of FromHeaderEmail.
+func (s *EmailDetail) SetFromHeaderEmail(val OptNilString) {
+	s.FromHeaderEmail = val
 }
 
 // SetRepeat sets the value of Repeat.
@@ -12759,6 +14760,17 @@ type EmailSearchResult struct {
 	// `failed_recipients`, `report`. Treat an unfamiliar value as a
 	// reason added after your client was built.
 	AutomatedReasons []string `json:"automated_reasons"`
+	// True when the From header address, `from_header_email`, passed DMARC for its domain on arrival
+	// (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the envelope:
+	// `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the
+	// envelope sender, which can differ. It proves the domain, not the mailbox. False with no From
+	// header address, when authentication failed or was not attempted (a delivery between Primitive
+	// mailboxes counts only when it passed DMARC too), and for mail stored before the verdict was
+	// recorded. Null on sent rows in search results. Not a spam or safety judgement.
+	FromVerified OptNilBool `json:"from_verified"`
+	// The From header address, lowercased, that `from_verified` is about; null when the message had none.
+	//  Unlike `sender` it is never the envelope address.
+	FromHeaderEmail OptNilString `json:"from_header_email"`
 	// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
 	// records, never from the message content. Null on every other message and on servers that predate
 	// repeating sends.
@@ -12933,6 +14945,16 @@ func (s *EmailSearchResult) GetAutomated() bool {
 // GetAutomatedReasons returns the value of AutomatedReasons.
 func (s *EmailSearchResult) GetAutomatedReasons() []string {
 	return s.AutomatedReasons
+}
+
+// GetFromVerified returns the value of FromVerified.
+func (s *EmailSearchResult) GetFromVerified() OptNilBool {
+	return s.FromVerified
+}
+
+// GetFromHeaderEmail returns the value of FromHeaderEmail.
+func (s *EmailSearchResult) GetFromHeaderEmail() OptNilString {
+	return s.FromHeaderEmail
 }
 
 // GetRepeat returns the value of Repeat.
@@ -13118,6 +15140,16 @@ func (s *EmailSearchResult) SetAutomated(val bool) {
 // SetAutomatedReasons sets the value of AutomatedReasons.
 func (s *EmailSearchResult) SetAutomatedReasons(val []string) {
 	s.AutomatedReasons = val
+}
+
+// SetFromVerified sets the value of FromVerified.
+func (s *EmailSearchResult) SetFromVerified(val OptNilBool) {
+	s.FromVerified = val
+}
+
+// SetFromHeaderEmail sets the value of FromHeaderEmail.
+func (s *EmailSearchResult) SetFromHeaderEmail(val OptNilString) {
+	s.FromHeaderEmail = val
 }
 
 // SetRepeat sets the value of Repeat.
@@ -13709,6 +15741,17 @@ type EmailSummary struct {
 	// `failed_recipients`, `report`. Treat an unfamiliar value as a
 	// reason added after your client was built.
 	AutomatedReasons []string `json:"automated_reasons"`
+	// True when the From header address, `from_header_email`, passed DMARC for its domain on arrival
+	// (aligned SPF or DKIM); decided once, at receipt. It is about the From header, never the envelope:
+	// `sender`, the `from` parameter and `from:` term, and the change feed's `address` match the
+	// envelope sender, which can differ. It proves the domain, not the mailbox. False with no From
+	// header address, when authentication failed or was not attempted (a delivery between Primitive
+	// mailboxes counts only when it passed DMARC too), and for mail stored before the verdict was
+	// recorded. Null on sent rows in search results. Not a spam or safety judgement.
+	FromVerified OptNilBool `json:"from_verified"`
+	// The From header address, lowercased, that `from_verified` is about; null when the message had none.
+	//  Unlike `sender` it is never the envelope address.
+	FromHeaderEmail OptNilString `json:"from_header_email"`
 	// Set when Primitive sent this message as part of a repeating send. Resolved from Primitive's own
 	// records, never from the message content. Null on every other message and on servers that predate
 	// repeating sends.
@@ -13872,6 +15915,16 @@ func (s *EmailSummary) GetAutomatedReasons() []string {
 	return s.AutomatedReasons
 }
 
+// GetFromVerified returns the value of FromVerified.
+func (s *EmailSummary) GetFromVerified() OptNilBool {
+	return s.FromVerified
+}
+
+// GetFromHeaderEmail returns the value of FromHeaderEmail.
+func (s *EmailSummary) GetFromHeaderEmail() OptNilString {
+	return s.FromHeaderEmail
+}
+
 // GetRepeat returns the value of Repeat.
 func (s *EmailSummary) GetRepeat() OptNilEmailSummaryRepeat {
 	return s.Repeat
@@ -14025,6 +16078,16 @@ func (s *EmailSummary) SetAutomated(val bool) {
 // SetAutomatedReasons sets the value of AutomatedReasons.
 func (s *EmailSummary) SetAutomatedReasons(val []string) {
 	s.AutomatedReasons = val
+}
+
+// SetFromVerified sets the value of FromVerified.
+func (s *EmailSummary) SetFromVerified(val OptNilBool) {
+	s.FromVerified = val
+}
+
+// SetFromHeaderEmail sets the value of FromHeaderEmail.
+func (s *EmailSummary) SetFromHeaderEmail(val OptNilString) {
+	s.FromHeaderEmail = val
 }
 
 // SetRepeat sets the value of Repeat.
@@ -15871,19 +17934,21 @@ func (s *ErrorResponseHeaders) SetResponse(val ErrorResponse) {
 	s.Response = val
 }
 
-func (*ErrorResponseHeaders) deleteAgentContactRes()            {}
-func (*ErrorResponseHeaders) deleteContactRes()                 {}
-func (*ErrorResponseHeaders) downloadEmailAttachmentPartRes()   {}
-func (*ErrorResponseHeaders) downloadSentAttachmentPartRes()    {}
-func (*ErrorResponseHeaders) getContactRes()                    {}
-func (*ErrorResponseHeaders) listAgentContactsRes()             {}
-func (*ErrorResponseHeaders) listContactsRes()                  {}
-func (*ErrorResponseHeaders) pollCliLoginRes()                  {}
-func (*ErrorResponseHeaders) putAgentContactRes()               {}
-func (*ErrorResponseHeaders) putContactRes()                    {}
-func (*ErrorResponseHeaders) redeemCreditCodeRes()              {}
-func (*ErrorResponseHeaders) resendAgentSignupVerificationRes() {}
-func (*ErrorResponseHeaders) resendCliSignupVerificationRes()   {}
+func (*ErrorResponseHeaders) cancelSentEmailByIdempotencyKeyRes() {}
+func (*ErrorResponseHeaders) deleteAgentContactRes()              {}
+func (*ErrorResponseHeaders) deleteContactRes()                   {}
+func (*ErrorResponseHeaders) downloadEmailAttachmentPartRes()     {}
+func (*ErrorResponseHeaders) downloadSentAttachmentPartRes()      {}
+func (*ErrorResponseHeaders) getContactRes()                      {}
+func (*ErrorResponseHeaders) listAgentContactsRes()               {}
+func (*ErrorResponseHeaders) listChangesRes()                     {}
+func (*ErrorResponseHeaders) listContactsRes()                    {}
+func (*ErrorResponseHeaders) pollCliLoginRes()                    {}
+func (*ErrorResponseHeaders) putAgentContactRes()                 {}
+func (*ErrorResponseHeaders) putContactRes()                      {}
+func (*ErrorResponseHeaders) redeemCreditCodeRes()                {}
+func (*ErrorResponseHeaders) resendAgentSignupVerificationRes()   {}
+func (*ErrorResponseHeaders) resendCliSignupVerificationRes()     {}
 
 // Ref: #/components/schemas/Filter
 type Filter struct {
@@ -21413,6 +23478,106 @@ type ListAgentNetworksUnauthorized ErrorResponse
 
 func (*ListAgentNetworksUnauthorized) listAgentNetworksRes() {}
 
+type ListChangesBadRequest ErrorResponse
+
+func (*ListChangesBadRequest) listChangesRes() {}
+
+type ListChangesExpand string
+
+const (
+	ListChangesExpandMessage ListChangesExpand = "message"
+)
+
+// AllValues returns all ListChangesExpand values.
+func (ListChangesExpand) AllValues() []ListChangesExpand {
+	return []ListChangesExpand{
+		ListChangesExpandMessage,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListChangesExpand) MarshalText() ([]byte, error) {
+	switch s {
+	case ListChangesExpandMessage:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListChangesExpand) UnmarshalText(data []byte) error {
+	switch ListChangesExpand(data) {
+	case ListChangesExpandMessage:
+		*s = ListChangesExpandMessage
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ListChangesGone ErrorResponse
+
+func (*ListChangesGone) listChangesRes() {}
+
+// Merged schema.
+type ListChangesOK struct {
+	Success bool       `json:"success"`
+	Data    ChangePage `json:"data"`
+}
+
+// GetSuccess returns the value of Success.
+func (s *ListChangesOK) GetSuccess() bool {
+	return s.Success
+}
+
+// GetData returns the value of Data.
+func (s *ListChangesOK) GetData() ChangePage {
+	return s.Data
+}
+
+// SetSuccess sets the value of Success.
+func (s *ListChangesOK) SetSuccess(val bool) {
+	s.Success = val
+}
+
+// SetData sets the value of Data.
+func (s *ListChangesOK) SetData(val ChangePage) {
+	s.Data = val
+}
+
+// ListChangesOKHeaders wraps ListChangesOK with response headers.
+type ListChangesOKHeaders struct {
+	CacheControl OptString
+	Response     ListChangesOK
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *ListChangesOKHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *ListChangesOKHeaders) GetResponse() ListChangesOK {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *ListChangesOKHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ListChangesOKHeaders) SetResponse(val ListChangesOK) {
+	s.Response = val
+}
+
+func (*ListChangesOKHeaders) listChangesRes() {}
+
+type ListChangesUnauthorized ErrorResponse
+
+func (*ListChangesUnauthorized) listChangesRes() {}
+
 type ListContactsBadRequest ErrorResponse
 
 func (*ListContactsBadRequest) listContactsRes() {}
@@ -22015,6 +24180,47 @@ func (s *ListEmailsExcludeFyi) UnmarshalText(data []byte) error {
 		return nil
 	case ListEmailsExcludeFyiFalse:
 		*s = ListEmailsExcludeFyiFalse
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ListEmailsFromVerified string
+
+const (
+	ListEmailsFromVerifiedTrue  ListEmailsFromVerified = "true"
+	ListEmailsFromVerifiedFalse ListEmailsFromVerified = "false"
+)
+
+// AllValues returns all ListEmailsFromVerified values.
+func (ListEmailsFromVerified) AllValues() []ListEmailsFromVerified {
+	return []ListEmailsFromVerified{
+		ListEmailsFromVerifiedTrue,
+		ListEmailsFromVerifiedFalse,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ListEmailsFromVerified) MarshalText() ([]byte, error) {
+	switch s {
+	case ListEmailsFromVerifiedTrue:
+		return []byte(s), nil
+	case ListEmailsFromVerifiedFalse:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ListEmailsFromVerified) UnmarshalText(data []byte) error {
+	switch ListEmailsFromVerified(data) {
+	case ListEmailsFromVerifiedTrue:
+		*s = ListEmailsFromVerifiedTrue
+		return nil
+	case ListEmailsFromVerifiedFalse:
+		*s = ListEmailsFromVerifiedFalse
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -23659,6 +25865,51 @@ func (o NilCallerIdentityMemberAddress) Get() (v CallerIdentityMemberAddress, ok
 
 // Or returns value if set, or given parameter if does not.
 func (o NilCallerIdentityMemberAddress) Or(d CallerIdentityMemberAddress) CallerIdentityMemberAddress {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilChangeReason returns new NilChangeReason with value set to v.
+func NewNilChangeReason(v ChangeReason) NilChangeReason {
+	return NilChangeReason{
+		Value: v,
+	}
+}
+
+// NilChangeReason is nullable ChangeReason.
+type NilChangeReason struct {
+	Value ChangeReason
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilChangeReason) SetTo(v ChangeReason) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilChangeReason) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilChangeReason) SetToNull() {
+	o.Null = true
+	var v ChangeReason
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilChangeReason) Get() (v ChangeReason, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilChangeReason) Or(d ChangeReason) ChangeReason {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -25948,6 +28199,52 @@ func (o OptListAgentConnectionsOwner) Or(d ListAgentConnectionsOwner) ListAgentC
 	return d
 }
 
+// NewOptListChangesExpand returns new OptListChangesExpand with value set to v.
+func NewOptListChangesExpand(v ListChangesExpand) OptListChangesExpand {
+	return OptListChangesExpand{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListChangesExpand is optional ListChangesExpand.
+type OptListChangesExpand struct {
+	Value ListChangesExpand
+	Set   bool
+}
+
+// IsSet returns true if OptListChangesExpand was set.
+func (o OptListChangesExpand) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListChangesExpand) Reset() {
+	var v ListChangesExpand
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListChangesExpand) SetTo(v ListChangesExpand) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListChangesExpand) Get() (v ListChangesExpand, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListChangesExpand) Or(d ListChangesExpand) ListChangesExpand {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptListDeliveriesStatus returns new OptListDeliveriesStatus with value set to v.
 func NewOptListDeliveriesStatus(v ListDeliveriesStatus) OptListDeliveriesStatus {
 	return OptListDeliveriesStatus{
@@ -26126,6 +28423,52 @@ func (o OptListEmailsExcludeFyi) Get() (v ListEmailsExcludeFyi, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptListEmailsExcludeFyi) Or(d ListEmailsExcludeFyi) ListEmailsExcludeFyi {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptListEmailsFromVerified returns new OptListEmailsFromVerified with value set to v.
+func NewOptListEmailsFromVerified(v ListEmailsFromVerified) OptListEmailsFromVerified {
+	return OptListEmailsFromVerified{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptListEmailsFromVerified is optional ListEmailsFromVerified.
+type OptListEmailsFromVerified struct {
+	Value ListEmailsFromVerified
+	Set   bool
+}
+
+// IsSet returns true if OptListEmailsFromVerified was set.
+func (o OptListEmailsFromVerified) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptListEmailsFromVerified) Reset() {
+	var v ListEmailsFromVerified
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptListEmailsFromVerified) SetTo(v ListEmailsFromVerified) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptListEmailsFromVerified) Get() (v ListEmailsFromVerified, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptListEmailsFromVerified) Or(d ListEmailsFromVerified) ListEmailsFromVerified {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -26453,6 +28796,573 @@ func (o OptNilBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeInboundMessageAutomationHeaders returns new OptNilChangeInboundMessageAutomationHeaders with value set to v.
+func NewOptNilChangeInboundMessageAutomationHeaders(v ChangeInboundMessageAutomationHeaders) OptNilChangeInboundMessageAutomationHeaders {
+	return OptNilChangeInboundMessageAutomationHeaders{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeInboundMessageAutomationHeaders is optional nullable ChangeInboundMessageAutomationHeaders.
+type OptNilChangeInboundMessageAutomationHeaders struct {
+	Value ChangeInboundMessageAutomationHeaders
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeInboundMessageAutomationHeaders was set.
+func (o OptNilChangeInboundMessageAutomationHeaders) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeInboundMessageAutomationHeaders) Reset() {
+	var v ChangeInboundMessageAutomationHeaders
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeInboundMessageAutomationHeaders) SetTo(v ChangeInboundMessageAutomationHeaders) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeInboundMessageAutomationHeaders) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeInboundMessageAutomationHeaders) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeInboundMessageAutomationHeaders
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeInboundMessageAutomationHeaders) Get() (v ChangeInboundMessageAutomationHeaders, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeInboundMessageAutomationHeaders) Or(d ChangeInboundMessageAutomationHeaders) ChangeInboundMessageAutomationHeaders {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeInboundMessagePresenceControl returns new OptNilChangeInboundMessagePresenceControl with value set to v.
+func NewOptNilChangeInboundMessagePresenceControl(v ChangeInboundMessagePresenceControl) OptNilChangeInboundMessagePresenceControl {
+	return OptNilChangeInboundMessagePresenceControl{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeInboundMessagePresenceControl is optional nullable ChangeInboundMessagePresenceControl.
+type OptNilChangeInboundMessagePresenceControl struct {
+	Value ChangeInboundMessagePresenceControl
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeInboundMessagePresenceControl was set.
+func (o OptNilChangeInboundMessagePresenceControl) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeInboundMessagePresenceControl) Reset() {
+	var v ChangeInboundMessagePresenceControl
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeInboundMessagePresenceControl) SetTo(v ChangeInboundMessagePresenceControl) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeInboundMessagePresenceControl) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeInboundMessagePresenceControl) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeInboundMessagePresenceControl
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeInboundMessagePresenceControl) Get() (v ChangeInboundMessagePresenceControl, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeInboundMessagePresenceControl) Or(d ChangeInboundMessagePresenceControl) ChangeInboundMessagePresenceControl {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeInboundMessageRelay returns new OptNilChangeInboundMessageRelay with value set to v.
+func NewOptNilChangeInboundMessageRelay(v ChangeInboundMessageRelay) OptNilChangeInboundMessageRelay {
+	return OptNilChangeInboundMessageRelay{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeInboundMessageRelay is optional nullable ChangeInboundMessageRelay.
+type OptNilChangeInboundMessageRelay struct {
+	Value ChangeInboundMessageRelay
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeInboundMessageRelay was set.
+func (o OptNilChangeInboundMessageRelay) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeInboundMessageRelay) Reset() {
+	var v ChangeInboundMessageRelay
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeInboundMessageRelay) SetTo(v ChangeInboundMessageRelay) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeInboundMessageRelay) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeInboundMessageRelay) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeInboundMessageRelay
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeInboundMessageRelay) Get() (v ChangeInboundMessageRelay, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeInboundMessageRelay) Or(d ChangeInboundMessageRelay) ChangeInboundMessageRelay {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeInboundMessageRepeat returns new OptNilChangeInboundMessageRepeat with value set to v.
+func NewOptNilChangeInboundMessageRepeat(v ChangeInboundMessageRepeat) OptNilChangeInboundMessageRepeat {
+	return OptNilChangeInboundMessageRepeat{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeInboundMessageRepeat is optional nullable ChangeInboundMessageRepeat.
+type OptNilChangeInboundMessageRepeat struct {
+	Value ChangeInboundMessageRepeat
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeInboundMessageRepeat was set.
+func (o OptNilChangeInboundMessageRepeat) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeInboundMessageRepeat) Reset() {
+	var v ChangeInboundMessageRepeat
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeInboundMessageRepeat) SetTo(v ChangeInboundMessageRepeat) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeInboundMessageRepeat) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeInboundMessageRepeat) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeInboundMessageRepeat
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeInboundMessageRepeat) Get() (v ChangeInboundMessageRepeat, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeInboundMessageRepeat) Or(d ChangeInboundMessageRepeat) ChangeInboundMessageRepeat {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeInboundMessageSenderMember returns new OptNilChangeInboundMessageSenderMember with value set to v.
+func NewOptNilChangeInboundMessageSenderMember(v ChangeInboundMessageSenderMember) OptNilChangeInboundMessageSenderMember {
+	return OptNilChangeInboundMessageSenderMember{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeInboundMessageSenderMember is optional nullable ChangeInboundMessageSenderMember.
+type OptNilChangeInboundMessageSenderMember struct {
+	Value ChangeInboundMessageSenderMember
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeInboundMessageSenderMember was set.
+func (o OptNilChangeInboundMessageSenderMember) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeInboundMessageSenderMember) Reset() {
+	var v ChangeInboundMessageSenderMember
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeInboundMessageSenderMember) SetTo(v ChangeInboundMessageSenderMember) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeInboundMessageSenderMember) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeInboundMessageSenderMember) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeInboundMessageSenderMember
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeInboundMessageSenderMember) Get() (v ChangeInboundMessageSenderMember, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeInboundMessageSenderMember) Or(d ChangeInboundMessageSenderMember) ChangeInboundMessageSenderMember {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeMessage returns new OptNilChangeMessage with value set to v.
+func NewOptNilChangeMessage(v ChangeMessage) OptNilChangeMessage {
+	return OptNilChangeMessage{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeMessage is optional nullable ChangeMessage.
+type OptNilChangeMessage struct {
+	Value ChangeMessage
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeMessage was set.
+func (o OptNilChangeMessage) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeMessage) Reset() {
+	var v ChangeMessage
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeMessage) SetTo(v ChangeMessage) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeMessage) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeMessage) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeMessage
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeMessage) Get() (v ChangeMessage, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeMessage) Or(d ChangeMessage) ChangeMessage {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeOutboundMessagePresenceControl returns new OptNilChangeOutboundMessagePresenceControl with value set to v.
+func NewOptNilChangeOutboundMessagePresenceControl(v ChangeOutboundMessagePresenceControl) OptNilChangeOutboundMessagePresenceControl {
+	return OptNilChangeOutboundMessagePresenceControl{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeOutboundMessagePresenceControl is optional nullable ChangeOutboundMessagePresenceControl.
+type OptNilChangeOutboundMessagePresenceControl struct {
+	Value ChangeOutboundMessagePresenceControl
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeOutboundMessagePresenceControl was set.
+func (o OptNilChangeOutboundMessagePresenceControl) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeOutboundMessagePresenceControl) Reset() {
+	var v ChangeOutboundMessagePresenceControl
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeOutboundMessagePresenceControl) SetTo(v ChangeOutboundMessagePresenceControl) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeOutboundMessagePresenceControl) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeOutboundMessagePresenceControl) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeOutboundMessagePresenceControl
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeOutboundMessagePresenceControl) Get() (v ChangeOutboundMessagePresenceControl, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeOutboundMessagePresenceControl) Or(d ChangeOutboundMessagePresenceControl) ChangeOutboundMessagePresenceControl {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeOutboundMessageRepeat returns new OptNilChangeOutboundMessageRepeat with value set to v.
+func NewOptNilChangeOutboundMessageRepeat(v ChangeOutboundMessageRepeat) OptNilChangeOutboundMessageRepeat {
+	return OptNilChangeOutboundMessageRepeat{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeOutboundMessageRepeat is optional nullable ChangeOutboundMessageRepeat.
+type OptNilChangeOutboundMessageRepeat struct {
+	Value ChangeOutboundMessageRepeat
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeOutboundMessageRepeat was set.
+func (o OptNilChangeOutboundMessageRepeat) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeOutboundMessageRepeat) Reset() {
+	var v ChangeOutboundMessageRepeat
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeOutboundMessageRepeat) SetTo(v ChangeOutboundMessageRepeat) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeOutboundMessageRepeat) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeOutboundMessageRepeat) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeOutboundMessageRepeat
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeOutboundMessageRepeat) Get() (v ChangeOutboundMessageRepeat, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeOutboundMessageRepeat) Or(d ChangeOutboundMessageRepeat) ChangeOutboundMessageRepeat {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilChangeOutboundMessageSenderMember returns new OptNilChangeOutboundMessageSenderMember with value set to v.
+func NewOptNilChangeOutboundMessageSenderMember(v ChangeOutboundMessageSenderMember) OptNilChangeOutboundMessageSenderMember {
+	return OptNilChangeOutboundMessageSenderMember{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilChangeOutboundMessageSenderMember is optional nullable ChangeOutboundMessageSenderMember.
+type OptNilChangeOutboundMessageSenderMember struct {
+	Value ChangeOutboundMessageSenderMember
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilChangeOutboundMessageSenderMember was set.
+func (o OptNilChangeOutboundMessageSenderMember) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilChangeOutboundMessageSenderMember) Reset() {
+	var v ChangeOutboundMessageSenderMember
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilChangeOutboundMessageSenderMember) SetTo(v ChangeOutboundMessageSenderMember) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilChangeOutboundMessageSenderMember) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilChangeOutboundMessageSenderMember) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ChangeOutboundMessageSenderMember
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilChangeOutboundMessageSenderMember) Get() (v ChangeOutboundMessageSenderMember, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilChangeOutboundMessageSenderMember) Or(d ChangeOutboundMessageSenderMember) ChangeOutboundMessageSenderMember {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -30075,6 +32985,52 @@ func (o OptSearchEmailsDirection) Get() (v SearchEmailsDirection, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSearchEmailsDirection) Or(d SearchEmailsDirection) SearchEmailsDirection {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSearchEmailsFromVerified returns new OptSearchEmailsFromVerified with value set to v.
+func NewOptSearchEmailsFromVerified(v SearchEmailsFromVerified) OptSearchEmailsFromVerified {
+	return OptSearchEmailsFromVerified{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSearchEmailsFromVerified is optional SearchEmailsFromVerified.
+type OptSearchEmailsFromVerified struct {
+	Value SearchEmailsFromVerified
+	Set   bool
+}
+
+// IsSet returns true if OptSearchEmailsFromVerified was set.
+func (o OptSearchEmailsFromVerified) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSearchEmailsFromVerified) Reset() {
+	var v SearchEmailsFromVerified
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSearchEmailsFromVerified) SetTo(v SearchEmailsFromVerified) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSearchEmailsFromVerified) Get() (v SearchEmailsFromVerified, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSearchEmailsFromVerified) Or(d SearchEmailsFromVerified) SearchEmailsFromVerified {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -37358,6 +40314,47 @@ func (s *SearchEmailsDirection) UnmarshalText(data []byte) error {
 		return nil
 	case SearchEmailsDirectionAny:
 		*s = SearchEmailsDirectionAny
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type SearchEmailsFromVerified string
+
+const (
+	SearchEmailsFromVerifiedTrue  SearchEmailsFromVerified = "true"
+	SearchEmailsFromVerifiedFalse SearchEmailsFromVerified = "false"
+)
+
+// AllValues returns all SearchEmailsFromVerified values.
+func (SearchEmailsFromVerified) AllValues() []SearchEmailsFromVerified {
+	return []SearchEmailsFromVerified{
+		SearchEmailsFromVerifiedTrue,
+		SearchEmailsFromVerifiedFalse,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SearchEmailsFromVerified) MarshalText() ([]byte, error) {
+	switch s {
+	case SearchEmailsFromVerifiedTrue:
+		return []byte(s), nil
+	case SearchEmailsFromVerifiedFalse:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SearchEmailsFromVerified) UnmarshalText(data []byte) error {
+	switch SearchEmailsFromVerified(data) {
+	case SearchEmailsFromVerifiedTrue:
+		*s = SearchEmailsFromVerifiedTrue
+		return nil
+	case SearchEmailsFromVerifiedFalse:
+		*s = SearchEmailsFromVerifiedFalse
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

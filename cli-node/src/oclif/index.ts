@@ -124,6 +124,7 @@ import RoutesUpdateCommand from "./commands/routes-update.js";
 import SearchCommand from "./commands/search.js";
 import SemanticSearchCommand from "./commands/semantic-search.js";
 import SendCommand from "./commands/send.js";
+import SentCancelCommand from "./commands/sent-cancel.js";
 import SentGetCommand from "./commands/sent-get.js";
 import SignalCommand from "./commands/signal.js";
 import {
@@ -422,6 +423,7 @@ export const CANONICAL_OPERATION_ALIASES: Record<string, string> = {
   "account:show": "account:get-account",
   "account:storage": "account:get-storage-stats",
   "account:webhook-secret": "account:get-webhook-secret",
+  "changes:list": "changes:list-changes",
   "agent:claim": "agent:start-agent-claim",
   "agent:claim-link": "agent:create-agent-claim-link",
   "agent:claim-verify": "agent:verify-agent-claim",
@@ -816,6 +818,9 @@ export const COMMANDS: Record<string, typeof Command> = {
   // uncertain send can reconcile it. `sending:get` and the operation id
   // stay generated.
   "sent:get": SentGetCommand,
+  // `sent:cancel` cancels a scheduled send by --id or --idempotency-key,
+  // one command over the two generated cancel operations.
+  "sent:cancel": SentCancelCommand,
   ...generatedCommandAliases,
   ...generatedCommands,
   // `functions:logs` is the human/agent-friendly log viewer: compact
