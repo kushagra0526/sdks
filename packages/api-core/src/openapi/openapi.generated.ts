@@ -18582,12 +18582,14 @@ export const openapiDocument: Record<string, unknown> = {
             "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
           },
           "headers": {
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
+              },
+              {
+                "type": "null"
               }
             ],
-            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -20421,12 +20423,14 @@ export const openapiDocument: Record<string, unknown> = {
             "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
           },
           "headers": {
-            "allOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
+              },
+              {
+                "type": "null"
               }
             ],
-            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {

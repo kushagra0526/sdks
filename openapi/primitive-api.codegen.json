@@ -18263,13 +18263,13 @@
             "nullable": true
           },
           "headers": {
+            "description": "With `include=headers`: stored addressing and threading headers.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
               }
             ],
-            "nullable": true,
-            "description": "With `include=headers`: stored addressing and threading headers."
+            "nullable": true
           },
           "attachments": {
             "type": "array",
@@ -19888,13 +19888,13 @@
             "nullable": true
           },
           "headers": {
+            "description": "With `include=headers`: stored addressing and threading headers.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/IncludedMessageHeaders"
               }
             ],
-            "nullable": true,
-            "description": "With `include=headers`: stored addressing and threading headers."
+            "nullable": true
           },
           "attachments": {
             "type": "array",

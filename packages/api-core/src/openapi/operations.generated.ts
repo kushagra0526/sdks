@@ -8525,7 +8525,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
           },
           "headers": {
-            "allOf": [
+            "anyOf": [
               {
                 "type": "object",
                 "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -8611,9 +8611,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "references",
                   "automation"
                 ]
+              },
+              {
+                "type": "null"
               }
             ],
-            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -9214,7 +9216,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
               },
               "headers": {
-                "allOf": [
+                "anyOf": [
                   {
                     "type": "object",
                     "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -9300,9 +9302,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                       "references",
                       "automation"
                     ]
+                  },
+                  {
+                    "type": "null"
                   }
                 ],
-                "nullable": true,
                 "description": "With `include=headers`: stored addressing and threading headers."
               },
               "attachments": {
@@ -18341,7 +18345,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "allOf": [
+              "anyOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -18427,9 +18431,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
+                },
+                {
+                  "type": "null"
                 }
               ],
-              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {
@@ -19453,7 +19459,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "allOf": [
+              "anyOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -19539,9 +19545,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
+                },
+                {
+                  "type": "null"
                 }
               ],
-              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {
@@ -20299,7 +20307,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
           },
           "headers": {
-            "allOf": [
+            "anyOf": [
               {
                 "type": "object",
                 "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -20385,9 +20393,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "references",
                   "automation"
                 ]
+              },
+              {
+                "type": "null"
               }
             ],
-            "nullable": true,
             "description": "With `include=headers`: stored addressing and threading headers."
           },
           "attachments": {
@@ -21159,7 +21169,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
             },
             "headers": {
-              "allOf": [
+              "anyOf": [
                 {
                   "type": "object",
                   "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
@@ -21245,9 +21255,11 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                     "references",
                     "automation"
                   ]
+                },
+                {
+                  "type": "null"
                 }
               ],
-              "nullable": true,
               "description": "With `include=headers`: stored addressing and threading headers."
             },
             "attachments": {

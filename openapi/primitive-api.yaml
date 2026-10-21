@@ -14643,9 +14643,9 @@ components:
             - "null"
           description: "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
         headers:
-          allOf:
+          anyOf:
             - $ref: "#/components/schemas/IncludedMessageHeaders"
-          nullable: true
+            - type: "null"
           description: "With `include=headers`: stored addressing and threading headers."
         attachments:
           type: array
@@ -16544,9 +16544,9 @@ components:
             carried only a plain-text body, or when bodies
             have been discarded post-send.
         headers:
-          allOf:
+          anyOf:
             - $ref: "#/components/schemas/IncludedMessageHeaders"
-          nullable: true
+            - type: "null"
           description: "With `include=headers`: stored addressing and threading headers."
         attachments:
           type: array
