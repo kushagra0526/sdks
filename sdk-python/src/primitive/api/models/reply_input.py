@@ -12,6 +12,7 @@ from typing import cast
 
 if TYPE_CHECKING:
   from ..models.repeat_input import RepeatInput
+  from ..models.reply_input_headers import ReplyInputHeaders
   from ..models.send_mail_attachment import SendMailAttachment
 
 
@@ -67,6 +68,18 @@ class ReplyInput:
                 `repeat_recipient_external`). `only_if_recipient_idle_minutes` needs
                 a recipient in your organization (422
                 `repeat_idle_requires_internal_recipient`).
+            headers (ReplyInputHeaders | Unset): Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of
+                `Auto-Submitted`, `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-
+                Ref`, or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as `auth`,
+                `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a reserved family:
+                X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*, X-Authenticated*, X-Envelope-*,
+                X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop, X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*,
+                X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*, X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*,
+                X-Proofpoint-*, X-Barracuda-*, X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*.
+                Names compare case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+                `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as spelled, are not
+                DKIM-signed, and can be searched with `header` on `GET /sent-emails`. Example: {'X-Campaign-Id': 'spring-sale',
+                'Auto-Submitted': 'auto-generated'}.
      """
 
     body_text: str | Unset = UNSET
@@ -76,6 +89,7 @@ class ReplyInput:
     reply_all: bool | Unset = UNSET
     attachments: list[SendMailAttachment] | Unset = UNSET
     repeat: RepeatInput | Unset = UNSET
+    headers: ReplyInputHeaders | Unset = UNSET
 
 
 
@@ -83,6 +97,7 @@ class ReplyInput:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.repeat_input import RepeatInput # noqa: PLC0415
+        from ..models.reply_input_headers import ReplyInputHeaders # noqa: PLC0415
         from ..models.send_mail_attachment import SendMailAttachment # noqa: PLC0415
         body_text = self.body_text
 
@@ -107,6 +122,10 @@ class ReplyInput:
         if not isinstance(self.repeat, Unset):
             repeat = self.repeat.to_dict()
 
+        headers: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.headers, Unset):
+            headers = self.headers.to_dict()
+
 
         field_dict: dict[str, Any] = {}
 
@@ -126,6 +145,8 @@ class ReplyInput:
             field_dict["attachments"] = attachments
         if repeat is not UNSET:
             field_dict["repeat"] = repeat
+        if headers is not UNSET:
+            field_dict["headers"] = headers
 
         return field_dict
 
@@ -134,6 +155,7 @@ class ReplyInput:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.repeat_input import RepeatInput # noqa: PLC0415
+        from ..models.reply_input_headers import ReplyInputHeaders # noqa: PLC0415
         from ..models.send_mail_attachment import SendMailAttachment # noqa: PLC0415
         d = dict(src_dict)
         body_text = d.pop("body_text", UNSET)
@@ -168,6 +190,16 @@ class ReplyInput:
 
 
 
+        _headers = d.pop("headers", UNSET)
+        headers: ReplyInputHeaders | Unset
+        if isinstance(_headers,  Unset):
+            headers = UNSET
+        else:
+            headers = ReplyInputHeaders.from_dict(_headers)
+
+
+
+
         reply_input = cls(
             body_text=body_text,
             body_html=body_html,
@@ -176,6 +208,7 @@ class ReplyInput:
             reply_all=reply_all,
             attachments=attachments,
             repeat=repeat,
+            headers=headers,
         )
 
         return reply_input

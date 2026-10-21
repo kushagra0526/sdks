@@ -14,6 +14,7 @@ import datetime
 if TYPE_CHECKING:
   from ..models.repeat_input import RepeatInput
   from ..models.send_mail_attachment import SendMailAttachment
+  from ..models.send_mail_input_headers import SendMailInputHeaders
   from ..models.send_mail_payload_ref import SendMailPayloadRef
 
 
@@ -73,6 +74,18 @@ class SendMailInput:
                 (`2026-10-09T17:00:00Z`, `2026-10-09T13:00:00-04:00`); an
                 offset is converted to UTC, so the stored and echoed value
                 is UTC. A time with no zone, or a bare date, is rejected.
+            headers (SendMailInputHeaders | Unset): Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of
+                `Auto-Submitted`, `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-
+                Ref`, or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as `auth`,
+                `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a reserved family:
+                X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*, X-Authenticated*, X-Envelope-*,
+                X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop, X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*,
+                X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*, X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*,
+                X-Proofpoint-*, X-Barracuda-*, X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*.
+                Names compare case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+                `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as spelled, are not
+                DKIM-signed, and can be searched with `header` on `GET /sent-emails`. Example: {'X-Campaign-Id': 'spring-sale',
+                'Auto-Submitted': 'auto-generated'}.
      """
 
     from_: str
@@ -90,6 +103,7 @@ class SendMailInput:
     wait: bool | Unset = UNSET
     wait_timeout_ms: int | Unset = UNSET
     scheduled_at: datetime.datetime | Unset = UNSET
+    headers: SendMailInputHeaders | Unset = UNSET
 
 
 
@@ -98,6 +112,7 @@ class SendMailInput:
     def to_dict(self) -> dict[str, Any]:
         from ..models.repeat_input import RepeatInput # noqa: PLC0415
         from ..models.send_mail_attachment import SendMailAttachment # noqa: PLC0415
+        from ..models.send_mail_input_headers import SendMailInputHeaders # noqa: PLC0415
         from ..models.send_mail_payload_ref import SendMailPayloadRef # noqa: PLC0415
         from_ = self.from_
 
@@ -167,6 +182,10 @@ class SendMailInput:
         if not isinstance(self.scheduled_at, Unset):
             scheduled_at = self.scheduled_at.isoformat()
 
+        headers: dict[str, Any] | Unset = UNSET
+        if not isinstance(self.headers, Unset):
+            headers = self.headers.to_dict()
+
 
         field_dict: dict[str, Any] = {}
 
@@ -199,6 +218,8 @@ class SendMailInput:
             field_dict["wait_timeout_ms"] = wait_timeout_ms
         if scheduled_at is not UNSET:
             field_dict["scheduled_at"] = scheduled_at
+        if headers is not UNSET:
+            field_dict["headers"] = headers
 
         return field_dict
 
@@ -208,6 +229,7 @@ class SendMailInput:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.repeat_input import RepeatInput # noqa: PLC0415
         from ..models.send_mail_attachment import SendMailAttachment # noqa: PLC0415
+        from ..models.send_mail_input_headers import SendMailInputHeaders # noqa: PLC0415
         from ..models.send_mail_payload_ref import SendMailPayloadRef # noqa: PLC0415
         d = dict(src_dict)
         from_ = d.pop("from")
@@ -305,6 +327,16 @@ class SendMailInput:
 
 
 
+        _headers = d.pop("headers", UNSET)
+        headers: SendMailInputHeaders | Unset
+        if isinstance(_headers,  Unset):
+            headers = UNSET
+        else:
+            headers = SendMailInputHeaders.from_dict(_headers)
+
+
+
+
         send_mail_input = cls(
             from_=from_,
             to=to,
@@ -321,6 +353,7 @@ class SendMailInput:
             wait=wait,
             wait_timeout_ms=wait_timeout_ms,
             scheduled_at=scheduled_at,
+            headers=headers,
         )
 
         return send_mail_input

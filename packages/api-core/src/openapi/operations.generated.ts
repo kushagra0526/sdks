@@ -8580,7 +8580,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
     "pathParams": [],
     "queryParams": [
       {
-        "description": "Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `\"quoted phrase\"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR \"past due\"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`\"OR\"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes.",
+        "description": "Full-text search DSL query. Supports `awaiting:you` and `awaiting:them` to filter on reply state (see the `awaiting` field; delivered mail only, never `rejected`). Supports `automated:true` and `automated:false` to filter on the `automated` field. Terms are separated by spaces and every term must match. A term is a word, a `\"quoted phrase\"`, or a `field:value` filter (`from:`, `to:`, `subject:`, `body:`, `has:attachment`, `before:`, `after:`, `domain:`, `status:`, `awaiting:`, `automated:`, `header:`, `has-header:`). An upper-case `OR` between two text terms (words, phrases, `subject:` and `body:` terms) accepts either, and binds tighter than the implicit AND: `acme invoice OR receipt` is `acme` and either `invoice` or `receipt`. `OR` cannot join the other filters, and there is no `NOT` and no parentheses. A query that uses an unsupported operator, an unknown field, an unterminated quote, or only stop words is a `validation_error` that says what to change; it is never silently reinterpreted. Alternatives chain (`invoice OR receipt OR \"past due\"`), and each one counts toward the limit of 32 terms. These are rejected with a 400 `validation_error`: `OR` next to a filter (`from:a@example.com OR from:b@example.com`; run one search per value instead); an `OR` with no term on one side (a leading, trailing or doubled `OR`); an upper-case `NOT` (a search cannot exclude a term); and an alternative with no searchable word once stop words are removed (`the OR invoice`). Only upper case is an operator: to search for the word `OR` or `NOT` itself, write it in lower case or in double quotes (`\"OR\"`). With `prefix=true`, a trailing `OR` or `NOT` is read as a word still being typed. To search for text that contains a colon, such as a URL, put it in double quotes. `header:Name=Value` matches mail whose header `Name` has exactly `Value` (name and value case-insensitive, the whole value, quote the term for a value with spaces: `header:\"List-Id=Team news <news.example.com>\"`); `has-header:Name` matches mail that carries header `Name` with any value. Neither can be an `OR` alternative. Header filters read a stored copy of each message's headers: for received mail every header except trace and signature headers (`Received`, `DKIM-Signature`, `ARC-*`, `Authentication-Results` and similar) and credential-like names (a word such as `auth`, `token`, `key`, `secret`, `cookie`, `session`, `bearer`, `jwt` or `hmac`, including joined forms such as `AuthToken` or `SessionId`), at most 100 headers and 16 KiB per message, each value cut to 1024 bytes; for sent mail the `headers` the request set. A filter on a header that is never stored is a `validation_error`. Mail stored before header search was available has no stored headers and is not matched.",
         "enum": null,
         "name": "q",
         "required": false,
@@ -19319,6 +19319,13 @@ export const operationManifest: PrimitiveOperationManifest[] = [
         "name": "from",
         "required": false,
         "type": "string"
+      },
+      {
+        "description": "Return only sends that set this header: `Name=Value` matches that exact value, `Name` alone any value. Name and value compare case-insensitively; the value is trimmed and matched whole, not as a substring, and only the first `=` separates the two. Matches only the `headers` the send request set. History pages only: with `since` or `wait` it is a `validation_error`, as is a name that is never stored (trace, signature or credential-like). Sends made before header search was available are not matched.",
+        "enum": null,
+        "name": "header",
+        "required": false,
+        "type": "string"
       }
     ],
     "requestSchema": null,
@@ -19812,6 +19819,27 @@ export const operationManifest: PrimitiveOperationManifest[] = [
           "required": [
             "every_minutes"
           ]
+        },
+        "headers": {
+          "type": "object",
+          "maxProperties": 25,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[\\x20-\\x7E]+$"
+          },
+          "description": "Extra headers, as `{ \"Name\": \"value\" }`, at most 25. A name is one of `Auto-Submitted`, `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`, or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*, X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop, X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*, X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*, X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.",
+          "example": {
+            "X-Campaign-Id": "spring-sale",
+            "Auto-Submitted": "auto-generated"
+          }
         }
       }
     },
@@ -20830,6 +20858,27 @@ export const operationManifest: PrimitiveOperationManifest[] = [
           "type": "string",
           "format": "date-time",
           "description": "Optional future execution time (ISO 8601). When set, the\nsend is recorded with status `scheduled` and executed at\nthe requested time instead of immediately. Must be in the\nfuture and at most 30 days out. Incompatible with `wait`\n(a scheduled send resolves after this request completes)\nand with `attachments` / `payload_attachments` (not yet\nsupported on scheduled sends). Reschedule via PATCH\n/sent-emails/{id}; cancel via /sent-emails/{id}/cancel.\nAccepts `Z` or a numeric UTC offset\n(`2026-10-09T17:00:00Z`, `2026-10-09T13:00:00-04:00`); an\noffset is converted to UTC, so the stored and echoed value\nis UTC. A time with no zone, or a bare date, is rejected.\n"
+        },
+        "headers": {
+          "type": "object",
+          "maxProperties": 25,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[\\x20-\\x7E]+$"
+          },
+          "description": "Extra headers, as `{ \"Name\": \"value\" }`, at most 25. A name is one of `Auto-Submitted`, `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`, or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*, X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop, X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*, X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*, X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.",
+          "example": {
+            "X-Campaign-Id": "spring-sale",
+            "Auto-Submitted": "auto-generated"
+          }
         }
       },
       "required": [

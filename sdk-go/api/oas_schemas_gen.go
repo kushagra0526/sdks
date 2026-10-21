@@ -29799,6 +29799,52 @@ func (o OptRepeatingSendStatus) Or(d RepeatingSendStatus) RepeatingSendStatus {
 	return d
 }
 
+// NewOptReplyInputHeaders returns new OptReplyInputHeaders with value set to v.
+func NewOptReplyInputHeaders(v ReplyInputHeaders) OptReplyInputHeaders {
+	return OptReplyInputHeaders{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptReplyInputHeaders is optional ReplyInputHeaders.
+type OptReplyInputHeaders struct {
+	Value ReplyInputHeaders
+	Set   bool
+}
+
+// IsSet returns true if OptReplyInputHeaders was set.
+func (o OptReplyInputHeaders) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptReplyInputHeaders) Reset() {
+	var v ReplyInputHeaders
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptReplyInputHeaders) SetTo(v ReplyInputHeaders) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptReplyInputHeaders) Get() (v ReplyInputHeaders, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptReplyInputHeaders) Or(d ReplyInputHeaders) ReplyInputHeaders {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSearchEmailsAutomated returns new OptSearchEmailsAutomated with value set to v.
 func NewOptSearchEmailsAutomated(v SearchEmailsAutomated) OptSearchEmailsAutomated {
 	return OptSearchEmailsAutomated{
@@ -30391,6 +30437,52 @@ func (o OptSendMailInputCc) Get() (v SendMailInputCc, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSendMailInputCc) Or(d SendMailInputCc) SendMailInputCc {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSendMailInputHeaders returns new OptSendMailInputHeaders with value set to v.
+func NewOptSendMailInputHeaders(v SendMailInputHeaders) OptSendMailInputHeaders {
+	return OptSendMailInputHeaders{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSendMailInputHeaders is optional SendMailInputHeaders.
+type OptSendMailInputHeaders struct {
+	Value SendMailInputHeaders
+	Set   bool
+}
+
+// IsSet returns true if OptSendMailInputHeaders was set.
+func (o OptSendMailInputHeaders) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSendMailInputHeaders) Reset() {
+	var v SendMailInputHeaders
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSendMailInputHeaders) SetTo(v SendMailInputHeaders) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSendMailInputHeaders) Get() (v SendMailInputHeaders, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSendMailInputHeaders) Or(d SendMailInputHeaders) SendMailInputHeaders {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -35733,6 +35825,19 @@ type ReplyInput struct {
 	// Combined raw decoded attachment bytes must be at most 31457280.
 	Attachments []SendMailAttachment `json:"attachments"`
 	Repeat      OptRepeatInput       `json:"repeat"`
+	// Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of `Auto-Submitted`,
+	// `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`,
+	//  or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as
+	// `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a
+	// reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*,
+	// X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop,
+	// X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*,
+	// X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*,
+	// X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare
+	// case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+	// `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as
+	// spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.
+	Headers OptReplyInputHeaders `json:"headers"`
 }
 
 // GetBodyText returns the value of BodyText.
@@ -35770,6 +35875,11 @@ func (s *ReplyInput) GetRepeat() OptRepeatInput {
 	return s.Repeat
 }
 
+// GetHeaders returns the value of Headers.
+func (s *ReplyInput) GetHeaders() OptReplyInputHeaders {
+	return s.Headers
+}
+
 // SetBodyText sets the value of BodyText.
 func (s *ReplyInput) SetBodyText(val OptString) {
 	s.BodyText = val
@@ -35803,6 +35913,36 @@ func (s *ReplyInput) SetAttachments(val []SendMailAttachment) {
 // SetRepeat sets the value of Repeat.
 func (s *ReplyInput) SetRepeat(val OptRepeatInput) {
 	s.Repeat = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *ReplyInput) SetHeaders(val OptReplyInputHeaders) {
+	s.Headers = val
+}
+
+// Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of `Auto-Submitted`,
+// `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`,
+//
+//	or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as
+//
+// `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a
+// reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*,
+// X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop,
+// X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*,
+// X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*,
+// X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare
+// case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+// `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as
+// spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.
+type ReplyInputHeaders map[string]string
+
+func (s *ReplyInputHeaders) init() ReplyInputHeaders {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
 }
 
 type ReplyToEmailBadGateway ErrorResponse
@@ -38595,6 +38735,19 @@ type SendMailInput struct {
 	// offset is converted to UTC, so the stored and echoed value
 	// is UTC. A time with no zone, or a bare date, is rejected.
 	ScheduledAt OptDateTime `json:"scheduled_at"`
+	// Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of `Auto-Submitted`,
+	// `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`,
+	//  or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as
+	// `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a
+	// reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*,
+	// X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop,
+	// X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*,
+	// X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*,
+	// X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare
+	// case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+	// `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as
+	// spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.
+	Headers OptSendMailInputHeaders `json:"headers"`
 }
 
 // GetRepeat returns the value of Repeat.
@@ -38672,6 +38825,11 @@ func (s *SendMailInput) GetScheduledAt() OptDateTime {
 	return s.ScheduledAt
 }
 
+// GetHeaders returns the value of Headers.
+func (s *SendMailInput) GetHeaders() OptSendMailInputHeaders {
+	return s.Headers
+}
+
 // SetRepeat sets the value of Repeat.
 func (s *SendMailInput) SetRepeat(val OptRepeatInput) {
 	s.Repeat = val
@@ -38745,6 +38903,11 @@ func (s *SendMailInput) SetWaitTimeoutMs(val OptInt) {
 // SetScheduledAt sets the value of ScheduledAt.
 func (s *SendMailInput) SetScheduledAt(val OptDateTime) {
 	s.ScheduledAt = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *SendMailInput) SetHeaders(val OptSendMailInputHeaders) {
+	s.Headers = val
 }
 
 // Blind-carbon-copy recipients. Either a single address or an array of addresses. Each entry must be
@@ -38880,6 +39043,31 @@ func NewStringArraySendMailInputCc(v []string) SendMailInputCc {
 	var s SendMailInputCc
 	s.SetStringArray(v)
 	return s
+}
+
+// Extra headers, as `{ "Name": "value" }`, at most 25. A name is one of `Auto-Submitted`,
+// `Precedence`, `X-Auto-Response-Suppress`, `X-Primitive-Interaction`, `X-Primitive-Interaction-Ref`,
+//
+//	or a custom `X-` name of letters, digits and hyphens that is not credential-like (a word such as
+//
+// `auth`, `token`, `key`, `secret`, `session` or `bearer`, joined forms included) and not in a
+// reserved family: X-Primitive*, X-Original-*, X-Originating-*, X-Forwarded-*, X-Received*,
+// X-Authenticated*, X-Envelope-*, X-Delivered-To, X-Apparently-To, X-Failed-Recipients, X-Loop,
+// X-Priority, X-MSMail-*, X-MS-*, X-Microsoft-*, X-Forefront-*, X-Exchange-*, X-Google-*, X-GM-*,
+// X-Apple-*, X-Yahoo-*, X-YMail-*, X-AOL-*, X-Spam*, X-Virus-*, X-Proofpoint-*, X-Barracuda-*,
+// X-Rspamd-*, X-Mimecast-*, X-IronPort-*, X-Sophos-*, X-Report-Abuse*, X-CSA-*. Names compare
+// case-insensitively (`_` and `.` count as `-` for families); a repeated or any other name is a
+// `validation_error`. Values: 1 to 200 printable ASCII characters. Custom headers are sent as
+// spelled, are not DKIM-signed, and can be searched with `header` on `GET /sent-emails`.
+type SendMailInputHeaders map[string]string
+
+func (s *SendMailInputHeaders) init() SendMailInputHeaders {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
 }
 
 // A reference to an already-uploaded Primitive Payloads object, delivered as an attachment without
