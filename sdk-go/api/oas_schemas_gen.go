@@ -17188,6 +17188,8 @@ const (
 	ErrorResponseErrorCodeAddressNotControlled                ErrorResponseErrorCode = "address_not_controlled"
 	ErrorResponseErrorCodeContactConflict                     ErrorResponseErrorCode = "contact_conflict"
 	ErrorResponseErrorCodeSentMailSearchUnavailable           ErrorResponseErrorCode = "sent_mail_search_unavailable"
+	ErrorResponseErrorCodeInvalidCursor                       ErrorResponseErrorCode = "invalid_cursor"
+	ErrorResponseErrorCodeCursorExpired                       ErrorResponseErrorCode = "cursor_expired"
 )
 
 // AllValues returns all ErrorResponseErrorCode values.
@@ -17286,6 +17288,8 @@ func (ErrorResponseErrorCode) AllValues() []ErrorResponseErrorCode {
 		ErrorResponseErrorCodeAddressNotControlled,
 		ErrorResponseErrorCodeContactConflict,
 		ErrorResponseErrorCodeSentMailSearchUnavailable,
+		ErrorResponseErrorCodeInvalidCursor,
+		ErrorResponseErrorCodeCursorExpired,
 	}
 }
 
@@ -17477,6 +17481,10 @@ func (s ErrorResponseErrorCode) MarshalText() ([]byte, error) {
 	case ErrorResponseErrorCodeContactConflict:
 		return []byte(s), nil
 	case ErrorResponseErrorCodeSentMailSearchUnavailable:
+		return []byte(s), nil
+	case ErrorResponseErrorCodeInvalidCursor:
+		return []byte(s), nil
+	case ErrorResponseErrorCodeCursorExpired:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -17764,6 +17772,12 @@ func (s *ErrorResponseErrorCode) UnmarshalText(data []byte) error {
 		return nil
 	case ErrorResponseErrorCodeSentMailSearchUnavailable:
 		*s = ErrorResponseErrorCodeSentMailSearchUnavailable
+		return nil
+	case ErrorResponseErrorCodeInvalidCursor:
+		*s = ErrorResponseErrorCodeInvalidCursor
+		return nil
+	case ErrorResponseErrorCodeCursorExpired:
+		*s = ErrorResponseErrorCodeCursorExpired
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

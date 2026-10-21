@@ -41111,6 +41111,10 @@ func (s *ErrorResponseErrorCode) Decode(d *jx.Decoder) error {
 		*s = ErrorResponseErrorCodeContactConflict
 	case ErrorResponseErrorCodeSentMailSearchUnavailable:
 		*s = ErrorResponseErrorCodeSentMailSearchUnavailable
+	case ErrorResponseErrorCodeInvalidCursor:
+		*s = ErrorResponseErrorCodeInvalidCursor
+	case ErrorResponseErrorCodeCursorExpired:
+		*s = ErrorResponseErrorCodeCursorExpired
 	default:
 		*s = ErrorResponseErrorCode(v)
 	}

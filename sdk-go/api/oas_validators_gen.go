@@ -10176,6 +10176,10 @@ func (s ErrorResponseErrorCode) Validate() error {
 		return nil
 	case "sent_mail_search_unavailable":
 		return nil
+	case "invalid_cursor":
+		return nil
+	case "cursor_expired":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}

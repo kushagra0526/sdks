@@ -12979,6 +12979,8 @@ components:
                 - address_not_controlled
                 - contact_conflict
                 - sent_mail_search_unavailable
+                - invalid_cursor
+                - cursor_expired
             message:
               type: string
             details:

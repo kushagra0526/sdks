@@ -16556,7 +16556,9 @@ export const openapiDocument: Record<string, unknown> = {
                   "address_note_conflict",
                   "address_not_controlled",
                   "contact_conflict",
-                  "sent_mail_search_unavailable"
+                  "sent_mail_search_unavailable",
+                  "invalid_cursor",
+                  "cursor_expired"
                 ]
               },
               "message": {
