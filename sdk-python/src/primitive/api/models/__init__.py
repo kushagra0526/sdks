@@ -216,11 +216,13 @@ from .email_search_result import EmailSearchResult
 from .email_search_result_direction import EmailSearchResultDirection
 from .email_status import EmailStatus
 from .email_summary import EmailSummary
+from .email_summary_attachments_item import EmailSummaryAttachmentsItem
 from .email_summary_automation_headers_type_0 import EmailSummaryAutomationHeadersType0
 from .email_summary_awaiting import EmailSummaryAwaiting
 from .email_summary_relay_type_0 import EmailSummaryRelayType0
 from .email_summary_repeat_type_0 import EmailSummaryRepeatType0
 from .email_summary_sender_member_type_0 import EmailSummarySenderMemberType0
+from .email_summary_truncated_fields_item import EmailSummaryTruncatedFieldsItem
 from .email_webhook_status_type_1 import EmailWebhookStatusType1
 from .email_webhook_status_type_2_type_1 import EmailWebhookStatusType2Type1
 from .email_webhook_status_type_3_type_1 import EmailWebhookStatusType3Type1
@@ -309,6 +311,8 @@ from .inbox_status_function_summary import InboxStatusFunctionSummary
 from .inbox_status_next_action import InboxStatusNextAction
 from .inbox_status_next_action_kind import InboxStatusNextActionKind
 from .inbox_status_recent_email_summary import InboxStatusRecentEmailSummary
+from .included_message_headers import IncludedMessageHeaders
+from .included_message_headers_automation_type_0 import IncludedMessageHeadersAutomationType0
 from .install_template_body import InstallTemplateBody
 from .install_template_body_secrets import InstallTemplateBodySecrets
 from .install_template_body_variables import InstallTemplateBodyVariables
@@ -523,8 +527,10 @@ from .sent_email_detail_tags_type_0_item import SentEmailDetailTagsType0Item
 from .sent_email_reschedule_input import SentEmailRescheduleInput
 from .sent_email_status import SentEmailStatus
 from .sent_email_summary import SentEmailSummary
+from .sent_email_summary_attachments_item import SentEmailSummaryAttachmentsItem
 from .sent_email_summary_repeat_type_0 import SentEmailSummaryRepeatType0
 from .sent_email_summary_sender_member_type_0 import SentEmailSummarySenderMemberType0
+from .sent_email_summary_truncated_fields_item import SentEmailSummaryTruncatedFieldsItem
 from .set_function_route_response_200 import SetFunctionRouteResponse200
 from .set_function_secret_input import SetFunctionSecretInput
 from .set_function_secret_response_200 import SetFunctionSecretResponse200
@@ -878,11 +884,13 @@ __all__ = (
     "EmailSearchResultDirection",
     "EmailStatus",
     "EmailSummary",
+    "EmailSummaryAttachmentsItem",
     "EmailSummaryAutomationHeadersType0",
     "EmailSummaryAwaiting",
     "EmailSummaryRelayType0",
     "EmailSummaryRepeatType0",
     "EmailSummarySenderMemberType0",
+    "EmailSummaryTruncatedFieldsItem",
     "EmailWebhookStatusType1",
     "EmailWebhookStatusType2Type1",
     "EmailWebhookStatusType3Type1",
@@ -971,6 +979,8 @@ __all__ = (
     "InboxStatusNextAction",
     "InboxStatusNextActionKind",
     "InboxStatusRecentEmailSummary",
+    "IncludedMessageHeaders",
+    "IncludedMessageHeadersAutomationType0",
     "InstallTemplateBody",
     "InstallTemplateBodySecrets",
     "InstallTemplateBodyVariables",
@@ -1185,8 +1195,10 @@ __all__ = (
     "SentEmailRescheduleInput",
     "SentEmailStatus",
     "SentEmailSummary",
+    "SentEmailSummaryAttachmentsItem",
     "SentEmailSummaryRepeatType0",
     "SentEmailSummarySenderMemberType0",
+    "SentEmailSummaryTruncatedFieldsItem",
     "SetFunctionRouteResponse200",
     "SetFunctionSecretInput",
     "SetFunctionSecretResponse200",

@@ -16912,6 +16912,10 @@ func (s *Server) handleListEmailsRequest(args [0]string, argsEscaped bool, w htt
 					Name: "exclude_fyi",
 					In:   "query",
 				}: params.ExcludeFyi,
+				{
+					Name: "include",
+					In:   "query",
+				}: params.Include,
 			},
 			Raw: r,
 		}
@@ -19295,6 +19299,10 @@ func (s *Server) handleListSentEmailsRequest(args [0]string, argsEscaped bool, w
 					Name: "from",
 					In:   "query",
 				}: params.From,
+				{
+					Name: "include",
+					In:   "query",
+				}: params.Include,
 			},
 			Raw: r,
 		}
@@ -24927,6 +24935,10 @@ func (s *Server) handleSearchEmailsRequest(args [0]string, argsEscaped bool, w h
 					Name: "count",
 					In:   "query",
 				}: params.Count,
+				{
+					Name: "include",
+					In:   "query",
+				}: params.Include,
 			},
 			Raw: r,
 		}

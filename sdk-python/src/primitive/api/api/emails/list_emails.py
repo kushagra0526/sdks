@@ -36,6 +36,7 @@ def _get_kwargs(
     automated: ListEmailsAutomated | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
+    include: str | Unset = UNSET,
 
 ) -> dict[str, Any]:
     
@@ -94,6 +95,8 @@ def _get_kwargs(
         json_exclude_fyi = exclude_fyi.value
 
     params["exclude_fyi"] = json_exclude_fyi
+
+    params["include"] = include
 
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
@@ -163,6 +166,7 @@ def sync_detailed(
     automated: ListEmailsAutomated | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
+    include: str | Unset = UNSET,
 
 ) -> Response[ErrorResponse | ListEmailsResponse200]:
     """ List inbound emails
@@ -223,6 +227,7 @@ def sync_detailed(
         automated (ListEmailsAutomated | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -247,6 +252,7 @@ awaiting=awaiting,
 automated=automated,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
+include=include,
 
     )
 
@@ -272,6 +278,7 @@ def sync(
     automated: ListEmailsAutomated | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
+    include: str | Unset = UNSET,
 
 ) -> ErrorResponse | ListEmailsResponse200 | None:
     """ List inbound emails
@@ -332,6 +339,7 @@ def sync(
         automated (ListEmailsAutomated | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -357,6 +365,7 @@ awaiting=awaiting,
 automated=automated,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
+include=include,
 
     ).parsed
 
@@ -376,6 +385,7 @@ async def asyncio_detailed(
     automated: ListEmailsAutomated | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
+    include: str | Unset = UNSET,
 
 ) -> Response[ErrorResponse | ListEmailsResponse200]:
     """ List inbound emails
@@ -436,6 +446,7 @@ async def asyncio_detailed(
         automated (ListEmailsAutomated | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -460,6 +471,7 @@ awaiting=awaiting,
 automated=automated,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
+include=include,
 
     )
 
@@ -485,6 +497,7 @@ async def asyncio(
     automated: ListEmailsAutomated | Unset = UNSET,
     recipient: str | Unset = UNSET,
     exclude_fyi: ListEmailsExcludeFyi | Unset = UNSET,
+    include: str | Unset = UNSET,
 
 ) -> ErrorResponse | ListEmailsResponse200 | None:
     """ List inbound emails
@@ -545,6 +558,7 @@ async def asyncio(
         automated (ListEmailsAutomated | Unset):
         recipient (str | Unset):
         exclude_fyi (ListEmailsExcludeFyi | Unset):
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -570,5 +584,6 @@ awaiting=awaiting,
 automated=automated,
 recipient=recipient,
 exclude_fyi=exclude_fyi,
+include=include,
 
     )).parsed

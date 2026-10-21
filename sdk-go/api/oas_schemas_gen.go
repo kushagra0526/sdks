@@ -12773,6 +12773,18 @@ type EmailSearchResult struct {
 	// For display only: the sender chooses this name freely, so
 	// identify the sender by `from_email`, never by this name.
 	FromName OptNilString `json:"from_name"`
+	// With `include=body_text`: the plain-text body, cut as `truncated_fields` says.
+	BodyText OptNilString `json:"body_text"`
+	// With `include=body_html`: the HTML body, cut as `truncated_fields` says.
+	BodyHTML OptNilString `json:"body_html"`
+	// With `include=headers`: stored addressing and threading headers.
+	Headers OptNilIncludedMessageHeaders `json:"headers"`
+	// With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes.
+	Attachments []EmailSearchResultAttachmentsItem `json:"attachments"`
+	// With `include`: true when a body on this row was cut or left out.
+	Truncated OptBool `json:"truncated"`
+	// With `include`: the body fields on this row that were cut or left out.
+	TruncatedFields []EmailSearchResultTruncatedFieldsItem `json:"truncated_fields"`
 	// Number of parsed attachments on the email.
 	AttachmentCount int `json:"attachment_count"`
 	// Whether the parsed From address is known to this org from prior authenticated inbound mail.
@@ -12939,6 +12951,36 @@ func (s *EmailSearchResult) GetRelay() OptNilEmailSearchResultRelay {
 // GetFromName returns the value of FromName.
 func (s *EmailSearchResult) GetFromName() OptNilString {
 	return s.FromName
+}
+
+// GetBodyText returns the value of BodyText.
+func (s *EmailSearchResult) GetBodyText() OptNilString {
+	return s.BodyText
+}
+
+// GetBodyHTML returns the value of BodyHTML.
+func (s *EmailSearchResult) GetBodyHTML() OptNilString {
+	return s.BodyHTML
+}
+
+// GetHeaders returns the value of Headers.
+func (s *EmailSearchResult) GetHeaders() OptNilIncludedMessageHeaders {
+	return s.Headers
+}
+
+// GetAttachments returns the value of Attachments.
+func (s *EmailSearchResult) GetAttachments() []EmailSearchResultAttachmentsItem {
+	return s.Attachments
+}
+
+// GetTruncated returns the value of Truncated.
+func (s *EmailSearchResult) GetTruncated() OptBool {
+	return s.Truncated
+}
+
+// GetTruncatedFields returns the value of TruncatedFields.
+func (s *EmailSearchResult) GetTruncatedFields() []EmailSearchResultTruncatedFieldsItem {
+	return s.TruncatedFields
 }
 
 // GetAttachmentCount returns the value of AttachmentCount.
@@ -13121,6 +13163,36 @@ func (s *EmailSearchResult) SetFromName(val OptNilString) {
 	s.FromName = val
 }
 
+// SetBodyText sets the value of BodyText.
+func (s *EmailSearchResult) SetBodyText(val OptNilString) {
+	s.BodyText = val
+}
+
+// SetBodyHTML sets the value of BodyHTML.
+func (s *EmailSearchResult) SetBodyHTML(val OptNilString) {
+	s.BodyHTML = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *EmailSearchResult) SetHeaders(val OptNilIncludedMessageHeaders) {
+	s.Headers = val
+}
+
+// SetAttachments sets the value of Attachments.
+func (s *EmailSearchResult) SetAttachments(val []EmailSearchResultAttachmentsItem) {
+	s.Attachments = val
+}
+
+// SetTruncated sets the value of Truncated.
+func (s *EmailSearchResult) SetTruncated(val OptBool) {
+	s.Truncated = val
+}
+
+// SetTruncatedFields sets the value of TruncatedFields.
+func (s *EmailSearchResult) SetTruncatedFields(val []EmailSearchResultTruncatedFieldsItem) {
+	s.TruncatedFields = val
+}
+
 // SetAttachmentCount sets the value of AttachmentCount.
 func (s *EmailSearchResult) SetAttachmentCount(val int) {
 	s.AttachmentCount = val
@@ -13144,6 +13216,17 @@ func (s *EmailSearchResult) SetHighlights(val OptEmailSearchHighlights) {
 // SetDirection sets the value of Direction.
 func (s *EmailSearchResult) SetDirection(val EmailSearchResultDirection) {
 	s.Direction = val
+}
+
+type EmailSearchResultAttachmentsItem map[string]jx.Raw
+
+func (s *EmailSearchResultAttachmentsItem) init() EmailSearchResultAttachmentsItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // What the message declared about being automated, verbatim:
@@ -13490,6 +13573,47 @@ func (s *EmailSearchResultSenderMember) SetName(val NilString) {
 	s.Name = val
 }
 
+type EmailSearchResultTruncatedFieldsItem string
+
+const (
+	EmailSearchResultTruncatedFieldsItemBodyText EmailSearchResultTruncatedFieldsItem = "body_text"
+	EmailSearchResultTruncatedFieldsItemBodyHTML EmailSearchResultTruncatedFieldsItem = "body_html"
+)
+
+// AllValues returns all EmailSearchResultTruncatedFieldsItem values.
+func (EmailSearchResultTruncatedFieldsItem) AllValues() []EmailSearchResultTruncatedFieldsItem {
+	return []EmailSearchResultTruncatedFieldsItem{
+		EmailSearchResultTruncatedFieldsItemBodyText,
+		EmailSearchResultTruncatedFieldsItemBodyHTML,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EmailSearchResultTruncatedFieldsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case EmailSearchResultTruncatedFieldsItemBodyText:
+		return []byte(s), nil
+	case EmailSearchResultTruncatedFieldsItemBodyHTML:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EmailSearchResultTruncatedFieldsItem) UnmarshalText(data []byte) error {
+	switch EmailSearchResultTruncatedFieldsItem(data) {
+	case EmailSearchResultTruncatedFieldsItemBodyText:
+		*s = EmailSearchResultTruncatedFieldsItemBodyText
+		return nil
+	case EmailSearchResultTruncatedFieldsItemBodyHTML:
+		*s = EmailSearchResultTruncatedFieldsItemBodyHTML
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Lifecycle status of an INBOUND email (a row in the `emails`
 // table). Distinct from `SentEmailStatus`, which describes
 // the OUTBOUND lifecycle (the `sent_emails` table) and uses
@@ -13710,6 +13834,18 @@ type EmailSummary struct {
 	// For display only: the sender chooses this name freely, so
 	// identify the sender by `from_email`, never by this name.
 	FromName OptNilString `json:"from_name"`
+	// With `include=body_text`: the plain-text body, cut as `truncated_fields` says.
+	BodyText OptNilString `json:"body_text"`
+	// With `include=body_html`: the HTML body, cut as `truncated_fields` says.
+	BodyHTML OptNilString `json:"body_html"`
+	// With `include=headers`: stored addressing and threading headers.
+	Headers OptNilIncludedMessageHeaders `json:"headers"`
+	// With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes.
+	Attachments []EmailSummaryAttachmentsItem `json:"attachments"`
+	// With `include`: true when a body on this row was cut or left out.
+	Truncated OptBool `json:"truncated"`
+	// With `include`: the body fields on this row that were cut or left out.
+	TruncatedFields []EmailSummaryTruncatedFieldsItem `json:"truncated_fields"`
 }
 
 // GetID returns the value of ID.
@@ -13867,6 +14003,36 @@ func (s *EmailSummary) GetFromName() OptNilString {
 	return s.FromName
 }
 
+// GetBodyText returns the value of BodyText.
+func (s *EmailSummary) GetBodyText() OptNilString {
+	return s.BodyText
+}
+
+// GetBodyHTML returns the value of BodyHTML.
+func (s *EmailSummary) GetBodyHTML() OptNilString {
+	return s.BodyHTML
+}
+
+// GetHeaders returns the value of Headers.
+func (s *EmailSummary) GetHeaders() OptNilIncludedMessageHeaders {
+	return s.Headers
+}
+
+// GetAttachments returns the value of Attachments.
+func (s *EmailSummary) GetAttachments() []EmailSummaryAttachmentsItem {
+	return s.Attachments
+}
+
+// GetTruncated returns the value of Truncated.
+func (s *EmailSummary) GetTruncated() OptBool {
+	return s.Truncated
+}
+
+// GetTruncatedFields returns the value of TruncatedFields.
+func (s *EmailSummary) GetTruncatedFields() []EmailSummaryTruncatedFieldsItem {
+	return s.TruncatedFields
+}
+
 // SetID sets the value of ID.
 func (s *EmailSummary) SetID(val uuid.UUID) {
 	s.ID = val
@@ -14020,6 +14186,47 @@ func (s *EmailSummary) SetRelay(val OptNilEmailSummaryRelay) {
 // SetFromName sets the value of FromName.
 func (s *EmailSummary) SetFromName(val OptNilString) {
 	s.FromName = val
+}
+
+// SetBodyText sets the value of BodyText.
+func (s *EmailSummary) SetBodyText(val OptNilString) {
+	s.BodyText = val
+}
+
+// SetBodyHTML sets the value of BodyHTML.
+func (s *EmailSummary) SetBodyHTML(val OptNilString) {
+	s.BodyHTML = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *EmailSummary) SetHeaders(val OptNilIncludedMessageHeaders) {
+	s.Headers = val
+}
+
+// SetAttachments sets the value of Attachments.
+func (s *EmailSummary) SetAttachments(val []EmailSummaryAttachmentsItem) {
+	s.Attachments = val
+}
+
+// SetTruncated sets the value of Truncated.
+func (s *EmailSummary) SetTruncated(val OptBool) {
+	s.Truncated = val
+}
+
+// SetTruncatedFields sets the value of TruncatedFields.
+func (s *EmailSummary) SetTruncatedFields(val []EmailSummaryTruncatedFieldsItem) {
+	s.TruncatedFields = val
+}
+
+type EmailSummaryAttachmentsItem map[string]jx.Raw
+
+func (s *EmailSummaryAttachmentsItem) init() EmailSummaryAttachmentsItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // What the message declared about being automated, verbatim:
@@ -14320,6 +14527,47 @@ func (s *EmailSummarySenderMember) SetUserID(val string) {
 // SetName sets the value of Name.
 func (s *EmailSummarySenderMember) SetName(val NilString) {
 	s.Name = val
+}
+
+type EmailSummaryTruncatedFieldsItem string
+
+const (
+	EmailSummaryTruncatedFieldsItemBodyText EmailSummaryTruncatedFieldsItem = "body_text"
+	EmailSummaryTruncatedFieldsItemBodyHTML EmailSummaryTruncatedFieldsItem = "body_html"
+)
+
+// AllValues returns all EmailSummaryTruncatedFieldsItem values.
+func (EmailSummaryTruncatedFieldsItem) AllValues() []EmailSummaryTruncatedFieldsItem {
+	return []EmailSummaryTruncatedFieldsItem{
+		EmailSummaryTruncatedFieldsItemBodyText,
+		EmailSummaryTruncatedFieldsItemBodyHTML,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s EmailSummaryTruncatedFieldsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case EmailSummaryTruncatedFieldsItemBodyText:
+		return []byte(s), nil
+	case EmailSummaryTruncatedFieldsItemBodyHTML:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *EmailSummaryTruncatedFieldsItem) UnmarshalText(data []byte) error {
+	switch EmailSummaryTruncatedFieldsItem(data) {
+	case EmailSummaryTruncatedFieldsItemBodyText:
+		*s = EmailSummaryTruncatedFieldsItemBodyText
+		return nil
+	case EmailSummaryTruncatedFieldsItemBodyHTML:
+		*s = EmailSummaryTruncatedFieldsItemBodyHTML
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Webhook-delivery state for an inbound email. Tracks a
@@ -19990,6 +20238,112 @@ func (s *InboxStatusRecentEmailSummary) SetLatestReceivedAt(val NilDateTime) {
 	s.LatestReceivedAt = val
 }
 
+// Stored addressing and threading headers. A member is null when absent or withheld.
+// Ref: #/components/schemas/IncludedMessageHeaders
+type IncludedMessageHeaders struct {
+	From       NilString `json:"from"`
+	To         []string  `json:"to"`
+	Cc         []string  `json:"cc"`
+	Bcc        []string  `json:"bcc"`
+	ReplyTo    []string  `json:"reply_to"`
+	InReplyTo  []string  `json:"in_reply_to"`
+	References []string  `json:"references"`
+	// Received mail only.
+	Automation NilIncludedMessageHeadersAutomation `json:"automation"`
+}
+
+// GetFrom returns the value of From.
+func (s *IncludedMessageHeaders) GetFrom() NilString {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *IncludedMessageHeaders) GetTo() []string {
+	return s.To
+}
+
+// GetCc returns the value of Cc.
+func (s *IncludedMessageHeaders) GetCc() []string {
+	return s.Cc
+}
+
+// GetBcc returns the value of Bcc.
+func (s *IncludedMessageHeaders) GetBcc() []string {
+	return s.Bcc
+}
+
+// GetReplyTo returns the value of ReplyTo.
+func (s *IncludedMessageHeaders) GetReplyTo() []string {
+	return s.ReplyTo
+}
+
+// GetInReplyTo returns the value of InReplyTo.
+func (s *IncludedMessageHeaders) GetInReplyTo() []string {
+	return s.InReplyTo
+}
+
+// GetReferences returns the value of References.
+func (s *IncludedMessageHeaders) GetReferences() []string {
+	return s.References
+}
+
+// GetAutomation returns the value of Automation.
+func (s *IncludedMessageHeaders) GetAutomation() NilIncludedMessageHeadersAutomation {
+	return s.Automation
+}
+
+// SetFrom sets the value of From.
+func (s *IncludedMessageHeaders) SetFrom(val NilString) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *IncludedMessageHeaders) SetTo(val []string) {
+	s.To = val
+}
+
+// SetCc sets the value of Cc.
+func (s *IncludedMessageHeaders) SetCc(val []string) {
+	s.Cc = val
+}
+
+// SetBcc sets the value of Bcc.
+func (s *IncludedMessageHeaders) SetBcc(val []string) {
+	s.Bcc = val
+}
+
+// SetReplyTo sets the value of ReplyTo.
+func (s *IncludedMessageHeaders) SetReplyTo(val []string) {
+	s.ReplyTo = val
+}
+
+// SetInReplyTo sets the value of InReplyTo.
+func (s *IncludedMessageHeaders) SetInReplyTo(val []string) {
+	s.InReplyTo = val
+}
+
+// SetReferences sets the value of References.
+func (s *IncludedMessageHeaders) SetReferences(val []string) {
+	s.References = val
+}
+
+// SetAutomation sets the value of Automation.
+func (s *IncludedMessageHeaders) SetAutomation(val NilIncludedMessageHeadersAutomation) {
+	s.Automation = val
+}
+
+// Received mail only.
+type IncludedMessageHeadersAutomation map[string]string
+
+func (s *IncludedMessageHeadersAutomation) init() IncludedMessageHeadersAutomation {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
 type InstallTemplateBadRequest ErrorResponse
 
 func (*InstallTemplateBadRequest) installTemplateRes() {}
@@ -24012,6 +24366,51 @@ func (o NilFunctionTestRunSend) Get() (v FunctionTestRunSend, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilFunctionTestRunSend) Or(d FunctionTestRunSend) FunctionTestRunSend {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilIncludedMessageHeadersAutomation returns new NilIncludedMessageHeadersAutomation with value set to v.
+func NewNilIncludedMessageHeadersAutomation(v IncludedMessageHeadersAutomation) NilIncludedMessageHeadersAutomation {
+	return NilIncludedMessageHeadersAutomation{
+		Value: v,
+	}
+}
+
+// NilIncludedMessageHeadersAutomation is nullable IncludedMessageHeadersAutomation.
+type NilIncludedMessageHeadersAutomation struct {
+	Value IncludedMessageHeadersAutomation
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilIncludedMessageHeadersAutomation) SetTo(v IncludedMessageHeadersAutomation) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilIncludedMessageHeadersAutomation) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilIncludedMessageHeadersAutomation) SetToNull() {
+	o.Null = true
+	var v IncludedMessageHeadersAutomation
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilIncludedMessageHeadersAutomation) Get() (v IncludedMessageHeadersAutomation, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilIncludedMessageHeadersAutomation) Or(d IncludedMessageHeadersAutomation) IncludedMessageHeadersAutomation {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -28291,6 +28690,69 @@ func (o OptNilGateDenialArray) Get() (v []GateDenial, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilGateDenialArray) Or(d []GateDenial) []GateDenial {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilIncludedMessageHeaders returns new OptNilIncludedMessageHeaders with value set to v.
+func NewOptNilIncludedMessageHeaders(v IncludedMessageHeaders) OptNilIncludedMessageHeaders {
+	return OptNilIncludedMessageHeaders{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilIncludedMessageHeaders is optional nullable IncludedMessageHeaders.
+type OptNilIncludedMessageHeaders struct {
+	Value IncludedMessageHeaders
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilIncludedMessageHeaders was set.
+func (o OptNilIncludedMessageHeaders) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilIncludedMessageHeaders) Reset() {
+	var v IncludedMessageHeaders
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilIncludedMessageHeaders) SetTo(v IncludedMessageHeaders) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilIncludedMessageHeaders) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilIncludedMessageHeaders) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v IncludedMessageHeaders
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilIncludedMessageHeaders) Get() (v IncludedMessageHeaders, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilIncludedMessageHeaders) Or(d IncludedMessageHeaders) IncludedMessageHeaders {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -39798,19 +40260,18 @@ type SentEmailDetail struct {
 	// Verified human authorship, projected only within the member organization. Historical attribution
 	// is not current sending or owner authority.
 	SenderMember OptNilSentEmailDetailSenderMember `json:"sender_member"`
-	// Plain-text body sent on the wire. Null when the
-	// send carried only an HTML body, or when bodies have
-	// been discarded post-send (`content_discarded_at`
-	// set).
+	// Merged property.
 	BodyText OptNilString `json:"body_text"`
-	// HTML body sent on the wire. Null when the send
-	// carried only a plain-text body, or when bodies
-	// have been discarded post-send.
+	// Merged property.
 	BodyHTML OptNilString `json:"body_html"`
-	// Metadata for submitted inline attachments; download availability is reported separately. Metadata
-	// may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded
-	// payload files are not included in the inline archive.
+	// With `include=headers`: stored addressing and threading headers.
+	Headers OptNilIncludedMessageHeaders `json:"headers"`
+	// Merged property.
 	Attachments []SentEmailDetailAttachmentsItem `json:"attachments"`
+	// With `include`: true when a body on this row was cut or left out.
+	Truncated OptBool `json:"truncated"`
+	// With `include`: the body fields on this row that were cut or left out.
+	TruncatedFields []SentEmailDetailTruncatedFieldsItem `json:"truncated_fields"`
 	// Original decoded attachment byte total accepted for this send, not the compressed archive size. It
 	// may exceed the retained inline total after offloading.
 	AttachmentsSizeBytes OptInt `json:"attachments_size_bytes"`
@@ -40033,9 +40494,24 @@ func (s *SentEmailDetail) GetBodyHTML() OptNilString {
 	return s.BodyHTML
 }
 
+// GetHeaders returns the value of Headers.
+func (s *SentEmailDetail) GetHeaders() OptNilIncludedMessageHeaders {
+	return s.Headers
+}
+
 // GetAttachments returns the value of Attachments.
 func (s *SentEmailDetail) GetAttachments() []SentEmailDetailAttachmentsItem {
 	return s.Attachments
+}
+
+// GetTruncated returns the value of Truncated.
+func (s *SentEmailDetail) GetTruncated() OptBool {
+	return s.Truncated
+}
+
+// GetTruncatedFields returns the value of TruncatedFields.
+func (s *SentEmailDetail) GetTruncatedFields() []SentEmailDetailTruncatedFieldsItem {
+	return s.TruncatedFields
 }
 
 // GetAttachmentsSizeBytes returns the value of AttachmentsSizeBytes.
@@ -40263,9 +40739,24 @@ func (s *SentEmailDetail) SetBodyHTML(val OptNilString) {
 	s.BodyHTML = val
 }
 
+// SetHeaders sets the value of Headers.
+func (s *SentEmailDetail) SetHeaders(val OptNilIncludedMessageHeaders) {
+	s.Headers = val
+}
+
 // SetAttachments sets the value of Attachments.
 func (s *SentEmailDetail) SetAttachments(val []SentEmailDetailAttachmentsItem) {
 	s.Attachments = val
+}
+
+// SetTruncated sets the value of Truncated.
+func (s *SentEmailDetail) SetTruncated(val OptBool) {
+	s.Truncated = val
+}
+
+// SetTruncatedFields sets the value of TruncatedFields.
+func (s *SentEmailDetail) SetTruncatedFields(val []SentEmailDetailTruncatedFieldsItem) {
+	s.TruncatedFields = val
 }
 
 // SetAttachmentsSizeBytes sets the value of AttachmentsSizeBytes.
@@ -40308,14 +40799,20 @@ func (s *SentEmailDetail) SetTags(val OptNilSentEmailDetailTagsItemArray) {
 	s.Tags = val
 }
 
-// Metadata for one submitted inline attachment.
+// Merged schema.
 type SentEmailDetailAttachmentsItem struct {
-	Filename        NilString `json:"filename"`
-	ContentType     string    `json:"content_type"`
-	SizeBytes       int       `json:"size_bytes"`
-	SHA256          string    `json:"sha256"`
-	PartIndex       int       `json:"part_index"`
-	TarPath         string    `json:"tar_path"`
+	// Merged property.
+	Filename NilString `json:"filename"`
+	// Merged property.
+	ContentType string `json:"content_type"`
+	// Merged property.
+	SizeBytes int `json:"size_bytes"`
+	// Merged property.
+	SHA256 string `json:"sha256"`
+	// Merged property.
+	PartIndex int `json:"part_index"`
+	// Merged property.
+	TarPath         string `json:"tar_path"`
 	AdditionalProps SentEmailDetailAttachmentsItemAdditional
 }
 
@@ -40562,6 +41059,47 @@ func (s *SentEmailDetailTagsItem) SetName(val string) {
 // SetValue sets the value of Value.
 func (s *SentEmailDetailTagsItem) SetValue(val string) {
 	s.Value = val
+}
+
+type SentEmailDetailTruncatedFieldsItem string
+
+const (
+	SentEmailDetailTruncatedFieldsItemBodyText SentEmailDetailTruncatedFieldsItem = "body_text"
+	SentEmailDetailTruncatedFieldsItemBodyHTML SentEmailDetailTruncatedFieldsItem = "body_html"
+)
+
+// AllValues returns all SentEmailDetailTruncatedFieldsItem values.
+func (SentEmailDetailTruncatedFieldsItem) AllValues() []SentEmailDetailTruncatedFieldsItem {
+	return []SentEmailDetailTruncatedFieldsItem{
+		SentEmailDetailTruncatedFieldsItemBodyText,
+		SentEmailDetailTruncatedFieldsItemBodyHTML,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SentEmailDetailTruncatedFieldsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case SentEmailDetailTruncatedFieldsItemBodyText:
+		return []byte(s), nil
+	case SentEmailDetailTruncatedFieldsItemBodyHTML:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SentEmailDetailTruncatedFieldsItem) UnmarshalText(data []byte) error {
+	switch SentEmailDetailTruncatedFieldsItem(data) {
+	case SentEmailDetailTruncatedFieldsItemBodyText:
+		*s = SentEmailDetailTruncatedFieldsItemBodyText
+		return nil
+	case SentEmailDetailTruncatedFieldsItemBodyHTML:
+		*s = SentEmailDetailTruncatedFieldsItemBodyHTML
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/SentEmailRescheduleInput
@@ -40845,6 +41383,25 @@ type SentEmailSummary struct {
 	// Verified human authorship, projected only within the member organization. Historical attribution
 	// is not current sending or owner authority.
 	SenderMember OptNilSentEmailSummarySenderMember `json:"sender_member"`
+	// Plain-text body sent on the wire. Null when the
+	// send carried only an HTML body, or when bodies have
+	// been discarded post-send (`content_discarded_at`
+	// set).
+	BodyText OptNilString `json:"body_text"`
+	// HTML body sent on the wire. Null when the send
+	// carried only a plain-text body, or when bodies
+	// have been discarded post-send.
+	BodyHTML OptNilString `json:"body_html"`
+	// With `include=headers`: stored addressing and threading headers.
+	Headers OptNilIncludedMessageHeaders `json:"headers"`
+	// Metadata for submitted inline attachments; download availability is reported separately. Metadata
+	// may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded
+	// payload files are not included in the inline archive.
+	Attachments []SentEmailSummaryAttachmentsItem `json:"attachments"`
+	// With `include`: true when a body on this row was cut or left out.
+	Truncated OptBool `json:"truncated"`
+	// With `include`: the body fields on this row that were cut or left out.
+	TruncatedFields []SentEmailSummaryTruncatedFieldsItem `json:"truncated_fields"`
 }
 
 // GetID returns the value of ID.
@@ -41022,6 +41579,36 @@ func (s *SentEmailSummary) GetSenderMember() OptNilSentEmailSummarySenderMember 
 	return s.SenderMember
 }
 
+// GetBodyText returns the value of BodyText.
+func (s *SentEmailSummary) GetBodyText() OptNilString {
+	return s.BodyText
+}
+
+// GetBodyHTML returns the value of BodyHTML.
+func (s *SentEmailSummary) GetBodyHTML() OptNilString {
+	return s.BodyHTML
+}
+
+// GetHeaders returns the value of Headers.
+func (s *SentEmailSummary) GetHeaders() OptNilIncludedMessageHeaders {
+	return s.Headers
+}
+
+// GetAttachments returns the value of Attachments.
+func (s *SentEmailSummary) GetAttachments() []SentEmailSummaryAttachmentsItem {
+	return s.Attachments
+}
+
+// GetTruncated returns the value of Truncated.
+func (s *SentEmailSummary) GetTruncated() OptBool {
+	return s.Truncated
+}
+
+// GetTruncatedFields returns the value of TruncatedFields.
+func (s *SentEmailSummary) GetTruncatedFields() []SentEmailSummaryTruncatedFieldsItem {
+	return s.TruncatedFields
+}
+
 // SetID sets the value of ID.
 func (s *SentEmailSummary) SetID(val uuid.UUID) {
 	s.ID = val
@@ -41197,6 +41784,127 @@ func (s *SentEmailSummary) SetSenderMember(val OptNilSentEmailSummarySenderMembe
 	s.SenderMember = val
 }
 
+// SetBodyText sets the value of BodyText.
+func (s *SentEmailSummary) SetBodyText(val OptNilString) {
+	s.BodyText = val
+}
+
+// SetBodyHTML sets the value of BodyHTML.
+func (s *SentEmailSummary) SetBodyHTML(val OptNilString) {
+	s.BodyHTML = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *SentEmailSummary) SetHeaders(val OptNilIncludedMessageHeaders) {
+	s.Headers = val
+}
+
+// SetAttachments sets the value of Attachments.
+func (s *SentEmailSummary) SetAttachments(val []SentEmailSummaryAttachmentsItem) {
+	s.Attachments = val
+}
+
+// SetTruncated sets the value of Truncated.
+func (s *SentEmailSummary) SetTruncated(val OptBool) {
+	s.Truncated = val
+}
+
+// SetTruncatedFields sets the value of TruncatedFields.
+func (s *SentEmailSummary) SetTruncatedFields(val []SentEmailSummaryTruncatedFieldsItem) {
+	s.TruncatedFields = val
+}
+
+type SentEmailSummaryAttachmentsItem struct {
+	Filename        NilString `json:"filename"`
+	ContentType     string    `json:"content_type"`
+	SizeBytes       int       `json:"size_bytes"`
+	SHA256          string    `json:"sha256"`
+	PartIndex       int       `json:"part_index"`
+	TarPath         string    `json:"tar_path"`
+	AdditionalProps SentEmailSummaryAttachmentsItemAdditional
+}
+
+// GetFilename returns the value of Filename.
+func (s *SentEmailSummaryAttachmentsItem) GetFilename() NilString {
+	return s.Filename
+}
+
+// GetContentType returns the value of ContentType.
+func (s *SentEmailSummaryAttachmentsItem) GetContentType() string {
+	return s.ContentType
+}
+
+// GetSizeBytes returns the value of SizeBytes.
+func (s *SentEmailSummaryAttachmentsItem) GetSizeBytes() int {
+	return s.SizeBytes
+}
+
+// GetSHA256 returns the value of SHA256.
+func (s *SentEmailSummaryAttachmentsItem) GetSHA256() string {
+	return s.SHA256
+}
+
+// GetPartIndex returns the value of PartIndex.
+func (s *SentEmailSummaryAttachmentsItem) GetPartIndex() int {
+	return s.PartIndex
+}
+
+// GetTarPath returns the value of TarPath.
+func (s *SentEmailSummaryAttachmentsItem) GetTarPath() string {
+	return s.TarPath
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *SentEmailSummaryAttachmentsItem) GetAdditionalProps() SentEmailSummaryAttachmentsItemAdditional {
+	return s.AdditionalProps
+}
+
+// SetFilename sets the value of Filename.
+func (s *SentEmailSummaryAttachmentsItem) SetFilename(val NilString) {
+	s.Filename = val
+}
+
+// SetContentType sets the value of ContentType.
+func (s *SentEmailSummaryAttachmentsItem) SetContentType(val string) {
+	s.ContentType = val
+}
+
+// SetSizeBytes sets the value of SizeBytes.
+func (s *SentEmailSummaryAttachmentsItem) SetSizeBytes(val int) {
+	s.SizeBytes = val
+}
+
+// SetSHA256 sets the value of SHA256.
+func (s *SentEmailSummaryAttachmentsItem) SetSHA256(val string) {
+	s.SHA256 = val
+}
+
+// SetPartIndex sets the value of PartIndex.
+func (s *SentEmailSummaryAttachmentsItem) SetPartIndex(val int) {
+	s.PartIndex = val
+}
+
+// SetTarPath sets the value of TarPath.
+func (s *SentEmailSummaryAttachmentsItem) SetTarPath(val string) {
+	s.TarPath = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *SentEmailSummaryAttachmentsItem) SetAdditionalProps(val SentEmailSummaryAttachmentsItemAdditional) {
+	s.AdditionalProps = val
+}
+
+type SentEmailSummaryAttachmentsItemAdditional map[string]jx.Raw
+
+func (s *SentEmailSummaryAttachmentsItemAdditional) init() SentEmailSummaryAttachmentsItemAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 type SentEmailSummaryPresenceControl struct {
 	Status     SentEmailSummaryPresenceControlStatus `json:"status"`
 	ValidForMs int                                   `json:"valid_for_ms"`
@@ -41334,6 +42042,47 @@ func (s *SentEmailSummarySenderMember) SetUserID(val string) {
 // SetName sets the value of Name.
 func (s *SentEmailSummarySenderMember) SetName(val NilString) {
 	s.Name = val
+}
+
+type SentEmailSummaryTruncatedFieldsItem string
+
+const (
+	SentEmailSummaryTruncatedFieldsItemBodyText SentEmailSummaryTruncatedFieldsItem = "body_text"
+	SentEmailSummaryTruncatedFieldsItemBodyHTML SentEmailSummaryTruncatedFieldsItem = "body_html"
+)
+
+// AllValues returns all SentEmailSummaryTruncatedFieldsItem values.
+func (SentEmailSummaryTruncatedFieldsItem) AllValues() []SentEmailSummaryTruncatedFieldsItem {
+	return []SentEmailSummaryTruncatedFieldsItem{
+		SentEmailSummaryTruncatedFieldsItemBodyText,
+		SentEmailSummaryTruncatedFieldsItemBodyHTML,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SentEmailSummaryTruncatedFieldsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case SentEmailSummaryTruncatedFieldsItemBodyText:
+		return []byte(s), nil
+	case SentEmailSummaryTruncatedFieldsItemBodyHTML:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SentEmailSummaryTruncatedFieldsItem) UnmarshalText(data []byte) error {
+	switch SentEmailSummaryTruncatedFieldsItem(data) {
+	case SentEmailSummaryTruncatedFieldsItemBodyText:
+		*s = SentEmailSummaryTruncatedFieldsItemBodyText
+		return nil
+	case SentEmailSummaryTruncatedFieldsItemBodyHTML:
+		*s = SentEmailSummaryTruncatedFieldsItemBodyHTML
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type SetFunctionRouteBadRequest ErrorResponse

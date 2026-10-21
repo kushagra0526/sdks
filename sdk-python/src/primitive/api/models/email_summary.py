@@ -10,6 +10,7 @@ from ..types import UNSET, Unset
 
 from ..models.email_status import EmailStatus
 from ..models.email_summary_awaiting import EmailSummaryAwaiting
+from ..models.email_summary_truncated_fields_item import EmailSummaryTruncatedFieldsItem
 from ..models.email_webhook_status_type_1 import EmailWebhookStatusType1
 from ..models.email_webhook_status_type_2_type_1 import EmailWebhookStatusType2Type1
 from ..models.email_webhook_status_type_3_type_1 import EmailWebhookStatusType3Type1
@@ -18,10 +19,12 @@ from uuid import UUID
 import datetime
 
 if TYPE_CHECKING:
+  from ..models.email_summary_attachments_item import EmailSummaryAttachmentsItem
   from ..models.email_summary_automation_headers_type_0 import EmailSummaryAutomationHeadersType0
   from ..models.email_summary_relay_type_0 import EmailSummaryRelayType0
   from ..models.email_summary_repeat_type_0 import EmailSummaryRepeatType0
   from ..models.email_summary_sender_member_type_0 import EmailSummarySenderMemberType0
+  from ..models.included_message_headers import IncludedMessageHeaders
   from ..models.presence_control_type_0 import PresenceControlType0
 
 
@@ -207,6 +210,15 @@ class EmailSummary:
 
                 For display only: the sender chooses this name freely, so
                 identify the sender by `from_email`, never by this name.
+            body_text (None | str | Unset): With `include=body_text`: the plain-text body, cut as `truncated_fields` says.
+            body_html (None | str | Unset): With `include=body_html`: the HTML body, cut as `truncated_fields` says.
+            headers (IncludedMessageHeaders | None | Unset): With `include=headers`: stored addressing and threading
+                headers.
+            attachments (list[EmailSummaryAttachmentsItem] | Unset): With `include=attachments`: attachment metadata as the
+                detail read reports it. Never the bytes.
+            truncated (bool | Unset): With `include`: true when a body on this row was cut or left out.
+            truncated_fields (list[EmailSummaryTruncatedFieldsItem] | Unset): With `include`: the body fields on this row
+                that were cut or left out.
      """
 
     id: UUID
@@ -240,6 +252,12 @@ class EmailSummary:
     interaction_candidate: bool | Unset = UNSET
     relay: EmailSummaryRelayType0 | None | Unset = UNSET
     from_name: None | str | Unset = UNSET
+    body_text: None | str | Unset = UNSET
+    body_html: None | str | Unset = UNSET
+    headers: IncludedMessageHeaders | None | Unset = UNSET
+    attachments: list[EmailSummaryAttachmentsItem] | Unset = UNSET
+    truncated: bool | Unset = UNSET
+    truncated_fields: list[EmailSummaryTruncatedFieldsItem] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
 
@@ -247,10 +265,12 @@ class EmailSummary:
 
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.email_summary_attachments_item import EmailSummaryAttachmentsItem # noqa: PLC0415
         from ..models.email_summary_automation_headers_type_0 import EmailSummaryAutomationHeadersType0 # noqa: PLC0415
         from ..models.email_summary_relay_type_0 import EmailSummaryRelayType0 # noqa: PLC0415
         from ..models.email_summary_repeat_type_0 import EmailSummaryRepeatType0 # noqa: PLC0415
         from ..models.email_summary_sender_member_type_0 import EmailSummarySenderMemberType0 # noqa: PLC0415
+        from ..models.included_message_headers import IncludedMessageHeaders # noqa: PLC0415
         from ..models.presence_control_type_0 import PresenceControlType0 # noqa: PLC0415
         id = str(self.id)
 
@@ -402,6 +422,46 @@ class EmailSummary:
         else:
             from_name = self.from_name
 
+        body_text: None | str | Unset
+        if isinstance(self.body_text, Unset):
+            body_text = UNSET
+        else:
+            body_text = self.body_text
+
+        body_html: None | str | Unset
+        if isinstance(self.body_html, Unset):
+            body_html = UNSET
+        else:
+            body_html = self.body_html
+
+        headers: dict[str, Any] | None | Unset
+        if isinstance(self.headers, Unset):
+            headers = UNSET
+        elif isinstance(self.headers, IncludedMessageHeaders):
+            headers = self.headers.to_dict()
+        else:
+            headers = self.headers
+
+        attachments: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.attachments, Unset):
+            attachments = []
+            for attachments_item_data in self.attachments:
+                attachments_item = attachments_item_data.to_dict()
+                attachments.append(attachments_item)
+
+
+
+        truncated = self.truncated
+
+        truncated_fields: list[str] | Unset = UNSET
+        if not isinstance(self.truncated_fields, Unset):
+            truncated_fields = []
+            for truncated_fields_item_data in self.truncated_fields:
+                truncated_fields_item = truncated_fields_item_data.value
+                truncated_fields.append(truncated_fields_item)
+
+
+
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -456,6 +516,18 @@ class EmailSummary:
             field_dict["relay"] = relay
         if from_name is not UNSET:
             field_dict["from_name"] = from_name
+        if body_text is not UNSET:
+            field_dict["body_text"] = body_text
+        if body_html is not UNSET:
+            field_dict["body_html"] = body_html
+        if headers is not UNSET:
+            field_dict["headers"] = headers
+        if attachments is not UNSET:
+            field_dict["attachments"] = attachments
+        if truncated is not UNSET:
+            field_dict["truncated"] = truncated
+        if truncated_fields is not UNSET:
+            field_dict["truncated_fields"] = truncated_fields
 
         return field_dict
 
@@ -463,10 +535,12 @@ class EmailSummary:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.email_summary_attachments_item import EmailSummaryAttachmentsItem # noqa: PLC0415
         from ..models.email_summary_automation_headers_type_0 import EmailSummaryAutomationHeadersType0 # noqa: PLC0415
         from ..models.email_summary_relay_type_0 import EmailSummaryRelayType0 # noqa: PLC0415
         from ..models.email_summary_repeat_type_0 import EmailSummaryRepeatType0 # noqa: PLC0415
         from ..models.email_summary_sender_member_type_0 import EmailSummarySenderMemberType0 # noqa: PLC0415
+        from ..models.included_message_headers import IncludedMessageHeaders # noqa: PLC0415
         from ..models.presence_control_type_0 import PresenceControlType0 # noqa: PLC0415
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -793,6 +867,72 @@ class EmailSummary:
         from_name = _parse_from_name(d.pop("from_name", UNSET))
 
 
+        def _parse_body_text(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        body_text = _parse_body_text(d.pop("body_text", UNSET))
+
+
+        def _parse_body_html(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        body_html = _parse_body_html(d.pop("body_html", UNSET))
+
+
+        def _parse_headers(data: object) -> IncludedMessageHeaders | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                headers_type_0 = IncludedMessageHeaders.from_dict(data)
+
+
+
+                return headers_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(IncludedMessageHeaders | None | Unset, data)
+
+        headers = _parse_headers(d.pop("headers", UNSET))
+
+
+        _attachments = d.pop("attachments", UNSET)
+        attachments: list[EmailSummaryAttachmentsItem] | Unset = UNSET
+        if _attachments is not UNSET:
+            attachments = []
+            for attachments_item_data in _attachments:
+                attachments_item = EmailSummaryAttachmentsItem.from_dict(attachments_item_data)
+
+
+
+                attachments.append(attachments_item)
+
+
+        truncated = d.pop("truncated", UNSET)
+
+        _truncated_fields = d.pop("truncated_fields", UNSET)
+        truncated_fields: list[EmailSummaryTruncatedFieldsItem] | Unset = UNSET
+        if _truncated_fields is not UNSET:
+            truncated_fields = []
+            for truncated_fields_item_data in _truncated_fields:
+                truncated_fields_item = EmailSummaryTruncatedFieldsItem(truncated_fields_item_data)
+
+
+
+                truncated_fields.append(truncated_fields_item)
+
+
         email_summary = cls(
             id=id,
             status=status,
@@ -825,6 +965,12 @@ class EmailSummary:
             interaction_candidate=interaction_candidate,
             relay=relay,
             from_name=from_name,
+            body_text=body_text,
+            body_html=body_html,
+            headers=headers,
+            attachments=attachments,
+            truncated=truncated,
+            truncated_fields=truncated_fields,
         )
 
 

@@ -8220,6 +8220,13 @@ export const operationManifest: PrimitiveOperationManifest[] = [
         "name": "exclude_fyi",
         "required": false,
         "type": "string"
+      },
+      {
+        "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.",
+        "enum": null,
+        "name": "include",
+        "required": false,
+        "type": "string"
       }
     ],
     "requestSchema": null,
@@ -8502,6 +8509,137 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "null"
             ],
             "description": "Display name from the `From:` header, decoded for display:\nRFC 2047 encoded words are decoded in their declared charset\nand folded lines are joined (e.g. `Dana Rúiz` for\n`=?UTF-8?Q?Dana_R=C3=BAiz?= <dana@example.com>`). Null when\nthe header carries no display name, and may be absent; treat\na missing value the same as null.\n\nFor display only: the sender chooses this name freely, so\nidentify the sender by `from_email`, never by this name.\n"
+          },
+          "body_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "With `include=body_text`: the plain-text body, cut as `truncated_fields` says."
+          },
+          "body_html": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "type": "object",
+                "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                "properties": {
+                  "from": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cc": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "bcc": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reply_to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "in_reply_to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "references": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "automation": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Received mail only."
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "cc",
+                  "bcc",
+                  "reply_to",
+                  "in_reply_to",
+                  "references",
+                  "automation"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With `include=headers`: stored addressing and threading headers."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes."
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "With `include`: true when a body on this row was cut or left out."
+          },
+          "truncated_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "body_text",
+                "body_html"
+              ]
+            },
+            "description": "With `include`: the body fields on this row that were cut or left out."
           }
         },
         "required": [
@@ -8769,6 +8907,13 @@ export const operationManifest: PrimitiveOperationManifest[] = [
           "false"
         ],
         "name": "count",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.",
+        "enum": null,
+        "name": "include",
         "required": false,
         "type": "string"
       }
@@ -9055,6 +9200,137 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                   "null"
                 ],
                 "description": "Display name from the `From:` header, decoded for display:\nRFC 2047 encoded words are decoded in their declared charset\nand folded lines are joined (e.g. `Dana Rúiz` for\n`=?UTF-8?Q?Dana_R=C3=BAiz?= <dana@example.com>`). Null when\nthe header carries no display name, and may be absent; treat\na missing value the same as null.\n\nFor display only: the sender chooses this name freely, so\nidentify the sender by `from_email`, never by this name.\n"
+              },
+              "body_text": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "With `include=body_text`: the plain-text body, cut as `truncated_fields` says."
+              },
+              "body_html": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says."
+              },
+              "headers": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                    "properties": {
+                      "from": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "to": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "cc": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "bcc": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "reply_to": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "in_reply_to": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "references": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "automation": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "description": "Received mail only."
+                      }
+                    },
+                    "required": [
+                      "from",
+                      "to",
+                      "cc",
+                      "bcc",
+                      "reply_to",
+                      "in_reply_to",
+                      "references",
+                      "automation"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "With `include=headers`: stored addressing and threading headers."
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "description": "With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes."
+              },
+              "truncated": {
+                "type": "boolean",
+                "description": "With `include`: true when a body on this row was cut or left out."
+              },
+              "truncated_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "body_text",
+                    "body_html"
+                  ]
+                },
+                "description": "With `include`: the body fields on this row that were cut or left out."
               }
             },
             "required": [
@@ -18053,6 +18329,176 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "user_id",
                 "name"
               ]
+            },
+            "body_text": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Plain-text body sent on the wire. Null when the\nsend carried only an HTML body, or when bodies have\nbeen discarded post-send (`content_discarded_at`\nset).\n"
+            },
+            "body_html": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
+            },
+            "headers": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                  "properties": {
+                    "from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "bcc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "in_reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "references": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "automation": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Received mail only."
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "cc",
+                    "bcc",
+                    "reply_to",
+                    "in_reply_to",
+                    "references",
+                    "automation"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "With `include=headers`: stored addressing and threading headers."
+            },
+            "attachments": {
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "part_index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "tar_path": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "filename",
+                  "content_type",
+                  "size_bytes",
+                  "sha256",
+                  "part_index",
+                  "tar_path"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "With `include`: true when a body on this row was cut or left out."
+            },
+            "truncated_fields": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "body_text",
+                  "body_html"
+                ]
+              },
+              "description": "With `include`: the body fields on this row that were cut or left out."
             }
           },
           "required": [
@@ -19000,6 +19446,176 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "user_id",
                 "name"
               ]
+            },
+            "body_text": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Plain-text body sent on the wire. Null when the\nsend carried only an HTML body, or when bodies have\nbeen discarded post-send (`content_discarded_at`\nset).\n"
+            },
+            "body_html": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
+            },
+            "headers": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                  "properties": {
+                    "from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "bcc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "in_reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "references": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "automation": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Received mail only."
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "cc",
+                    "bcc",
+                    "reply_to",
+                    "in_reply_to",
+                    "references",
+                    "automation"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "With `include=headers`: stored addressing and threading headers."
+            },
+            "attachments": {
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "part_index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "tar_path": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "filename",
+                  "content_type",
+                  "size_bytes",
+                  "sha256",
+                  "part_index",
+                  "tar_path"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "With `include`: true when a body on this row was cut or left out."
+            },
+            "truncated_fields": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "body_text",
+                  "body_html"
+                ]
+              },
+              "description": "With `include`: the body fields on this row that were cut or left out."
             }
           },
           "required": [
@@ -19317,6 +19933,13 @@ export const operationManifest: PrimitiveOperationManifest[] = [
         "description": "Exact case-insensitive sender mailbox filter. Returns\nonly sends whose from address equals this value; it is\nnot a substring match, so a partial mailbox matches\nnothing. Use `q` to search sender text loosely.\nCombines with every other filter, and unlike `q` it is\nserved by every deployment.\n",
         "enum": null,
         "name": "from",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.",
+        "enum": null,
+        "name": "include",
         "required": false,
         "type": "string"
       }
@@ -19674,6 +20297,176 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               "user_id",
               "name"
             ]
+          },
+          "body_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Plain-text body sent on the wire. Null when the\nsend carried only an HTML body, or when bodies have\nbeen discarded post-send (`content_discarded_at`\nset).\n"
+          },
+          "body_html": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "type": "object",
+                "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                "properties": {
+                  "from": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cc": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "bcc": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reply_to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "in_reply_to": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "references": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "automation": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Received mail only."
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "cc",
+                  "bcc",
+                  "reply_to",
+                  "in_reply_to",
+                  "references",
+                  "automation"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With `include=headers`: stored addressing and threading headers."
+          },
+          "attachments": {
+            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "content_type": {
+                  "type": "string"
+                },
+                "size_bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "sha256": {
+                  "type": "string"
+                },
+                "part_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "tar_path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filename",
+                "content_type",
+                "size_bytes",
+                "sha256",
+                "part_index",
+                "tar_path"
+              ],
+              "additionalProperties": {}
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "With `include`: true when a body on this row was cut or left out."
+          },
+          "truncated_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "body_text",
+                "body_html"
+              ]
+            },
+            "description": "With `include`: the body fields on this row that were cut or left out."
           }
         },
         "required": [
@@ -20369,6 +21162,176 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "user_id",
                 "name"
               ]
+            },
+            "body_text": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Plain-text body sent on the wire. Null when the\nsend carried only an HTML body, or when bodies have\nbeen discarded post-send (`content_discarded_at`\nset).\n"
+            },
+            "body_html": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n"
+            },
+            "headers": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+                  "properties": {
+                    "from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "bcc": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "in_reply_to": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "references": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "automation": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Received mail only."
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "cc",
+                    "bcc",
+                    "reply_to",
+                    "in_reply_to",
+                    "references",
+                    "automation"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "With `include=headers`: stored addressing and threading headers."
+            },
+            "attachments": {
+              "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "content_type": {
+                    "type": "string"
+                  },
+                  "size_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sha256": {
+                    "type": "string"
+                  },
+                  "part_index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "tar_path": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "filename",
+                  "content_type",
+                  "size_bytes",
+                  "sha256",
+                  "part_index",
+                  "tar_path"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "truncated": {
+              "type": "boolean",
+              "description": "With `include`: true when a body on this row was cut or left out."
+            },
+            "truncated_fields": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "body_text",
+                  "body_html"
+                ]
+              },
+              "description": "With `include`: the body fields on this row that were cut or left out."
             }
           },
           "required": [

@@ -4,6 +4,25 @@ export type ClientOptions = {
     baseUrl: 'https://api.primitive.dev/v1' | 'https://www.primitive.dev/api/v1' | 'https://api.primitive.dev/v1' | 'https://www.primitive.dev/api/v1' | 'https://api.primitive.dev/v1' | 'https://www.primitive.dev/api/v1' | (string & {});
 };
 
+/**
+ * Stored addressing and threading headers. A member is null when absent or withheld.
+ */
+export type IncludedMessageHeaders = {
+    from: string | null;
+    to: Array<string> | null;
+    cc: Array<string> | null;
+    bcc: Array<string> | null;
+    reply_to: Array<string> | null;
+    in_reply_to: Array<string> | null;
+    references: Array<string> | null;
+    /**
+     * Received mail only.
+     */
+    automation: {
+        [key: string]: string;
+    } | null;
+};
+
 export type ContactPolicyRuleInput = {
     /**
      * Trim outer whitespace, then require ASCII before lowercase normalization. Exact mailbox or restricted mailbox glob. See operation description.
@@ -1875,6 +1894,32 @@ export type EmailSummary = {
      *
      */
     from_name?: string | null;
+    /**
+     * With `include=body_text`: the plain-text body, cut as `truncated_fields` says.
+     */
+    body_text?: string | null;
+    /**
+     * With `include=body_html`: the HTML body, cut as `truncated_fields` says.
+     */
+    body_html?: string | null;
+    /**
+     * With `include=headers`: stored addressing and threading headers.
+     */
+    headers?: IncludedMessageHeaders | unknown;
+    /**
+     * With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes.
+     */
+    attachments?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * With `include`: true when a body on this row was cut or left out.
+     */
+    truncated?: boolean;
+    /**
+     * With `include`: the body fields on this row that were cut or left out.
+     */
+    truncated_fields?: Array<'body_text' | 'body_html'>;
 };
 
 export type EmailSearchHighlights = {
@@ -3085,6 +3130,45 @@ export type SentEmailSummary = {
         user_id: string;
         name: string | null;
     } | null;
+    /**
+     * Plain-text body sent on the wire. Null when the
+     * send carried only an HTML body, or when bodies have
+     * been discarded post-send (`content_discarded_at`
+     * set).
+     *
+     */
+    body_text?: string | null;
+    /**
+     * HTML body sent on the wire. Null when the send
+     * carried only a plain-text body, or when bodies
+     * have been discarded post-send.
+     *
+     */
+    body_html?: string | null;
+    /**
+     * With `include=headers`: stored addressing and threading headers.
+     */
+    headers?: IncludedMessageHeaders | unknown;
+    /**
+     * Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.
+     */
+    attachments?: Array<{
+        filename: string | unknown;
+        content_type: string;
+        size_bytes: number;
+        sha256: string;
+        part_index: number;
+        tar_path: string;
+        [key: string]: unknown;
+    }>;
+    /**
+     * With `include`: true when a body on this row was cut or left out.
+     */
+    truncated?: boolean;
+    /**
+     * With `include`: the body fields on this row that were cut or left out.
+     */
+    truncated_fields?: Array<'body_text' | 'body_html'>;
 };
 
 /**
@@ -6761,6 +6845,10 @@ export type ListEmailsData = {
          * With `true`, leave out emails whose `fyi` is true. Combines with every other filter and with both `cursor` and `since`.
          */
         exclude_fyi?: 'true' | 'false';
+        /**
+         * Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.
+         */
+        include?: string;
     };
     url: '/emails';
 };
@@ -6960,6 +7048,10 @@ export type SearchEmailsData = {
          *
          */
         count?: 'true' | 'false';
+        /**
+         * Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.
+         */
+        include?: string;
     };
     url: '/emails/search';
 };
@@ -9249,6 +9341,10 @@ export type ListSentEmailsData = {
          *
          */
         from?: string;
+        /**
+         * Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`.
+         */
+        include?: string;
     };
     url: '/sent-emails';
 };

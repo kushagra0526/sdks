@@ -51,6 +51,7 @@ def _get_kwargs(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    include: str | Unset = UNSET,
 
 ) -> dict[str, Any]:
     
@@ -156,6 +157,8 @@ def _get_kwargs(
 
     params["count"] = json_count
 
+    params["include"] = include
+
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -248,6 +251,7 @@ def sync_detailed(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    include: str | Unset = UNSET,
 
 ) -> Response[ErrorResponse | SearchEmailsResponse200]:
     """ Search inbound emails
@@ -327,6 +331,7 @@ def sync_detailed(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -361,6 +366,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+include=include,
 
     )
 
@@ -396,6 +402,7 @@ def sync(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    include: str | Unset = UNSET,
 
 ) -> ErrorResponse | SearchEmailsResponse200 | None:
     """ Search inbound emails
@@ -475,6 +482,7 @@ def sync(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -510,6 +518,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+include=include,
 
     ).parsed
 
@@ -539,6 +548,7 @@ async def asyncio_detailed(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    include: str | Unset = UNSET,
 
 ) -> Response[ErrorResponse | SearchEmailsResponse200]:
     """ Search inbound emails
@@ -618,6 +628,7 @@ async def asyncio_detailed(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -652,6 +663,7 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+include=include,
 
     )
 
@@ -687,6 +699,7 @@ async def asyncio(
     thread_id: UUID | Unset = UNSET,
     prefix: SearchEmailsPrefix | Unset = SearchEmailsPrefix.FALSE,
     count: SearchEmailsCount | Unset = SearchEmailsCount.TRUE,
+    include: str | Unset = UNSET,
 
 ) -> ErrorResponse | SearchEmailsResponse200 | None:
     """ Search inbound emails
@@ -766,6 +779,7 @@ async def asyncio(
         thread_id (UUID | Unset):
         prefix (SearchEmailsPrefix | Unset):  Default: SearchEmailsPrefix.FALSE.
         count (SearchEmailsCount | Unset):  Default: SearchEmailsCount.TRUE.
+        include (str | Unset):  Example: body_text,headers.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -801,5 +815,6 @@ include_facets=include_facets,
 thread_id=thread_id,
 prefix=prefix,
 count=count,
+include=include,
 
     )).parsed

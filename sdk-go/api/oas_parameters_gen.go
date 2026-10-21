@@ -6884,6 +6884,12 @@ type ListEmailsParams struct {
 	// With `true`, leave out emails whose `fyi` is true. Combines with every other filter and with both
 	// `cursor` and `since`.
 	ExcludeFyi OptListEmailsExcludeFyi `json:",omitempty,omitzero"`
+	// Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`.
+	// Reads a page of messages in one request instead of one detail read per row. Parts are withheld
+	// where the detail read withholds them. Each body field is cut to 64 KiB per row and a response
+	// carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in
+	// `truncated_fields`. Unknown values are a `validation_error`.
+	Include OptString `json:",omitempty,omitzero"`
 }
 
 func unpackListEmailsParams(packed middleware.Parameters) (params ListEmailsParams) {
@@ -7002,6 +7008,15 @@ func unpackListEmailsParams(packed middleware.Parameters) (params ListEmailsPara
 		}
 		if v, ok := packed[key]; ok {
 			params.ExcludeFyi = v.(OptListEmailsExcludeFyi)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "include",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Include = v.(OptString)
 		}
 	}
 	return params
@@ -7734,6 +7749,74 @@ func decodeListEmailsParams(args [0]string, argsEscaped bool, r *http.Request) (
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "exclude_fyi",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: include.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "include",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIncludeVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIncludeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Include.SetTo(paramsDotIncludeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Include.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "include",
 			In:   "query",
 			Err:  err,
 		}
@@ -8559,6 +8642,12 @@ type ListSentEmailsParams struct {
 	// Combines with every other filter, and unlike `q` it is
 	// served by every deployment.
 	From OptString `json:",omitempty,omitzero"`
+	// Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`.
+	// Reads a page of messages in one request instead of one detail read per row. Parts are withheld
+	// where the detail read withholds them. Each body field is cut to 64 KiB per row and a response
+	// carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in
+	// `truncated_fields`. Unknown values are a `validation_error`.
+	Include OptString `json:",omitempty,omitzero"`
 }
 
 func unpackListSentEmailsParams(packed middleware.Parameters) (params ListSentEmailsParams) {
@@ -8641,6 +8730,15 @@ func unpackListSentEmailsParams(packed middleware.Parameters) (params ListSentEm
 		}
 		if v, ok := packed[key]; ok {
 			params.From = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "include",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Include = v.(OptString)
 		}
 	}
 	return params
@@ -9112,6 +9210,74 @@ func decodeListSentEmailsParams(args [0]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "from",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: include.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "include",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIncludeVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIncludeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Include.SetTo(paramsDotIncludeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Include.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "include",
 			In:   "query",
 			Err:  err,
 		}
@@ -11150,6 +11316,12 @@ type SearchEmailsParams struct {
 	// whether another page exists. Skipping the count makes a broad query,
 	// such as a one-letter prefix, cheaper to serve. Defaults to `true`.
 	Count OptSearchEmailsCount `json:",omitempty,omitzero"`
+	// Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`.
+	// Reads a page of messages in one request instead of one detail read per row. Parts are withheld
+	// where the detail read withholds them. Each body field is cut to 64 KiB per row and a response
+	// carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in
+	// `truncated_fields`. Unknown values are a `validation_error`.
+	Include OptString `json:",omitempty,omitzero"`
 }
 
 func unpackSearchEmailsParams(packed middleware.Parameters) (params SearchEmailsParams) {
@@ -11358,6 +11530,15 @@ func unpackSearchEmailsParams(packed middleware.Parameters) (params SearchEmails
 		}
 		if v, ok := packed[key]; ok {
 			params.Count = v.(OptSearchEmailsCount)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "include",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Include = v.(OptString)
 		}
 	}
 	return params
@@ -12681,6 +12862,74 @@ func decodeSearchEmailsParams(args [0]string, argsEscaped bool, r *http.Request)
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "count",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: include.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "include",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIncludeVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIncludeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Include.SetTo(paramsDotIncludeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Include.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     200,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         nil,
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "include",
 			In:   "query",
 			Err:  err,
 		}

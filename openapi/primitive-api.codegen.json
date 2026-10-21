@@ -2049,6 +2049,17 @@
               ]
             },
             "description": "With `true`, leave out emails whose `fyi` is true. Combines with every other filter and with both `cursor` and `since`."
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "example": "body_text,headers"
+            },
+            "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`."
           }
         ],
         "responses": {
@@ -2326,6 +2337,17 @@
               "default": "true"
             },
             "description": "When `false`, the total match count is not computed and `meta.total`\nis null (`meta.total_capped` is false). Use `meta.cursor` to tell\nwhether another page exists. Skipping the count makes a broad query,\nsuch as a one-letter prefix, cheaper to serve. Defaults to `true`.\n"
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "example": "body_text,headers"
+            },
+            "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`."
           }
         ],
         "responses": {
@@ -5245,6 +5267,17 @@
               "maxLength": 320
             },
             "description": "Exact case-insensitive sender mailbox filter. Returns\nonly sends whose from address equals this value; it is\nnot a substring match, so a partial mailbox matches\nnothing. Use `q` to search sender text loosely.\nCombines with every other filter, and unlike `q` it is\nserved by every deployment.\n"
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "example": "body_text,headers"
+            },
+            "description": "Extra parts on every row, comma-separated: `body_text`, `body_html`, `headers`, `attachments`. Reads a page of messages in one request instead of one detail read per row. Parts are withheld where the detail read withholds them. Each body field is cut to 64 KiB per row and a response carries at most 2048 KiB of body text, in page order; a cut or omitted body is named in `truncated_fields`. Unknown values are a `validation_error`."
           }
         ],
         "responses": {
@@ -14303,6 +14336,76 @@
       }
     },
     "schemas": {
+      "IncludedMessageHeaders": {
+        "type": "object",
+        "description": "Stored addressing and threading headers. A member is null when absent or withheld.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "reply_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "in_reply_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "automation": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Received mail only.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "cc",
+          "bcc",
+          "reply_to",
+          "in_reply_to",
+          "references",
+          "automation"
+        ]
+      },
       "ContactPolicyRuleInput": {
         "type": "object",
         "additionalProperties": false,
@@ -18148,6 +18251,50 @@
             "type": "string",
             "description": "Display name from the `From:` header, decoded for display:\nRFC 2047 encoded words are decoded in their declared charset\nand folded lines are joined (e.g. `Dana Rúiz` for\n`=?UTF-8?Q?Dana_R=C3=BAiz?= <dana@example.com>`). Null when\nthe header carries no display name, and may be absent; treat\na missing value the same as null.\n\nFor display only: the sender chooses this name freely, so\nidentify the sender by `from_email`, never by this name.\n",
             "nullable": true
+          },
+          "body_text": {
+            "type": "string",
+            "description": "With `include=body_text`: the plain-text body, cut as `truncated_fields` says.",
+            "nullable": true
+          },
+          "body_html": {
+            "type": "string",
+            "description": "With `include=body_html`: the HTML body, cut as `truncated_fields` says.",
+            "nullable": true
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IncludedMessageHeaders"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With `include=headers`: stored addressing and threading headers."
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "With `include=attachments`: attachment metadata as the detail read reports it. Never the bytes."
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "With `include`: true when a body on this row was cut or left out."
+          },
+          "truncated_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "body_text",
+                "body_html"
+              ]
+            },
+            "description": "With `include`: the body fields on this row that were cut or left out."
           }
         },
         "required": [
@@ -19731,6 +19878,89 @@
               "name"
             ],
             "nullable": true
+          },
+          "body_text": {
+            "type": "string",
+            "description": "Plain-text body sent on the wire. Null when the\nsend carried only an HTML body, or when bodies have\nbeen discarded post-send (`content_discarded_at`\nset).\n",
+            "nullable": true
+          },
+          "body_html": {
+            "type": "string",
+            "description": "HTML body sent on the wire. Null when the send\ncarried only a plain-text body, or when bodies\nhave been discarded post-send.\n",
+            "nullable": true
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IncludedMessageHeaders"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "With `include=headers`: stored addressing and threading headers."
+          },
+          "attachments": {
+            "description": "Metadata for submitted inline attachments; download availability is reported separately. Metadata may exist when the archive is unavailable, and legacy sends may have no metadata. Offloaded payload files are not included in the inline archive.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "content_type": {
+                  "type": "string"
+                },
+                "size_bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "sha256": {
+                  "type": "string"
+                },
+                "part_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "tar_path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filename",
+                "content_type",
+                "size_bytes",
+                "sha256",
+                "part_index",
+                "tar_path"
+              ],
+              "additionalProperties": {}
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "With `include`: true when a body on this row was cut or left out."
+          },
+          "truncated_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "body_text",
+                "body_html"
+              ]
+            },
+            "description": "With `include`: the body fields on this row that were cut or left out."
           }
         },
         "required": [
