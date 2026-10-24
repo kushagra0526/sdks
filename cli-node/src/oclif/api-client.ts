@@ -231,6 +231,22 @@ export function selectedOrgFromEnv(env: Env = process.env): string | null {
   return env[ORG_SELECTION_ENV]?.trim() || null;
 }
 
+/**
+ * Refuse `--org` before a command acts with a connected agent profile's own
+ * key: the profile belongs to one organization and cannot act in another.
+ */
+export function refuseOrgSelectionForProfile(
+  profileName: string,
+  env: Env = process.env,
+): void {
+  const selection = selectedOrgFromEnv(env);
+  if (!selection) return;
+  throw new Errors.CLIError(
+    `--org (PRIMITIVE_CLI_ORG=${selection}) selects an organization for a saved \`primitive login\`. Connected agent profile ${profileName} belongs to one organization; drop --org, or unset PRIMITIVE_CLI_ORG.`,
+    { exit: 1 },
+  );
+}
+
 function orgMatches(credentials: StoredCliCredentials, selection: string) {
   const wanted = selection.toLowerCase();
   return (

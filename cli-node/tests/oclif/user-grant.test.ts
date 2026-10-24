@@ -10,7 +10,10 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { getAccount } from "@primitivedotdev/api-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createAuthenticatedCliApiClient } from "../../src/oclif/api-client.js";
+import {
+  createAuthenticatedCliApiClient,
+  refuseOrgSelectionForProfile,
+} from "../../src/oclif/api-client.js";
 import {
   acquireCliCredentialsLock,
   credentialsPath,
@@ -89,6 +92,7 @@ class MockPrimitive {
   base = "";
   userGrants = true;
   requestedGrantAccepted = false;
+  revokeEmpty = false;
   /** Live per-org access tokens: token to org id. */
   orgTokens = new Map<string, string>();
   identityToken = "prim_uat_1";
@@ -297,6 +301,11 @@ class MockPrimitive {
     if (req.method === "POST" && url.pathname === "/oauth/revoke") {
       this.revoked.push(new URLSearchParams(text).get("token") ?? "");
       this.orgTokens.clear();
+      if (this.revokeEmpty) {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
       return this.json(res, 200, {});
     }
     if (req.method === "GET" && url.pathname === "/v1/cli/orgs") {
@@ -985,6 +994,47 @@ describe("CLI login as the person, against a mock server", () => {
       "keys:manage: not allowed (permission_missing)",
     );
     expect(denied.exitCode).toBe(1);
+  });
+
+  it("switches by name without losing the login when the identity token is due a refresh", async () => {
+    const credentials = userLogin(mock, mock.issueOrgToken(OWNER_ORG));
+    credentials.user_grant = {
+      ...(credentials.user_grant as NonNullable<
+        StoredCliCredentials["user_grant"]
+      >),
+      expires_at: new Date(0).toISOString(),
+    };
+    saveCliCredentials(configDir, credentials);
+    const { org } = await switchCurrentOrg({
+      apiBaseUrl: mock.base,
+      configDir,
+      selection: "Beta",
+    });
+    expect(org.org_id).toBe(MEMBER_ORG);
+    expect(mock.refreshCount).toBe(1);
+    const saved = loadCliCredentials(configDir) as StoredCliCredentials;
+    expect(saved.org_id).toBe(MEMBER_ORG);
+    expect(saved.refresh_token).toBe(mock.refreshToken);
+  });
+
+  it("refuses --org before a connected profile acts", () => {
+    expect(() =>
+      refuseOrgSelectionForProfile("work", { PRIMITIVE_CLI_ORG: "beta" }),
+    ).toThrow(/Connected agent profile work belongs to one organization/);
+    expect(() => refuseOrgSelectionForProfile("work", {})).not.toThrow();
+  });
+
+  it("treats an empty successful revoke response as signed out", async () => {
+    mock.revokeEmpty = true;
+    saveCliCredentials(
+      configDir,
+      userLogin(mock, mock.issueOrgToken(OWNER_ORG)),
+    );
+    const out = await capture(() =>
+      runLogoutWithCredentialLock({ configDir, flags: {} }),
+    );
+    expect(out.error).toBeNull();
+    expect(loadCliCredentials(configDir)).toBeNull();
   });
 
   it("logs out of every organization by revoking the refresh token", async () => {

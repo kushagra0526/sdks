@@ -24,6 +24,7 @@ import {
 } from "./agent-connect.js";
 import { archiveRevokedSetup, savedSetupRevoked } from "./agent-disconnect.js";
 import { readSetupApi, type SetupReadBudget } from "./agent-setup-read.js";
+import { refuseOrgSelectionForProfile } from "./api-client.js";
 import type { ClaudeWakeHookResult } from "./claude-wake-install.js";
 import {
   AGENT_PROFILE_ENV,
@@ -904,6 +905,7 @@ export async function setupAgent(params: {
       signal: AbortSignal.timeout(setupBudgetMs),
       retries: 0,
     };
+    refuseOrgSelectionForProfile(profileName);
     const context: Context = {
       identity: connectedAgentIdentity(profileName, profile),
       profile,

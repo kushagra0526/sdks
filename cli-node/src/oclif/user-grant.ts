@@ -214,6 +214,8 @@ async function postTokenEndpoint(params: {
   fetch?: FetchFn;
   headers?: Record<string, string>;
   path?: string;
+  /** Revocation answers 200 with an empty or non-JSON body. */
+  allowEmptySuccess?: boolean;
 }): Promise<TokenEndpointResult> {
   const fetchImpl = params.fetch ?? fetch;
   let response: Response;
@@ -238,6 +240,7 @@ async function postTokenEndpoint(params: {
   }
   const payload: unknown = await response.json().catch(() => null);
   if (response.ok && isRecord(payload)) return { ok: true, payload };
+  if (response.ok && params.allowEmptySuccess) return { ok: true, payload: {} };
   const record = isRecord(payload) ? payload : {};
   return {
     ok: false,
@@ -776,10 +779,16 @@ export async function switchCurrentOrg(params: {
       credentialsLockHeld: true,
       now,
     });
+    // Resolving a name can refresh the identity token, which rotates the
+    // refresh token on disk; exchange from what is saved now.
+    const latest = loadCliCredentials(params.configDir);
+    if (!latest) {
+      throw new Errors.CLIError(USER_LOGIN_EXPIRED_MESSAGE, { exit: 1 });
+    }
     return exchangeAndSave({
       apiBaseUrl: params.apiBaseUrl,
       configDir: params.configDir,
-      credentials: current,
+      credentials: latest,
       fetch: params.fetch,
       headers: params.headers,
       makeCurrent: true,
@@ -914,6 +923,7 @@ export async function revokeUserLogin(params: {
     fetch: params.fetch,
     headers: params.headers,
     path: "/oauth/revoke",
+    allowEmptySuccess: true,
   });
   if (result.ok) return { ok: true };
   return {
