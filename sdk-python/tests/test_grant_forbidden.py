@@ -100,7 +100,6 @@ def test_builtin_role_keys_include_operator() -> None:
         "member",
         "operator",
         "owner",
-        "restricted",
     ]
     role = Role.from_dict(
         {
@@ -113,3 +112,15 @@ def test_builtin_role_keys_include_operator() -> None:
         }
     )
     assert BuiltinRoleKey(role.key) is BuiltinRoleKey.OPERATOR
+    unlisted = Role.from_dict(
+        {
+            "id": "r-other",
+            "key": "restricted",
+            "kind": "builtin",
+            "name": "Restricted",
+            "permissions": [],
+            "version": 1,
+        }
+    )
+    assert unlisted.key == "restricted"
+    assert "restricted" not in {key.value for key in BuiltinRoleKey}

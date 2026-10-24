@@ -9,16 +9,15 @@ type BuiltinRoleKey string
 // except managing members, changing roles, sending invitations and billing.
 // By default the CLI may be used by RoleOwner, RoleAdmin and RoleOperator.
 const (
-	RoleOwner      BuiltinRoleKey = "owner"
-	RoleAdmin      BuiltinRoleKey = "admin"
-	RoleOperator   BuiltinRoleKey = "operator"
-	RoleMember     BuiltinRoleKey = "member"
-	RoleRestricted BuiltinRoleKey = "restricted"
+	RoleOwner    BuiltinRoleKey = "owner"
+	RoleAdmin    BuiltinRoleKey = "admin"
+	RoleOperator BuiltinRoleKey = "operator"
+	RoleMember   BuiltinRoleKey = "member"
 )
 
 // BuiltinRoleKeys lists every built-in role key, in the spec's order.
 func BuiltinRoleKeys() []BuiltinRoleKey {
-	return []BuiltinRoleKey{RoleOwner, RoleAdmin, RoleOperator, RoleMember, RoleRestricted}
+	return []BuiltinRoleKey{RoleOwner, RoleAdmin, RoleOperator, RoleMember}
 }
 
 // IsBuiltinRoleKey reports whether key names a built-in role.

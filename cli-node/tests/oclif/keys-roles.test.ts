@@ -308,7 +308,7 @@ describe("roles commands", () => {
 
   it("names the built-in roles, operator included, in roles list help", () => {
     expect(RolesListCommand.description).toContain(
-      "owner, admin, operator, member and restricted",
+      "owner, admin, operator and member",
     );
   });
 

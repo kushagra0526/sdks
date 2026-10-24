@@ -1738,9 +1738,9 @@ func (UnimplementedHandler) ListRepeatingSends(ctx context.Context, params ListR
 //
 // The organization's roles (built-in, template and custom), the role
 // templates that can be assigned, and whether role assignment is
-// available. The built-in roles are `owner`, `admin`, `operator`,
-// `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
-// person in the organization.
+// available. The built-in roles are `owner`, `admin`, `operator`
+// and `member` (see `BuiltinRoleKey`). Readable by any person in
+// the organization.
 //
 // GET /roles
 func (UnimplementedHandler) ListRoles(ctx context.Context) (r ListRolesRes, _ error) {

@@ -37,7 +37,9 @@ func TestIsBuiltinRoleKey(t *testing.T) {
 	if !IsBuiltinRoleKey("operator") {
 		t.Fatal("operator should be a built-in role key")
 	}
-	if IsBuiltinRoleKey("custom_1") {
-		t.Fatal("custom_1 should not be a built-in role key")
+	for _, key := range []string{"custom_1", "restricted"} {
+		if IsBuiltinRoleKey(key) {
+			t.Fatalf("%s should not be a built-in role key", key)
+		}
 	}
 }

@@ -20715,7 +20715,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
     "binaryResponse": false,
     "bodyRequired": false,
     "command": "list-roles",
-    "description": "The organization's roles (built-in, template and custom), the role\ntemplates that can be assigned, and whether role assignment is\navailable. The built-in roles are `owner`, `admin`, `operator`,\n`member` and `restricted` (see `BuiltinRoleKey`). Readable by any\nperson in the organization.\n",
+    "description": "The organization's roles (built-in, template and custom), the role\ntemplates that can be assigned, and whether role assignment is\navailable. The built-in roles are `owner`, `admin`, `operator`\nand `member` (see `BuiltinRoleKey`). Readable by any person in\nthe organization.\n",
     "hasJsonBody": false,
     "method": "GET",
     "operationId": "listRoles",
@@ -20742,7 +20742,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
               },
               "key": {
                 "type": "string",
-                "description": "The role's key. A built-in role uses one of the `BuiltinRoleKey`\nvalues (`owner`, `admin`, `operator`, `member` or `restricted`);\ntemplate and custom roles use their own keys.\n"
+                "description": "The role's key. A built-in role uses one of the `BuiltinRoleKey`\nvalues (`owner`, `admin`, `operator` or `member`);\ntemplate and custom roles use their own keys. Other values can\nappear, so read the key as a string.\n"
               },
               "kind": {
                 "type": "string",

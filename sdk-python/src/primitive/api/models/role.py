@@ -26,8 +26,9 @@ class Role:
         Attributes:
             id (str):
             key (str): The role's key. A built-in role uses one of the `BuiltinRoleKey`
-                values (`owner`, `admin`, `operator`, `member` or `restricted`);
-                template and custom roles use their own keys.
+                values (`owner`, `admin`, `operator` or `member`);
+                template and custom roles use their own keys. Other values can
+                appear, so read the key as a string.
             kind (RoleKind):
             name (str):
             permissions (list[str]):

@@ -47088,8 +47088,9 @@ func (*RevokeCredentialUnauthorized) revokeCredentialRes() {}
 type Role struct {
 	ID string `json:"id"`
 	// The role's key. A built-in role uses one of the `BuiltinRoleKey`
-	// values (`owner`, `admin`, `operator`, `member` or `restricted`);
-	// template and custom roles use their own keys.
+	// values (`owner`, `admin`, `operator` or `member`);
+	// template and custom roles use their own keys. Other values can
+	// appear, so read the key as a string.
 	Key         string       `json:"key"`
 	Kind        RoleKind     `json:"kind"`
 	Name        string       `json:"name"`

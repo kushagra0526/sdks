@@ -86,9 +86,9 @@ def sync_detailed(
 
      The organization's roles (built-in, template and custom), the role
     templates that can be assigned, and whether role assignment is
-    available. The built-in roles are `owner`, `admin`, `operator`,
-    `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
-    person in the organization.
+    available. The built-in roles are `owner`, `admin`, `operator`
+    and `member` (see `BuiltinRoleKey`). Readable by any person in
+    the organization.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -118,9 +118,9 @@ def sync(
 
      The organization's roles (built-in, template and custom), the role
     templates that can be assigned, and whether role assignment is
-    available. The built-in roles are `owner`, `admin`, `operator`,
-    `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
-    person in the organization.
+    available. The built-in roles are `owner`, `admin`, `operator`
+    and `member` (see `BuiltinRoleKey`). Readable by any person in
+    the organization.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -145,9 +145,9 @@ async def asyncio_detailed(
 
      The organization's roles (built-in, template and custom), the role
     templates that can be assigned, and whether role assignment is
-    available. The built-in roles are `owner`, `admin`, `operator`,
-    `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
-    person in the organization.
+    available. The built-in roles are `owner`, `admin`, `operator`
+    and `member` (see `BuiltinRoleKey`). Readable by any person in
+    the organization.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -177,9 +177,9 @@ async def asyncio(
 
      The organization's roles (built-in, template and custom), the role
     templates that can be assigned, and whether role assignment is
-    available. The built-in roles are `owner`, `admin`, `operator`,
-    `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
-    person in the organization.
+    available. The built-in roles are `owner`, `admin`, `operator`
+    and `member` (see `BuiltinRoleKey`). Readable by any person in
+    the organization.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

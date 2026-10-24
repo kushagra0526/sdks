@@ -121,7 +121,7 @@ export function formatAccessMode(mode: AccessMode): string {
 
 export class RolesListCommand extends Command {
   static description =
-    "List the organization's roles (built-in, template and custom) with their permission counts, the templates that can be assigned, and whether role assignment is available. The built-in roles are owner, admin, operator, member and restricted; operator has every permission admin has except managing members, changing roles, sending invitations and billing.";
+    "List the organization's roles (built-in, template and custom) with their permission counts, the templates that can be assigned, and whether role assignment is available. The built-in roles are owner, admin, operator and member; operator has every permission admin has except managing members, changing roles, sending invitations and billing.";
 
   static summary = "List roles";
 

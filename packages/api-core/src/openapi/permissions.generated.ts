@@ -533,6 +533,5 @@ export const BUILTIN_ROLE_KEYS = [
   "owner",
   "admin",
   "operator",
-  "member",
-  "restricted"
+  "member"
 ] as const;
