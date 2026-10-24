@@ -22,6 +22,19 @@ if (
   process.removeAllListeners("warning");
 }
 
+// `--org <org>` works on every command: take it out of argv before oclif
+// parses the command, and pass it on as PRIMITIVE_ORG.
+{
+  const { applyGlobalOrgFlag } = await import(
+    "../dist/oclif/global-org-flag.js"
+  );
+  const orgFlagError = applyGlobalOrgFlag();
+  if (orgFlagError) {
+    process.stderr.write(`${orgFlagError}\n`);
+    process.exit(2);
+  }
+}
+
 // Auto-restart with NODE_USE_ENV_PROXY=1 when HTTP(S)_PROXY is in the env.
 // Node reads NODE_USE_ENV_PROXY during process startup, so mutating
 // process.env inside this process is too late for built-in fetch.
