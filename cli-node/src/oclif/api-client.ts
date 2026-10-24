@@ -236,13 +236,16 @@ export function selectedOrgFromEnv(env: Env = process.env): string | null {
  * key: the profile belongs to one organization and cannot act in another.
  */
 export function refuseOrgSelectionForProfile(
-  profileName: string,
+  profileName: string | undefined,
   env: Env = process.env,
 ): void {
   const selection = selectedOrgFromEnv(env);
   if (!selection) return;
+  const who = profileName
+    ? `Connected agent profile ${profileName}`
+    : "A connected agent credential";
   throw new Errors.CLIError(
-    `--org (PRIMITIVE_CLI_ORG=${selection}) selects an organization for a saved \`primitive login\`. Connected agent profile ${profileName} belongs to one organization; drop --org, or unset PRIMITIVE_CLI_ORG.`,
+    `--org (PRIMITIVE_CLI_ORG=${selection}) selects an organization for a saved \`primitive login\`. ${who} belongs to one organization; drop --org, or unset PRIMITIVE_CLI_ORG.`,
     { exit: 1 },
   );
 }
