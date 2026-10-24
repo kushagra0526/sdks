@@ -34,6 +34,8 @@ export {
   type Account,
   AccountResource,
   type AttachmentPartDownload,
+  BUILTIN_ROLE_KEYS,
+  type BuiltinRoleKey,
   type CreateAgentOptions,
   type CreatedAgent,
   CredentialsResource,

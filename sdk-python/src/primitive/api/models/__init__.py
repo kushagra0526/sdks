@@ -42,6 +42,7 @@ from .archive_members import ArchiveMembers
 from .archive_members_format import ArchiveMembersFormat
 from .await_reply_response_200 import AwaitReplyResponse200
 from .await_reply_result import AwaitReplyResult
+from .builtin_role_key import BuiltinRoleKey
 from .caller_identity import CallerIdentity
 from .caller_identity_member_address_type_0 import CallerIdentityMemberAddressType0
 from .cancel_sent_email_by_idempotency_key_body import CancelSentEmailByIdempotencyKeyBody
@@ -813,6 +814,7 @@ __all__ = (
     "ArchiveMembersFormat",
     "AwaitReplyResponse200",
     "AwaitReplyResult",
+    "BuiltinRoleKey",
     "CallerIdentity",
     "CallerIdentityMemberAddressType0",
     "CancelSentEmailByIdempotencyKeyBody",

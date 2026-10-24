@@ -3133,7 +3133,9 @@ export const updateKey = <ThrowOnError extends boolean = false>(options: Options
  *
  * The organization's roles (built-in, template and custom), the role
  * templates that can be assigned, and whether role assignment is
- * available. Readable by any person in the organization.
+ * available. The built-in roles are `owner`, `admin`, `operator`,
+ * `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
+ * person in the organization.
  *
  */
 export const listRoles = <ThrowOnError extends boolean = false>(options?: Options<ListRolesData, ThrowOnError>): RequestResult<ListRolesResponses, ListRolesErrors, ThrowOnError> => (options?.client ?? client).get<ListRolesResponses, ListRolesErrors, ThrowOnError>({

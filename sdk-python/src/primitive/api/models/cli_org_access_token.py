@@ -31,7 +31,7 @@ class CliOrgAccessToken:
             expires_in (int):
             org_id (UUID):
             org_name (None | str):
-            role (str):
+            role (str): Your role's key in the organization, such as a `BuiltinRoleKey` value.
             oauth_grant_id (UUID):
             scope (str | Unset):
      """

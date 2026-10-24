@@ -1,6 +1,7 @@
 /**
- * Permissions declared by the Primitive API, from the spec's
- * `x-primitive-permission` extension.
+ * Permissions and built-in role keys declared by the Primitive API, from
+ * the spec's `x-primitive-permission` extension and its `BuiltinRoleKey`
+ * schema.
  *
  * AUTO-GENERATED - DO NOT EDIT
  * Run `pnpm generate:openapi` to regenerate.
@@ -523,3 +524,15 @@ export const OPERATION_PERMISSIONS: Readonly<Record<string, readonly Permission[
     "account:read"
   ]
 };
+
+/**
+ * The keys of the built-in roles, from the spec's `BuiltinRoleKey`.
+ * Template and custom roles use other keys.
+ */
+export const BUILTIN_ROLE_KEYS = [
+  "owner",
+  "admin",
+  "operator",
+  "member",
+  "restricted"
+] as const;

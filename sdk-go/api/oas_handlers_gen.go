@@ -21997,7 +21997,9 @@ func (s *Server) handleListRepeatingSendsRequest(args [0]string, argsEscaped boo
 //
 // The organization's roles (built-in, template and custom), the role
 // templates that can be assigned, and whether role assignment is
-// available. Readable by any person in the organization.
+// available. The built-in roles are `owner`, `admin`, `operator`,
+// `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
+// person in the organization.
 //
 // GET /roles
 func (s *Server) handleListRolesRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

@@ -247,16 +247,13 @@ Against a server without organization switching, and for logins saved by earlier
 `primitive whoami` shows your organization, role and grant when the server reports them. `primitive whoami --check mail:send` asks whether the current credential may use a permission, prints the decision, and exits 1 when it may not; nothing is enforced by asking. A request refused because the credential's grant lacks a permission fails with `grant_forbidden`, and the CLI names the permission.
 
 ```bash
-primitive keys create --name ci --preset send_only --expires 30d --step-up <token>
-primitive keys create --name reader --permission mail:read --address support@example.com --step-up <token>
-primitive keys rotate <key-id> --overlap 1h --step-up <token>
 primitive keys list
-primitive keys revoke <key-id>
+primitive keys list --json
 ```
 
-`keys create` and `keys rotate` print the new secret once on stdout. From a CLI login the server asks for a single-use step-up token from the dashboard; the command prints where to get it, then you rerun with `--step-up`. `--expires` takes a duration (`30d`, `12h`) or a date; `--ip` and `--rate-limit` add conditions. `keys list` and `keys revoke` use the credential inventory, which the server answers only for an owner or admin in a dashboard session, so from the CLI they show the server's refusal.
+`keys list` shows each key's id, prefix, name, grant, expiry and last use. It never shows a secret. API keys are created, rotated and revoked in the dashboard; the CLI has no command for those. `keys list` uses the credential inventory, which the server answers only for an owner or admin in a dashboard session, so from the CLI it shows the server's refusal.
 
-`primitive roles list`, `primitive roles groups`, `primitive roles mailbox-access` and `primitive roles access-mode` read roles, groups, mailbox access and the access mode. Where the server has not enabled them, they print `feature_disabled`.
+`primitive roles list`, `primitive roles groups`, `primitive roles mailbox-access` and `primitive roles access-mode` read roles, groups, mailbox access and the access mode. Where the server has not enabled them, they print `feature_disabled`. The built-in roles are `owner`, `admin`, `operator`, `member` and `restricted`. `operator` has every permission `admin` has except managing members, changing roles, sending invitations and billing. By default, owners, admins and operators may use the CLI.
 
 ## Reply state and the agent loop
 

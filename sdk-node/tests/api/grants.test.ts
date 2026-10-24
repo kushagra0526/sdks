@@ -1,5 +1,7 @@
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import {
+  BUILTIN_ROLE_KEYS,
+  type BuiltinRoleKey,
   createPrimitiveApiError,
   GrantForbiddenError,
   GrantSpec,
@@ -106,6 +108,22 @@ describe("Permission and OPERATION_PERMISSIONS", () => {
       }
     }
     expectTypeOf<"mail:send">().toMatchTypeOf<Permission>();
+  });
+});
+
+describe("BUILTIN_ROLE_KEYS", () => {
+  it("come from the spec's BuiltinRoleKey and include operator", () => {
+    expect(BUILTIN_ROLE_KEYS).toEqual([
+      "owner",
+      "admin",
+      "operator",
+      "member",
+      "restricted",
+    ]);
+    expectTypeOf<"operator">().toMatchTypeOf<BuiltinRoleKey>();
+    expectTypeOf<
+      (typeof BUILTIN_ROLE_KEYS)[number]
+    >().toEqualTypeOf<BuiltinRoleKey>();
   });
 });
 
@@ -254,13 +272,24 @@ describe("keys, credentials, roles and whoami", () => {
     const roles = clientReturning(200, {
       success: true,
       data: {
-        roles: [],
+        roles: [
+          {
+            id: "r-operator",
+            key: "operator",
+            kind: "builtin",
+            name: "Operator",
+            permissions: ["mail:send"],
+            version: 1,
+          },
+        ],
         templates: [],
         assignment: { available: false, reason: "flag_off" },
       },
     });
     const result = await roles.client.roles.list();
     expect(result.assignment.available).toBe(false);
+    expect(result.roles.map((role) => role.key)).toEqual(["operator"]);
+    expect(BUILTIN_ROLE_KEYS).toContain(result.roles[0]?.key);
     expect(new URL(roles.requests[0].url).pathname).toBe("/v1/roles");
   });
 

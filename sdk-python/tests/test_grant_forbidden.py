@@ -90,3 +90,26 @@ def test_grant_forbidden_without_details() -> None:
     assert error.code == "grant_forbidden"
     assert error.permission is None
     assert error.resource is None
+
+
+def test_builtin_role_keys_include_operator() -> None:
+    from primitive.api.models import BuiltinRoleKey, Role
+
+    assert [key.value for key in BuiltinRoleKey] == [
+        "admin",
+        "member",
+        "operator",
+        "owner",
+        "restricted",
+    ]
+    role = Role.from_dict(
+        {
+            "id": "r-operator",
+            "key": "operator",
+            "kind": "builtin",
+            "name": "Operator",
+            "permissions": ["mail:send"],
+            "version": 1,
+        }
+    )
+    assert BuiltinRoleKey(role.key) is BuiltinRoleKey.OPERATOR

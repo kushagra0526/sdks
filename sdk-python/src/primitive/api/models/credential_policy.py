@@ -34,7 +34,8 @@ class CredentialPolicy:
             removal_suspends_created (bool):
             oauth_consent_admin_only (bool):
             cli_access (CredentialPolicyCliAccess | Unset): Who may use the CLI in the organization. Present only where CLI
-                user logins exist.
+                user logins exist. `owners_and_admins` admits the `owner`, `admin`
+                and `operator` roles.
      """
 
     max_key_lifetime_days: int | None

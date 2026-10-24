@@ -1,9 +1,7 @@
 import { Args, Command, Errors } from "@oclif/core";
-import {
-  operationManifest,
-  type PrimitiveOperationManifest,
-} from "@primitivedotdev/api-core";
+import type { PrimitiveOperationManifest } from "@primitivedotdev/api-core";
 import { createOperationCommand } from "./api-command.js";
+import { cliOperationManifest } from "./cli-operations.js";
 import AgentCheckMailCommand from "./commands/agent-check-mail.js";
 import AgentConnectCommand from "./commands/agent-connect.js";
 import AgentContactsAddCommand from "./commands/agent-contacts-add.js";
@@ -77,10 +75,7 @@ import InboxNextCommand from "./commands/inbox-next.js";
 import InboxSetupCommand from "./commands/inbox-setup.js";
 import InboxStatusCommand from "./commands/inbox-status.js";
 import {
-  KeysCreateCommand,
   KeysListCommand,
-  KeysRevokeCommand,
-  KeysRotateCommand,
 } from "./commands/keys.js";
 import ListenCommand from "./commands/listen.js";
 import ListenInitCommand from "./commands/listen-init.js";
@@ -198,7 +193,7 @@ class ListOperationsCommand extends Command {
   static summary = "List all generated API operations (JSON)";
 
   async run(): Promise<void> {
-    this.log(JSON.stringify(operationManifest, null, 2));
+    this.log(JSON.stringify(cliOperationManifest, null, 2));
   }
 }
 
@@ -289,7 +284,7 @@ export function lookupOperation(id: string): {
   const trimmed = resolveOperationAlias(id.trim());
 
   const match =
-    operationManifest.find((op) =>
+    cliOperationManifest.find((op) =>
       operationLookupTokens(op).some(
         (token) =>
           token === trimmed ||
@@ -299,7 +294,7 @@ export function lookupOperation(id: string): {
 
   if (match) return { match, candidates: [] };
 
-  const candidates = operationManifest
+  const candidates = cliOperationManifest
     .map((op) => ({ id: operationId(op), score: scoreOperation(trimmed, op) }))
     .filter(({ score }) => score >= 45)
     .sort(
@@ -557,7 +552,7 @@ const OVERRIDDEN_OPERATION_IDS = new Set<string>([
 ]);
 
 const generatedCommands = Object.fromEntries(
-  operationManifest
+  cliOperationManifest
     .filter(
       (operation) => !OVERRIDDEN_OPERATION_IDS.has(operationId(operation)),
     )
@@ -799,12 +794,9 @@ export const COMMANDS: Record<string, typeof Command> = {
   // `cli list-cli-orgs` authenticates with the login's identity token, which
   // only the hand-rolled `orgs` holds, so the id is served by it.
   "cli:list-cli-orgs": OrgsCommand,
-  // API keys: create and rotate with a step-up, list and revoke through the
-  // credential inventory.
-  "keys:create": KeysCreateCommand,
+  // API keys: list only. Keys are created, rotated and revoked in the
+  // dashboard; see DASHBOARD_ONLY_OPERATION_IDS in cli-operations.ts.
   "keys:list": KeysListCommand,
-  "keys:rotate": KeysRotateCommand,
-  "keys:revoke": KeysRevokeCommand,
   // Read-only role views.
   "roles:list": RolesListCommand,
   "roles:groups": RolesGroupsCommand,

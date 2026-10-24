@@ -5845,8 +5845,9 @@ func (*CliLogoutUnauthorized) cliLogoutRes() {}
 
 // Ref: #/components/schemas/CliOrg
 type CliOrg struct {
-	ID   uuid.UUID    `json:"id"`
-	Name NilString    `json:"name"`
+	ID   uuid.UUID `json:"id"`
+	Name NilString `json:"name"`
+	// Your role's key in the organization, such as a `BuiltinRoleKey` value.
 	Role OptNilString `json:"role"`
 	// Whether the CLI can switch to this organization.
 	Available bool                   `json:"available"`
@@ -11582,7 +11583,9 @@ type CredentialPolicy struct {
 	CapAgentsBelowPerson   bool                                  `json:"cap_agents_below_person"`
 	RemovalSuspendsCreated bool                                  `json:"removal_suspends_created"`
 	OAuthConsentAdminOnly  bool                                  `json:"oauth_consent_admin_only"`
-	// Who may use the CLI in the organization. Present only where CLI user logins exist.
+	// Who may use the CLI in the organization. Present only where CLI
+	// user logins exist. `owners_and_admins` admits the `owner`, `admin`
+	// and `operator` roles.
 	CliAccess       OptCredentialPolicyCliAccess `json:"cli_access"`
 	AdditionalProps CredentialPolicyAdditional
 }
@@ -11698,7 +11701,9 @@ func (s *CredentialPolicyAdditional) init() CredentialPolicyAdditional {
 	return m
 }
 
-// Who may use the CLI in the organization. Present only where CLI user logins exist.
+// Who may use the CLI in the organization. Present only where CLI
+// user logins exist. `owners_and_admins` admits the `owner`, `admin`
+// and `operator` roles.
 type CredentialPolicyCliAccess string
 
 const (
@@ -47081,7 +47086,10 @@ func (*RevokeCredentialUnauthorized) revokeCredentialRes() {}
 
 // Ref: #/components/schemas/Role
 type Role struct {
-	ID          string       `json:"id"`
+	ID string `json:"id"`
+	// The role's key. A built-in role uses one of the `BuiltinRoleKey`
+	// values (`owner`, `admin`, `operator`, `member` or `restricted`);
+	// template and custom roles use their own keys.
 	Key         string       `json:"key"`
 	Kind        RoleKind     `json:"kind"`
 	Name        string       `json:"name"`

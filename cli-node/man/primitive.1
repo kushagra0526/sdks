@@ -202,16 +202,9 @@ flag. A login saved by an earlier CLI, an API key and a connected agent
 profile are bound to one organization and refuse a different one.
 .PP
 Run
-.B primitive keys create
-with
-.BR --preset ,
-.BR --permission ,
-.B --expires
-and
-.B --step-up
-to create a narrowed API key, and
-.B primitive keys rotate KEY_ID
-to rotate one.
+.B primitive keys list
+to list API key metadata; it never shows a secret. API keys are created,
+rotated and revoked in the dashboard.
 .B primitive whoami --check PERMISSION
 reports whether the current credential may use a permission.
 .PP

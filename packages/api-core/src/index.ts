@@ -45,6 +45,7 @@ export {
   type PrimitiveParameterManifest,
 } from "./openapi/operations.generated.js";
 export {
+  BUILTIN_ROLE_KEYS,
   OPERATION_PERMISSIONS,
   PERMISSIONS,
   type Permission,

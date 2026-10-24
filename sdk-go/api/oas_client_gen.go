@@ -1385,7 +1385,9 @@ type Invoker interface {
 	//
 	// The organization's roles (built-in, template and custom), the role
 	// templates that can be assigned, and whether role assignment is
-	// available. Readable by any person in the organization.
+	// available. The built-in roles are `owner`, `admin`, `operator`,
+	// `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
+	// person in the organization.
 	//
 	// GET /roles
 	ListRoles(ctx context.Context) (ListRolesRes, error)
@@ -17826,7 +17828,9 @@ func (c *Client) sendListRepeatingSends(ctx context.Context, params ListRepeatin
 //
 // The organization's roles (built-in, template and custom), the role
 // templates that can be assigned, and whether role assignment is
-// available. Readable by any person in the organization.
+// available. The built-in roles are `owner`, `admin`, `operator`,
+// `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
+// person in the organization.
 //
 // GET /roles
 func (c *Client) ListRoles(ctx context.Context) (ListRolesRes, error) {

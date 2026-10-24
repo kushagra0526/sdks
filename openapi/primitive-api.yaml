@@ -12442,7 +12442,9 @@ paths:
       description: |
         The organization's roles (built-in, template and custom), the role
         templates that can be assigned, and whether role assignment is
-        available. Readable by any person in the organization.
+        available. The built-in roles are `owner`, `admin`, `operator`,
+        `member` and `restricted` (see `BuiltinRoleKey`). Readable by any
+        person in the organization.
       tags:
         - Roles
       responses:
@@ -13231,6 +13233,7 @@ components:
             - "null"
         role:
           type: string
+          description: Your role's key in the organization, such as a `BuiltinRoleKey` value.
         oauth_grant_id:
           type: string
           format: uuid
@@ -13282,6 +13285,7 @@ components:
           type:
             - string
             - "null"
+          description: Your role's key in the organization, such as a `BuiltinRoleKey` value.
         available:
           type: boolean
           description: Whether the CLI can switch to this organization.
@@ -13602,7 +13606,10 @@ components:
           type: boolean
         cli_access:
           type: string
-          description: Who may use the CLI in the organization. Present only where CLI user logins exist.
+          description: |
+            Who may use the CLI in the organization. Present only where CLI
+            user logins exist. `owners_and_admins` admits the `owner`, `admin`
+            and `operator` roles.
           enum:
             - owners_and_admins
             - all_members
@@ -13964,6 +13971,19 @@ components:
         - presets
         - matrix
         - policy
+    BuiltinRoleKey:
+      type: string
+      description: |
+        The key of a built-in role. `operator` has every permission `admin`
+        has except managing members, changing roles, sending invitations and
+        billing. By default the CLI may be used by `owner`, `admin` and
+        `operator`.
+      enum:
+        - owner
+        - admin
+        - operator
+        - member
+        - restricted
     Role:
       type: object
       additionalProperties: true
@@ -13972,6 +13992,10 @@ components:
           type: string
         key:
           type: string
+          description: |
+            The role's key. A built-in role uses one of the `BuiltinRoleKey`
+            values (`owner`, `admin`, `operator`, `member` or `restricted`);
+            template and custom roles use their own keys.
         kind:
           type: string
           enum:

@@ -49,6 +49,7 @@ const OFF_ORG = "33333333-3333-4333-8333-333333333333";
 const DEFAULT_POLICY_ORG = "44444444-4444-4444-8444-444444444444";
 const REVOKED_ORG = "55555555-5555-4555-8555-555555555555";
 const STRANGER_ORG = "66666666-6666-4666-8666-666666666666";
+const OPERATOR_ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const USER_ID = "77777777-7777-4777-8777-777777777777";
 const GRANT_ID = "88888888-8888-4888-8888-888888888888";
 
@@ -72,6 +73,7 @@ const ORGS: Record<string, OrgSpec> = {
     refusal: "role_insufficient",
   },
   [REVOKED_ORG]: { name: "Gone", role: "admin", refusal: "cli_access_revoked" },
+  [OPERATOR_ORG]: { name: "Ops", role: "operator", refusal: null },
 };
 
 const REFUSAL_MESSAGES: Record<string, string> = {
@@ -101,7 +103,6 @@ class MockPrimitive {
   exchangeCount = 0;
   revoked: string[] = [];
   loginStarts: Array<Record<string, unknown>> = [];
-  lastStepUp: string | null = null;
   requests: string[] = [];
   private tokenSeq = 0;
 
@@ -395,42 +396,6 @@ class MockPrimitive {
                       },
               }
             : {}),
-        },
-      });
-    }
-    if (req.method === "POST" && url.pathname === "/v1/keys") {
-      this.lastStepUp = (req.headers["primitive-step-up"] as string) ?? null;
-      if (!this.lastStepUp) {
-        return this.json(res, 403, {
-          success: false,
-          error: {
-            code: "step_up_required",
-            message:
-              "Creating a key needs the person to confirm in the dashboard.",
-            details: {
-              purpose: "keys.create",
-              step_up_url: "https://example.test/app/settings/step-up",
-            },
-          },
-        });
-      }
-      return this.json(res, 201, {
-        success: true,
-        data: {
-          id: "k1",
-          name: "ci",
-          key: "prim_secret_once",
-          key_prefix: "prim_sec",
-          grant: {
-            template: "send_only",
-            credential_grant_id: null,
-            permissions: null,
-            mail_scope: "org",
-            resources: null,
-          },
-          expires_at: "2026-12-01T00:00:00.000Z",
-          conditions: null,
-          warnings: [],
         },
       });
     }
@@ -935,6 +900,17 @@ describe("CLI login as the person, against a mock server", () => {
       OrgsCommand.run(["--json"], { root: CLI_ROOT }),
     );
     expect(JSON.parse(json.stdout).orgs).toHaveLength(Object.keys(ORGS).length);
+    expect(listed.stdout).toContain(
+      `  Ops (${OPERATOR_ORG}) operator, available`,
+    );
+
+    const operator = await capture(() =>
+      OrgUseCommand.run(["Ops"], { root: CLI_ROOT }),
+    );
+    expect(operator.error).toBeNull();
+    expect(operator.stdout).toContain(
+      `Now using Ops (${OPERATOR_ORG}), role operator.`,
+    );
 
     const used = await capture(() =>
       OrgUseCommand.run(["Beta"], { root: CLI_ROOT }),

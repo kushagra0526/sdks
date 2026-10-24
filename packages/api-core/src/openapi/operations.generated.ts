@@ -4976,7 +4976,8 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "type": [
                   "string",
                   "null"
-                ]
+                ],
+                "description": "Your role's key in the organization, such as a `BuiltinRoleKey` value."
               },
               "available": {
                 "type": "boolean",
@@ -7074,7 +7075,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
         },
         "cli_access": {
           "type": "string",
-          "description": "Who may use the CLI in the organization. Present only where CLI user logins exist.",
+          "description": "Who may use the CLI in the organization. Present only where CLI\nuser logins exist. `owners_and_admins` admits the `owner`, `admin`\nand `operator` roles.\n",
           "enum": [
             "owners_and_admins",
             "all_members",
@@ -16576,7 +16577,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             },
             "cli_access": {
               "type": "string",
-              "description": "Who may use the CLI in the organization. Present only where CLI user logins exist.",
+              "description": "Who may use the CLI in the organization. Present only where CLI\nuser logins exist. `owners_and_admins` admits the `owner`, `admin`\nand `operator` roles.\n",
               "enum": [
                 "owners_and_admins",
                 "all_members",
@@ -20714,7 +20715,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
     "binaryResponse": false,
     "bodyRequired": false,
     "command": "list-roles",
-    "description": "The organization's roles (built-in, template and custom), the role\ntemplates that can be assigned, and whether role assignment is\navailable. Readable by any person in the organization.\n",
+    "description": "The organization's roles (built-in, template and custom), the role\ntemplates that can be assigned, and whether role assignment is\navailable. The built-in roles are `owner`, `admin`, `operator`,\n`member` and `restricted` (see `BuiltinRoleKey`). Readable by any\nperson in the organization.\n",
     "hasJsonBody": false,
     "method": "GET",
     "operationId": "listRoles",
@@ -20740,7 +20741,8 @@ export const operationManifest: PrimitiveOperationManifest[] = [
                 "type": "string"
               },
               "key": {
-                "type": "string"
+                "type": "string",
+                "description": "The role's key. A built-in role uses one of the `BuiltinRoleKey`\nvalues (`owner`, `admin`, `operator`, `member` or `restricted`);\ntemplate and custom roles use their own keys.\n"
               },
               "kind": {
                 "type": "string",

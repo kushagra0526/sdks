@@ -586,13 +586,22 @@ for (const operation of manifest) {
   for (const permission of operation.permissions) permissionSet.add(permission);
 }
 const permissionList = [...permissionSet].sort();
+
+const builtinRoleSchema = (
+  (rawSpec.components as { schemas?: Record<string, { enum?: unknown }> } | undefined)?.schemas ?? {}
+).BuiltinRoleKey;
+if (!Array.isArray(builtinRoleSchema?.enum) || !builtinRoleSchema.enum.every((value) => typeof value === "string")) {
+  throw new Error("components.schemas.BuiltinRoleKey must be a string enum");
+}
+const builtinRoleKeys = builtinRoleSchema.enum as string[];
 operationPermissionEntries.sort(([left], [right]) => left.localeCompare(right));
 
 writeFileSync(
   permissionsOutputPath,
   `/**
- * Permissions declared by the Primitive API, from the spec's
- * \`x-primitive-permission\` extension.
+ * Permissions and built-in role keys declared by the Primitive API, from
+ * the spec's \`x-primitive-permission\` extension and its \`BuiltinRoleKey\`
+ * schema.
  *
  * AUTO-GENERATED - DO NOT EDIT
  * Run \`pnpm generate:openapi\` to regenerate.
@@ -606,5 +615,11 @@ export type Permission = (typeof PERMISSIONS)[number];
 
 /** The permissions each operation requires, all of them, by operation id. */
 export const OPERATION_PERMISSIONS: Readonly<Record<string, readonly Permission[]>> = ${JSON.stringify(Object.fromEntries(operationPermissionEntries), null, 2)};
+
+/**
+ * The keys of the built-in roles, from the spec's \`BuiltinRoleKey\`.
+ * Template and custom roles use other keys.
+ */
+export const BUILTIN_ROLE_KEYS = ${JSON.stringify(builtinRoleKeys, null, 2)} as const;
 `,
 );

@@ -147,6 +147,9 @@ export type CliOrgAccessToken = {
     scope?: string;
     org_id: string;
     org_name: string | null;
+    /**
+     * Your role's key in the organization, such as a `BuiltinRoleKey` value.
+     */
     role: string;
     oauth_grant_id: string;
 };
@@ -169,6 +172,9 @@ export type CliOrgRefusal = {
 export type CliOrg = {
     id: string;
     name: string | null;
+    /**
+     * Your role's key in the organization, such as a `BuiltinRoleKey` value.
+     */
     role?: string | null;
     /**
      * Whether the CLI can switch to this organization.
@@ -295,7 +301,10 @@ export type CredentialPolicy = {
     removal_suspends_created: boolean;
     oauth_consent_admin_only: boolean;
     /**
-     * Who may use the CLI in the organization. Present only where CLI user logins exist.
+     * Who may use the CLI in the organization. Present only where CLI
+     * user logins exist. `owners_and_admins` admits the `owner`, `admin`
+     * and `operator` roles.
+     *
      */
     cli_access?: 'owners_and_admins' | 'all_members' | 'off';
     [key: string]: unknown;
@@ -474,8 +483,23 @@ export type KeyBuilder = {
     [key: string]: unknown;
 };
 
+/**
+ * The key of a built-in role. `operator` has every permission `admin`
+ * has except managing members, changing roles, sending invitations and
+ * billing. By default the CLI may be used by `owner`, `admin` and
+ * `operator`.
+ *
+ */
+export type BuiltinRoleKey = 'owner' | 'admin' | 'operator' | 'member' | 'restricted';
+
 export type Role = {
     id: string;
+    /**
+     * The role's key. A built-in role uses one of the `BuiltinRoleKey`
+     * values (`owner`, `admin`, `operator`, `member` or `restricted`);
+     * template and custom roles use their own keys.
+     *
+     */
     key: string;
     kind: 'builtin' | 'template' | 'custom';
     name: string;

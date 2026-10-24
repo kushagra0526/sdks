@@ -29,7 +29,7 @@ class CliOrg:
             name (None | str):
             available (bool): Whether the CLI can switch to this organization.
             reason (CliOrgRefusalReason | None):
-            role (None | str | Unset):
+            role (None | str | Unset): Your role's key in the organization, such as a `BuiltinRoleKey` value.
             message (None | str | Unset):
      """
 

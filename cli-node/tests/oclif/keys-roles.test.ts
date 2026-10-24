@@ -12,14 +12,12 @@ vi.mock("../../src/oclif/api-client.js", () => ({
 
 import { grantForbiddenHint } from "../../src/oclif/api-command.js";
 import {
-  buildKeyGrant,
+  cliOperationManifest,
+  DASHBOARD_ONLY_OPERATION_IDS,
+} from "../../src/oclif/cli-operations.js";
+import {
   formatKeyRows,
-  KeysCreateCommand,
   KeysListCommand,
-  KeysRevokeCommand,
-  KeysRotateCommand,
-  parseDurationSeconds,
-  parseExpires,
 } from "../../src/oclif/commands/keys.js";
 import {
   formatAccessMode,
@@ -31,7 +29,7 @@ import {
   extractGlobalOrgFlag,
   withoutOrgSelection,
 } from "../../src/oclif/global-org-flag.js";
-import { COMMANDS } from "../../src/oclif/index.js";
+import { COMMANDS, lookupOperation } from "../../src/oclif/index.js";
 
 const CLI_ROOT = resolve(import.meta.dirname, "../..");
 const KEY_ID = "0f0e0d0c-0b0a-4908-8706-050403020100";
@@ -131,53 +129,6 @@ describe("the global --org flag", () => {
 });
 
 describe("keys helpers", () => {
-  it("parses --expires durations and dates", () => {
-    const now = () => Date.parse("2026-10-01T00:00:00.000Z");
-    expect(parseExpires("30d", now)).toEqual({ expires_in_days: 30 });
-    expect(parseExpires("12h", now)).toEqual({
-      expires_at: "2026-10-01T12:00:00.000Z",
-    });
-    expect(parseExpires("2026-12-31", now)).toEqual({
-      expires_at: "2026-12-31T00:00:00.000Z",
-    });
-    expect(() => parseExpires("0d", now)).toThrow(/1d to 3650d/);
-    expect(() => parseExpires("2020-01-01", now)).toThrow(/future/);
-    expect(() => parseExpires("soon", now)).toThrow(/not a duration/);
-    expect(parseDurationSeconds("2w")).toBe(14 * 86400);
-    expect(parseDurationSeconds("x")).toBeNull();
-  });
-
-  it("builds the grant from flags", () => {
-    expect(buildKeyGrant({})).toBeUndefined();
-    expect(buildKeyGrant({ preset: "send_only" })).toBe("send_only");
-    expect(
-      buildKeyGrant({
-        permission: ["mail:read,mail:send"],
-        address: ["a@example.com"],
-      }),
-    ).toEqual({
-      preset: "custom",
-      permissions: ["mail:read", "mail:send"],
-      addresses: ["a@example.com"],
-    });
-    expect(
-      buildKeyGrant({ preset: "own_addresses", address: ["a@example.com"] }),
-    ).toEqual({
-      preset: "own_addresses",
-      addresses: ["a@example.com"],
-    });
-    expect(() =>
-      buildKeyGrant({ preset: "send_only", permission: ["mail:read"] }),
-    ).toThrow(/custom grant/);
-    expect(() => buildKeyGrant({ permission: ["all"] })).toThrow(
-      /not a permission/,
-    );
-    expect(() => buildKeyGrant({ address: ["a@example.com"] })).toThrow(
-      /narrow/,
-    );
-    expect(() => buildKeyGrant({ preset: "custom" })).toThrow(/at least one/);
-  });
-
   it("formats inventory rows", () => {
     expect(formatKeyRows([])).toBe("No API keys.");
     expect(
@@ -227,10 +178,7 @@ describe("keys commands", () => {
 
   it("are registered", () => {
     for (const id of [
-      "keys:create",
       "keys:list",
-      "keys:rotate",
-      "keys:revoke",
       "orgs",
       "org:use",
       "cli:list-cli-orgs",
@@ -243,101 +191,40 @@ describe("keys commands", () => {
     }
   });
 
-  it("creates a key with a step-up, a grant, an expiry and conditions, and prints the secret once", async () => {
-    const requests = useServer(() =>
-      Response.json(
-        {
-          success: true,
-          data: {
-            id: KEY_ID,
-            name: "ci",
-            key: "prim_secret_once",
-            key_prefix: "prim_sec",
-            grant: {
-              template: null,
-              credential_grant_id: "g1",
-              permissions: ["mail:read"],
-              mail_scope: {
-                addresses: ["a@example.com"],
-                domains: [],
-                depth: "raw",
-              },
-              resources: null,
-            },
-            expires_at: "2026-11-01T00:00:00.000Z",
-            conditions: null,
-            warnings: [
-              {
-                permission: "mail:read",
-                adds: ["threads:read"],
-                why: "Reading mail reads its threads.",
-                description: "",
-              },
-            ],
-          },
-        },
-        { status: 201 },
-      ),
+  it("offer no way to create, rotate, update or revoke a key", () => {
+    for (const id of [
+      "keys:create",
+      "keys:rotate",
+      "keys:revoke",
+      "keys:update",
+      ...DASHBOARD_ONLY_OPERATION_IDS,
+    ]) {
+      expect(COMMANDS[id], id).toBeUndefined();
+    }
+    for (const operationId of [
+      "createKey",
+      "rotateKey",
+      "updateKey",
+      "revokeCredential",
+    ]) {
+      expect(
+        cliOperationManifest.some(
+          (operation) => operation.operationId === operationId,
+        ),
+        operationId,
+      ).toBe(false);
+      expect(lookupOperation(operationId).match, operationId).toBeNull();
+    }
+    expect(
+      Object.keys(COMMANDS)
+        .filter((id) => id.startsWith("keys:"))
+        .sort(),
+    ).toEqual(["keys:get-key-builder", "keys:list"]);
+    const list = COMMANDS["keys:list"] as unknown as { description: string };
+    expect(list.description).toContain(
+      "API keys are created, rotated and revoked in the dashboard.",
     );
-    const result = await run(KeysCreateCommand, [
-      "--name",
-      "ci",
-      "--permission",
-      "mail:read",
-      "--address",
-      "a@example.com",
-      "--expires",
-      "30d",
-      "--ip",
-      "10.0.0.0/8",
-      "--rate-limit",
-      "60",
-      "--step-up",
-      "pstep_abc",
-    ]);
-    expect(result.error).toBeNull();
-    expect(result.stdout).toBe("prim_secret_once\n");
-    expect(result.stderr).toContain("Also added threads:read");
-    expect(result.stderr).toContain("shown once");
-    const request = requests[0] as Request;
-    expect(new URL(request.url).pathname).toBe("/v1/keys");
-    expect(request.headers.get("primitive-step-up")).toBe("pstep_abc");
-    expect(await request.json()).toEqual({
-      name: "ci",
-      grant: {
-        preset: "custom",
-        permissions: ["mail:read"],
-        addresses: ["a@example.com"],
-      },
-      expires_in_days: 30,
-      conditions: { ip_allowlist: ["10.0.0.0/8"], rate_limit_per_minute: 60 },
-    });
-  });
-
-  it("points to the dashboard step-up when the server asks for one", async () => {
-    useServer(() =>
-      Response.json(
-        {
-          success: false,
-          error: {
-            code: "step_up_required",
-            message:
-              "Creating a key needs the person to confirm in the dashboard.",
-            details: {
-              purpose: "keys.create",
-              step_up_url: "https://example.test/step-up",
-            },
-          },
-        },
-        { status: 403 },
-      ),
-    );
-    const result = await run(KeysCreateCommand, ["--preset", "send_only"]);
-    expect(result.exitCode).toBe(1);
-    expect(result.stdout).toBe("");
-    expect(result.stderr).toContain(
-      "Confirm in the dashboard (https://example.test/step-up), then rerun this command with --step-up <token>.",
-    );
+    expect(list.description).toContain("never a secret");
   });
 
   it("lists keys from the inventory and passes the server's refusal through", async () => {
@@ -359,56 +246,6 @@ describe("keys commands", () => {
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain("dashboard session");
   });
-
-  it("rotates with an overlap and revokes through the inventory", async () => {
-    const requests = useServer((request) =>
-      new URL(request.url).pathname.endsWith("/rotate")
-        ? Response.json({
-            success: true,
-            data: {
-              id: "k2",
-              key: "prim_new_secret",
-              key_prefix: "prim_new",
-              previous_key_id: KEY_ID,
-              previous_key_expires_at: "2026-10-02T00:00:00.000Z",
-            },
-          })
-        : Response.json({
-            success: true,
-            data: { revoked: 1, kind: "org_key", id: KEY_ID },
-          }),
-    );
-    const rotated = await run(KeysRotateCommand, [
-      KEY_ID,
-      "--overlap",
-      "1h",
-      "--step-up",
-      "pstep_x",
-    ]);
-    expect(rotated.stdout).toBe("prim_new_secret\n");
-    expect(await (requests[0] as Request).json()).toEqual({
-      overlap_seconds: 3600,
-    });
-    const revoked = await run(KeysRevokeCommand, [
-      KEY_ID,
-      "--reason",
-      "leaked",
-    ]);
-    expect(revoked.stdout).toBe(`Revoked key ${KEY_ID}.\n`);
-    expect(await (requests[1] as Request).json()).toEqual({
-      id: KEY_ID,
-      kind: "org_key",
-      reason: "leaked",
-    });
-    const bad = await run(KeysRotateCommand, ["not-a-uuid"]);
-    expect(String((bad.error as Error).message)).toContain("must be a UUID");
-    const badOverlap = await run(KeysRotateCommand, [
-      KEY_ID,
-      "--overlap",
-      "30d",
-    ]);
-    expect(String((badOverlap.error as Error).message)).toContain("up to 7d");
-  });
 });
 
 describe("roles commands", () => {
@@ -423,6 +260,14 @@ describe("roles commands", () => {
             kind: "builtin",
             name: "Owner",
             permissions: ["a:b"],
+            version: 1,
+          },
+          {
+            id: "r3",
+            key: "operator",
+            kind: "builtin",
+            name: "Operator",
+            permissions: ["a:b", "c:d"],
             version: 1,
           },
           {
@@ -446,6 +291,7 @@ describe("roles commands", () => {
     ).toBe(
       [
         "owner  builtin  Owner  1 permissions",
+        "operator  builtin  Operator  2 permissions",
         "custom_1  custom  Support  0 permissions  (r2)",
         "",
         "Templates:",
@@ -458,6 +304,12 @@ describe("roles commands", () => {
     expect(
       formatAccessMode({ changed_at: null, mode: "whole_org", version: 0 }),
     ).toBe("Access mode: whole_org (version 0).");
+  });
+
+  it("names the built-in roles, operator included, in roles list help", () => {
+    expect(RolesListCommand.description).toContain(
+      "owner, admin, operator, member and restricted",
+    );
   });
 
   it("prints the server's refusal where roles are not enabled", async () => {
