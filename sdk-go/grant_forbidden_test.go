@@ -88,3 +88,19 @@ func TestGrantForbiddenWithoutDetails(t *testing.T) {
 		t.Fatalf("unexpected: %+v", refused)
 	}
 }
+
+func TestNullDetailFieldsStillDecode(t *testing.T) {
+	err := sendWithResponse(t, http.StatusForbidden, `{"success":false,"error":{
+		"code":"forbidden",
+		"message":"You cannot change this delegation.",
+		"details":{"permission":null,"reason":null,"credential_kind":null}
+	}}`)
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) || apiErr.Code != "forbidden" {
+		t.Fatalf("expected a decoded forbidden APIError, got %T %v", err, err)
+	}
+	var refused *GrantForbiddenError
+	if errors.As(err, &refused) {
+		t.Fatal("forbidden must not read as GrantForbiddenError")
+	}
+}

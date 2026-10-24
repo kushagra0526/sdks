@@ -111,6 +111,13 @@ describe("the global --org flag", () => {
       argv: ["memories", "set", "--org", "--key", "k"],
       org: null,
     });
+    expect(
+      extractGlobalOrgFlag(["memories:search", "--org", "--prefix", "a"]),
+    ).toEqual({
+      ok: true,
+      argv: ["memories:search", "--org", "--prefix", "a"],
+      org: null,
+    });
     expect(extractGlobalOrgFlag(["whoami", "--org"]).ok).toBe(false);
     expect(extractGlobalOrgFlag(["whoami", "--org", "--json"]).ok).toBe(false);
     expect(extractGlobalOrgFlag(["whoami", "--org="]).ok).toBe(false);

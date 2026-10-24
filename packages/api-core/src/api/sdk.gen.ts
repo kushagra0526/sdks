@@ -3062,7 +3062,7 @@ export const getCredentialPolicy = <ThrowOnError extends boolean = false>(option
  * (such as a CLI login) needs a single-use step-up token from the
  * dashboard in the `Primitive-Step-Up` header; without one the answer
  * is `403 step_up_required` with `details.step_up_url`. A grant the
- * caller may not give, or one not available yet, answers
+ * caller may not give, or one the server does not offer, answers
  * `409 grant_not_available` with a `reason`.
  *
  */

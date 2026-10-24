@@ -319,10 +319,10 @@ GRANT_FORBIDDEN_CODE = "grant_forbidden"
 class GrantForbiddenError(PrimitiveAPIError):
     """A 403 ``grant_forbidden``: the credential's grant lacks a permission.
 
-    Only narrowed credentials receive it; refusals that existed before
-    narrowed grants keep their own codes. It is a ``PrimitiveAPIError``, so
-    existing ``except PrimitiveAPIError`` handlers keep catching it. Fields
-    the server omitted are ``None``.
+    Returned when the credential's grant does not include a permission the
+    operation requires; ``permission`` and ``reason`` say which one and why.
+    It is a ``PrimitiveAPIError``, so existing ``except PrimitiveAPIError``
+    handlers keep catching it. Fields the server omitted are ``None``.
     """
 
     def __init__(

@@ -220,9 +220,9 @@ function readGrantForbiddenDetails(
 }
 
 /**
- * A `403 grant_forbidden`: the credential's grant does not include a
- * permission the operation requires. Only narrowed credentials receive it;
- * refusals that existed before narrowed grants keep their own codes.
+ * A `403 grant_forbidden`: returned when the credential's grant does not
+ * include a permission the operation requires. `permission` and `reason`
+ * say which one and why.
  *
  * It is a `PrimitiveApiError`, so existing `instanceof PrimitiveApiError`
  * checks keep matching.

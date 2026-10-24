@@ -60783,11 +60783,11 @@ func (s *GrantForbiddenDetails) Encode(e *jx.Encoder) {
 func (s *GrantForbiddenDetails) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("permission")
-		e.Str(s.Permission)
+		s.Permission.Encode(e)
 	}
 	{
 		e.FieldStart("credential_kind")
-		e.Str(s.CredentialKind)
+		s.CredentialKind.Encode(e)
 	}
 	{
 		if s.GrantTemplateKey.Set {
@@ -60803,11 +60803,11 @@ func (s *GrantForbiddenDetails) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("catalog_version")
-		e.Str(s.CatalogVersion)
+		s.CatalogVersion.Encode(e)
 	}
 	{
 		e.FieldStart("reason")
-		e.Str(s.Reason)
+		s.Reason.Encode(e)
 	}
 	{
 		if s.Missing.Set {
@@ -60854,9 +60854,7 @@ func (s *GrantForbiddenDetails) Decode(d *jx.Decoder) error {
 		case "permission":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Permission = string(v)
-				if err != nil {
+				if err := s.Permission.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -60866,9 +60864,7 @@ func (s *GrantForbiddenDetails) Decode(d *jx.Decoder) error {
 		case "credential_kind":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.CredentialKind = string(v)
-				if err != nil {
+				if err := s.CredentialKind.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -60898,9 +60894,7 @@ func (s *GrantForbiddenDetails) Decode(d *jx.Decoder) error {
 		case "catalog_version":
 			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Str()
-				s.CatalogVersion = string(v)
-				if err != nil {
+				if err := s.CatalogVersion.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -60910,9 +60904,7 @@ func (s *GrantForbiddenDetails) Decode(d *jx.Decoder) error {
 		case "reason":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := d.Str()
-				s.Reason = string(v)
-				if err != nil {
+				if err := s.Reason.Decode(d); err != nil {
 					return err
 				}
 				return nil

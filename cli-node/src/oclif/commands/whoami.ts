@@ -171,6 +171,12 @@ class WhoamiCommand extends Command {
           configDir: this.config.configDir,
         });
 
+      if (auth.connectedAgent && flags.check !== undefined) {
+        throw new Errors.CLIError(
+          "--check needs a live account credential. A selected connected-agent profile is shown offline; rerun with `PRIMITIVE_AGENT_PROFILE=` in front of the command to check the member login.",
+          { exit: 1 },
+        );
+      }
       if (auth.connectedAgent) {
         const identity = auth.connectedAgent;
         const statusCommand = `${cliInvocation(process.argv[1])} agent connect --profile ${identity.profileName} --status --json`;
@@ -328,13 +334,16 @@ class WhoamiCommand extends Command {
       // Best effort, like the managed inbox: the organization, role and
       // grant. An older server answers without `grant`; any failure only
       // drops these lines.
+      // Skipped for --json without --grant, whose output does not use it.
       let identity: CallerIdentity | null = null;
-      try {
-        identity = (
-          await fetchCallerIdentity(apiClient.client, { include: "grant" })
-        ).identity;
-      } catch {
-        identity = null;
+      if (!flags.json || flags.grant) {
+        try {
+          identity = (
+            await fetchCallerIdentity(apiClient.client, { include: "grant" })
+          ).identity;
+        } catch {
+          identity = null;
+        }
       }
 
       if (flags.json) {
@@ -359,7 +368,9 @@ class WhoamiCommand extends Command {
       }
 
       const summary = [formatWhoamiSummary(account, managedInboxDomain)];
-      if (identity) {
+      // Only where the server reports a grant, so the summary from a server
+      // without grants reads exactly as before.
+      if (identity?.grant) {
         summary.push(
           ...formatGrantLines(identity, {
             orgName: auth.credentials?.org_name ?? null,

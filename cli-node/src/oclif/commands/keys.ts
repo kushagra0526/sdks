@@ -22,8 +22,8 @@ import {
 } from "../api-command.js";
 
 // Organization API keys. Creating and rotating a key from the CLI needs a
-// single-use step-up token from the dashboard (--step-up), because a CLI
-// login is an OAuth token and an OAuth token never manages keys on its own.
+// single-use step-up token from the dashboard (--step-up): a CLI login is an
+// OAuth token, and the server asks an OAuth token for a step-up here.
 // Listing and revoking go through the credential inventory, which the server
 // answers only for an owner or admin in a dashboard session; from the CLI
 // those commands show the server's refusal.
@@ -43,7 +43,7 @@ const UUID_PATTERN =
 
 const API_KEY_FLAG = Flags.string({
   description:
-    "Primitive API key override (defaults to PRIMITIVE_API_KEY or saved login credentials). Keys never manage keys, so this is for testing refusals.",
+    "Primitive API key override (defaults to PRIMITIVE_API_KEY or saved login credentials). The server does not let API keys create or rotate keys.",
   env: "PRIMITIVE_API_KEY",
   hidden: true,
 });
@@ -250,7 +250,7 @@ export class KeysCreateCommand extends Command {
 
   The secret is printed once on stdout; store it now. Details go to stderr.
 
-  From a CLI login, the server asks for a step-up: confirm in the dashboard, then pass the token it shows with --step-up. A grant you may not give, or one this server does not offer yet, is refused with its reason.`;
+  From a CLI login, the server asks for a step-up: confirm in the dashboard, then pass the token it shows with --step-up. A grant you may not give, or one this server does not offer, is refused with its reason.`;
 
   static summary = "Create an API key";
 

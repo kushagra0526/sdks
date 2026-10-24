@@ -15671,7 +15671,7 @@
         ],
         "operationId": "createKey",
         "summary": "Create an API key",
-        "description": "Creates an organization API key with a preset or a custom grant, an\noptional expiry and optional conditions. The secret is returned once,\nin `key`. A person's session may call this directly. An OAuth token\n(such as a CLI login) needs a single-use step-up token from the\ndashboard in the `Primitive-Step-Up` header; without one the answer\nis `403 step_up_required` with `details.step_up_url`. A grant the\ncaller may not give, or one not available yet, answers\n`409 grant_not_available` with a `reason`.\n",
+        "description": "Creates an organization API key with a preset or a custom grant, an\noptional expiry and optional conditions. The secret is returned once,\nin `key`. A person's session may call this directly. An OAuth token\n(such as a CLI login) needs a single-use step-up token from the\ndashboard in the `Primitive-Step-Up` header; without one the answer\nis `403 step_up_required` with `details.step_up_url`. A grant the\ncaller may not give, or one the server does not offer, answers\n`409 grant_not_available` with a `reason`.\n",
         "tags": [
           "Keys"
         ],
@@ -16711,36 +16711,43 @@
     "schemas": {
       "GrantForbiddenDetails": {
         "type": "object",
-        "description": "The `details` of a `403 grant_forbidden`: the permission the\noperation needed and the grant that did not hold it. A narrowed\ncredential receives this; existing refusals keep their own codes.\n",
+        "description": "The `details` of a `403 grant_forbidden`: the permission the\noperation needed and the grant that did not hold it.\n",
         "additionalProperties": true,
         "properties": {
           "permission": {
             "type": "string",
-            "description": "The permission the operation requires, for example `mail:send`."
+            "description": "The permission the operation requires, for example `mail:send`.",
+            "nullable": true
           },
           "credential_kind": {
             "type": "string",
-            "description": "The kind of credential that made the request, for example `org_key`."
+            "description": "The kind of credential that made the request, for example `org_key`.",
+            "nullable": true
           },
           "grant_template_key": {
             "type": "string",
-            "description": "The grant template, when the credential holds one."
+            "description": "The grant template, when the credential holds one.",
+            "nullable": true
           },
           "credential_grant_id": {
             "type": "string",
-            "description": "The concrete grant id, when the credential holds one."
+            "description": "The concrete grant id, when the credential holds one.",
+            "nullable": true
           },
           "catalog_version": {
             "type": "string",
-            "description": "Version of the permission catalog the decision used."
+            "description": "Version of the permission catalog the decision used.",
+            "nullable": true
           },
           "reason": {
             "type": "string",
-            "description": "Why the grant did not allow the operation: `permission_missing`,\n`required_permission_missing`, `mail_scope_requires_org`,\n`resource_outside_grant`, `credential_expired` or\n`unknown_permission`. New reasons may be added.\n"
+            "description": "Why the grant did not allow the operation: `permission_missing`,\n`required_permission_missing`, `mail_scope_requires_org`,\n`resource_outside_grant`, `credential_expired` or\n`unknown_permission`. New reasons may be added.\n",
+            "nullable": true
           },
           "missing": {
             "type": "string",
-            "description": "A further permission the operation also requires, when that is the one missing."
+            "description": "A further permission the operation also requires, when that is the one missing.",
+            "nullable": true
           },
           "resource": {
             "type": "object",
@@ -20133,31 +20140,38 @@
                   },
                   "permission": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden`. The permission the operation requires. See `GrantForbiddenDetails` for the full shape."
+                    "description": "Present when `code == grant_forbidden`. The permission the operation requires. See `GrantForbiddenDetails` for the full shape.",
+                    "nullable": true
                   },
                   "credential_kind": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden`. The kind of credential that was refused."
+                    "description": "Present when `code == grant_forbidden`. The kind of credential that was refused.",
+                    "nullable": true
                   },
                   "grant_template_key": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden` and the credential holds a template grant."
+                    "description": "Present when `code == grant_forbidden` and the credential holds a template grant.",
+                    "nullable": true
                   },
                   "credential_grant_id": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden` and the credential holds a concrete grant."
+                    "description": "Present when `code == grant_forbidden` and the credential holds a concrete grant.",
+                    "nullable": true
                   },
                   "catalog_version": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden`. Version of the permission catalog the decision used."
+                    "description": "Present when `code == grant_forbidden`. Version of the permission catalog the decision used.",
+                    "nullable": true
                   },
                   "reason": {
                     "type": "string",
-                    "description": "Present when `code == grant_forbidden` (why the grant refused) or `grant_not_available` (why the grant cannot be given)."
+                    "description": "Present when `code == grant_forbidden` (why the grant refused) or `grant_not_available` (why the grant cannot be given).",
+                    "nullable": true
                   },
                   "purpose": {
                     "type": "string",
-                    "description": "Present when `code == step_up_required`. What the step-up token must be issued for."
+                    "description": "Present when `code == step_up_required`. What the step-up token must be issued for.",
+                    "nullable": true
                   },
                   "step_up_url": {
                     "type": "string",
@@ -20279,7 +20293,7 @@
           },
           "requested_grant": {
             "type": "string",
-            "description": "Narrow the login's grant. Only `primitive:api` (the person's own\ngrant, as when omitted) is accepted for now; anything else answers\n`400 grant_not_available`.\n"
+            "description": "Narrow the login's grant. Only `primitive:api` (the person's own\ngrant, as when omitted) is accepted; anything else answers\n`400 grant_not_available`.\n"
           }
         }
       },

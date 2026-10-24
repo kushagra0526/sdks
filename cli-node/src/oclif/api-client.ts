@@ -226,7 +226,7 @@ function oauthErrorDescription(value: unknown): string | null {
   return typeof raw === "string" && raw.trim() ? raw : null;
 }
 
-/** The organization the global `--org` flag (or PRIMITIVE_ORG) selects, if any. */
+/** The organization the global `--org` flag (or PRIMITIVE_CLI_ORG) selects, if any. */
 export function selectedOrgFromEnv(env: Env = process.env): string | null {
   return env[ORG_SELECTION_ENV]?.trim() || null;
 }
@@ -266,7 +266,7 @@ export async function refreshStoredCliCredentials(params: {
   fetch?: FetchFn;
   now?: () => number;
   /**
-   * The organization to act in. Undefined reads `--org` (PRIMITIVE_ORG);
+   * The organization to act in. Undefined reads `--org` (PRIMITIVE_CLI_ORG);
    * null means the login's current organization.
    */
   orgSelection?: string | null;
@@ -428,13 +428,13 @@ export async function createAuthenticatedCliApiClient(params: {
   const orgSelection = selectedOrgFromEnv(params.env ?? process.env);
   if (orgSelection && auth.source !== "stored") {
     throw new Errors.CLIError(
-      `--org (PRIMITIVE_ORG=${orgSelection}) selects an organization for a saved \`primitive login\`. ${
+      `--org (PRIMITIVE_CLI_ORG=${orgSelection}) selects an organization for a saved \`primitive login\`. ${
         auth.source === "connected-profile"
           ? "A connected agent profile"
           : auth.source === "flag-or-env"
             ? "An API key"
             : "This command's credential"
-      } belongs to one organization; drop --org, or unset PRIMITIVE_ORG.`,
+      } belongs to one organization; drop --org, or unset PRIMITIVE_CLI_ORG.`,
       { exit: 1 },
     );
   }

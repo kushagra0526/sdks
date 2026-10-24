@@ -31,8 +31,7 @@ class PermissionCheck:
             allow (bool):
             reason (str | Unset): Why the permission is not allowed; same values as `grant_forbidden`.
             details (GrantForbiddenDetails | Unset): The `details` of a `403 grant_forbidden`: the permission the
-                operation needed and the grant that did not hold it. A narrowed
-                credential receives this; existing refusals keep their own codes.
+                operation needed and the grant that did not hold it.
             resource (PermissionCheckResource | Unset):
      """
 

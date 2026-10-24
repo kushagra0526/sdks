@@ -555,17 +555,53 @@ export async function fetchCliOrgs(params: {
   return data as unknown as CliOrgList;
 }
 
+/** How long a command waits for another CLI process to finish with the saved login. */
+const LOCK_WAIT_MS = 15_000;
+const LOCK_RETRY_MS = 100;
+
+function isLockBusy(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.startsWith(
+      "Another Primitive CLI credential operation is already in progress",
+    )
+  );
+}
+
+/**
+ * Run `fn` holding the credentials lock. Exchanges happen every few minutes
+ * and from parallel commands, so a busy lock is waited for (briefly) rather
+ * than refused; callers re-read the saved login once they hold it.
+ */
 async function withLock<T>(
-  params: { configDir: string; credentialsLockHeld?: boolean },
+  params: {
+    configDir: string;
+    credentialsLockHeld?: boolean;
+    now?: () => number;
+  },
   fn: () => Promise<T>,
 ): Promise<T> {
   let release: (() => void) | undefined;
   if (!params.credentialsLockHeld) {
-    try {
-      release = acquireCliCredentialsLock(params.configDir);
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : String(error);
-      throw new Errors.CLIError(detail, { exit: 1 });
+    const deadline = Date.now() + LOCK_WAIT_MS;
+    for (;;) {
+      try {
+        release = acquireCliCredentialsLock(params.configDir);
+        break;
+      } catch (error) {
+        if (isLockBusy(error) && Date.now() < deadline) {
+          await new Promise((done) => setTimeout(done, LOCK_RETRY_MS));
+          continue;
+        }
+        if (isLockBusy(error)) {
+          throw new Errors.CLIError(
+            "Another Primitive CLI command is still updating the saved login. Retry in a moment.",
+            { exit: 1 },
+          );
+        }
+        const detail = error instanceof Error ? error.message : String(error);
+        throw new Errors.CLIError(detail, { exit: 1 });
+      }
     }
   }
   try {
@@ -617,18 +653,10 @@ export async function resolveOrgSelection(params: {
 }): Promise<string> {
   const selection = params.selection.trim();
   if (isUuid(selection)) return selection.toLowerCase();
-  if (
-    params.credentials.org_name &&
-    params.credentials.org_name.toLowerCase() === selection.toLowerCase()
-  ) {
-    return params.credentials.org_id;
-  }
-  const grant = requireUserGrant(params.credentials);
-  for (const cached of Object.values(grant.org_tokens)) {
-    if ((cached.org_name ?? "").toLowerCase() === selection.toLowerCase()) {
-      return cached.org_id;
-    }
-  }
+  // Names are always matched against the full list, so a name two
+  // organizations share is refused rather than resolved to whichever one
+  // happens to be cached.
+  requireUserGrant(params.credentials);
   const list = await fetchCliOrgs(params);
   return matchOrg(selection, list.orgs).id;
 }
@@ -648,9 +676,24 @@ export async function ensureUserGrantSession(params: {
   headers?: Record<string, string>;
   now?: () => number;
   orgSelection?: string | null;
+  /**
+   * With `forceExchange`: the token the API just rejected. If another
+   * process has already replaced it, that replacement is used.
+   */
+  staleToken?: string;
 }): Promise<StoredCliCredentials> {
   const now = params.now ?? Date.now;
-  const selection = params.orgSelection?.trim() || null;
+  requireUserGrant(params.credentials);
+  const raw = params.orgSelection?.trim() || null;
+  const selection =
+    raw === null
+      ? null
+      : await resolveOrgSelection({
+          ...params,
+          credentials: params.credentials,
+          now,
+          selection: raw,
+        });
   const fast = usableOrgToken(params.credentials, selection, now);
   if (fast && !params.forceExchange) return fast;
 
@@ -660,19 +703,16 @@ export async function ensureUserGrantSession(params: {
       throw new Errors.CLIError(USER_LOGIN_EXPIRED_MESSAGE, { exit: 1 });
     }
     requireUserGrant(current);
-    const orgId = selection
-      ? await resolveOrgSelection({
-          ...params,
-          credentials: current,
-          credentialsLockHeld: true,
-          now,
-          selection,
-        })
-      : current.org_id || null;
+    const orgId = selection ?? (current.org_id || null);
     if (!orgId) throw new Errors.CLIError(NO_CURRENT_ORG_MESSAGE, { exit: 1 });
-    if (!params.forceExchange) {
-      const cached = usableOrgToken(current, orgId, now);
-      if (cached) return cached;
+    const saved = usableOrgToken(current, orgId, now);
+    if (
+      saved &&
+      (!params.forceExchange ||
+        (params.staleToken !== undefined &&
+          saved.access_token !== params.staleToken))
+    ) {
+      return saved;
     }
     const { credentials, org } = await exchangeAndSave({
       apiBaseUrl: params.apiBaseUrl,
@@ -695,19 +735,17 @@ function usableOrgToken(
 ): StoredCliCredentials | null {
   const grant = credentials.user_grant;
   if (!grant) return null;
+  // `selection` is an organization id (names are resolved first), or null
+  // for the current organization.
   const wanted = selection?.toLowerCase() ?? null;
   const matchesCurrent =
-    wanted === null ||
-    wanted === credentials.org_id.toLowerCase() ||
-    (credentials.org_name ?? "").toLowerCase() === wanted;
+    wanted === null || wanted === credentials.org_id.toLowerCase();
   if (matchesCurrent) {
     if (!credentials.org_id || !credentials.access_token) return null;
     return expiringSoon(credentials.expires_at, now) ? null : credentials;
   }
   const cached = Object.values(grant.org_tokens).find(
-    (token) =>
-      token.org_id.toLowerCase() === wanted ||
-      (token.org_name ?? "").toLowerCase() === wanted,
+    (token) => token.org_id.toLowerCase() === wanted,
   );
   if (!cached || expiringSoon(cached.expires_at, now)) return null;
   return credentialsForOrg(credentials, cached);
@@ -758,7 +796,9 @@ export async function switchCurrentOrg(params: {
  */
 export function reexchangingFetch(params: {
   base?: FetchFn;
-  reexchange: () => Promise<
+  reexchange: (
+    staleToken: string,
+  ) => Promise<
     | { ok: true; token: string }
     | { ok: false; status: number; code: string; message: string }
   >;
@@ -775,16 +815,16 @@ export function reexchangingFetch(params: {
     init?: Parameters<FetchFn>[1],
   ): Promise<Response> => {
     const request = new Request(input, init);
-    const sentToken = params.token.current;
+    const sent = /^Bearer\s+(\S+)$/i.exec(
+      request.headers.get("authorization") ?? "",
+    )?.[1];
     const retry = request.clone();
     const response = await base(request);
-    if (response.status !== 401) return response;
-    if (request.headers.get("authorization") !== `Bearer ${sentToken}`) {
-      return response;
-    }
-    // One exchange for every request that saw the same stale token.
-    if (params.token.current === sentToken) {
-      pending ??= params.reexchange().finally(() => {
+    if (response.status !== 401 || !sent) return response;
+    // One exchange for every request that saw the same stale token; a
+    // request whose token was already replaced just retries with the new one.
+    if (params.token.current === sent) {
+      pending ??= params.reexchange(sent).finally(() => {
         pending = null;
       });
       const outcome = await pending;
@@ -813,11 +853,13 @@ export function savedLoginReexchange(params: {
   headers?: Record<string, string>;
   now?: () => number;
   orgId: string;
-}): () => Promise<
+}): (
+  staleToken: string,
+) => Promise<
   | { ok: true; token: string }
   | { ok: false; status: number; code: string; message: string }
 > {
-  return async () => {
+  return async (staleToken) => {
     try {
       const current = loadCliCredentials(params.configDir);
       if (!current?.user_grant) {
@@ -837,6 +879,7 @@ export function savedLoginReexchange(params: {
         headers: params.headers,
         now: params.now,
         orgSelection: params.orgId,
+        staleToken,
       });
       return { ok: true, token: next.access_token };
     } catch (error) {

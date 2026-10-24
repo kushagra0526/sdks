@@ -43,6 +43,7 @@ import { ORG_SELECTION_ENV } from "../global-org-flag.js";
 import {
   CliOrgRefusedError,
   credentialsFromUserLogin,
+  fetchCliOrgs,
   switchCurrentOrg,
 } from "../user-grant.js";
 
@@ -188,8 +189,28 @@ export async function checkExistingLogin(params: {
     requestConfig.apiBaseUrl ?? params.credentials.api_base_url;
   let credentials = params.credentials;
   if (credentials.auth_method === "user_grant" && !credentials.org_id) {
-    // A login as yourself with no organization selected yet is still a login.
-    return { status: "valid" };
+    // A login as yourself with no organization selected yet: it is live if
+    // its identity token can still list organizations.
+    try {
+      await fetchCliOrgs({
+        apiBaseUrl: probeApiBaseUrl,
+        configDir: params.configDir,
+        credentials,
+        credentialsLockHeld: params.credentialsLockHeld,
+        headers: requestConfig.headers,
+      });
+      return { status: "valid" };
+    } catch (error) {
+      if (loadCliCredentials(params.configDir) === null) {
+        return { status: "removed_stale" };
+      }
+      return {
+        status: "blocked",
+        payload: error,
+        message:
+          "A saved Primitive CLI login exists, but the CLI could not verify it. Run `primitive logout` before logging in again.",
+      };
+    }
   }
   try {
     credentials = await refreshStoredCliCredentials({
@@ -338,7 +359,7 @@ export async function startLoginWithFallback(params: {
     if (code === "grant_not_available") {
       writeErrorWithHints(payload);
       throw cliError(
-        "This server does not offer CLI logins narrowed with --permission yet. Log in without --permission.",
+        "This server does not offer CLI logins narrowed with --permission. Log in without --permission.",
       );
     }
     if (code !== "validation_error" || attempt.kind === "org") break;

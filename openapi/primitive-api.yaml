@@ -12264,7 +12264,7 @@ paths:
         (such as a CLI login) needs a single-use step-up token from the
         dashboard in the `Primitive-Step-Up` header; without one the answer
         is `403 step_up_required` with `details.step_up_url`. A grant the
-        caller may not give, or one not available yet, answers
+        caller may not give, or one the server does not offer, answers
         `409 grant_not_available` with a `reason`.
       tags:
         - Keys
@@ -13029,34 +13029,47 @@ components:
       type: object
       description: |
         The `details` of a `403 grant_forbidden`: the permission the
-        operation needed and the grant that did not hold it. A narrowed
-        credential receives this; existing refusals keep their own codes.
+        operation needed and the grant that did not hold it.
       additionalProperties: true
       properties:
         permission:
-          type: string
+          type:
+            - string
+            - "null"
           description: The permission the operation requires, for example `mail:send`.
         credential_kind:
-          type: string
+          type:
+            - string
+            - "null"
           description: The kind of credential that made the request, for example `org_key`.
         grant_template_key:
-          type: string
+          type:
+            - string
+            - "null"
           description: The grant template, when the credential holds one.
         credential_grant_id:
-          type: string
+          type:
+            - string
+            - "null"
           description: The concrete grant id, when the credential holds one.
         catalog_version:
-          type: string
+          type:
+            - string
+            - "null"
           description: Version of the permission catalog the decision used.
         reason:
-          type: string
+          type:
+            - string
+            - "null"
           description: |
             Why the grant did not allow the operation: `permission_missing`,
             `required_permission_missing`, `mail_scope_requires_org`,
             `resource_outside_grant`, `credential_expired` or
             `unknown_permission`. New reasons may be added.
         missing:
-          type: string
+          type:
+            - string
+            - "null"
           description: A further permission the operation also requires, when that is the one missing.
         resource:
           type: object
@@ -15859,31 +15872,45 @@ components:
                   type: string
                   description: Effective idempotency key associated with the original request.
                 permission:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden`. The permission the
                     operation requires. See `GrantForbiddenDetails` for the full shape.
                 credential_kind:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden`. The kind of credential
                     that was refused.
                 grant_template_key:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden` and the credential holds
                     a template grant.
                 credential_grant_id:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden` and the credential holds
                     a concrete grant.
                 catalog_version:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden`. Version of the
                     permission catalog the decision used.
                 reason:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == grant_forbidden` (why the grant refused)
                     or `grant_not_available` (why the grant cannot be given).
                 purpose:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: Present when `code == step_up_required`. What the step-up
                     token must be issued for.
                 step_up_url:
@@ -15983,7 +16010,7 @@ components:
           type: string
           description: |
             Narrow the login's grant. Only `primitive:api` (the person's own
-            grant, as when omitted) is accepted for now; anything else answers
+            grant, as when omitted) is accepted; anything else answers
             `400 grant_not_available`.
     CliLoginStartResult:
       type: object

@@ -1506,7 +1506,8 @@ function stepUpHeaders(
  * Organization API keys, grouped under `client.keys`.
  *
  * Creating and rotating keys is for people: a dashboard session, or an OAuth
- * token with a step-up token (`stepUp`). An API key never manages keys. List
+ * token with a step-up token (`stepUp`). The server does not let API keys
+ * create or rotate keys. List
  * and revoke keys through `client.credentials`.
  */
 export class KeysResource {

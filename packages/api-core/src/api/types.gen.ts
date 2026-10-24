@@ -6,31 +6,30 @@ export type ClientOptions = {
 
 /**
  * The `details` of a `403 grant_forbidden`: the permission the
- * operation needed and the grant that did not hold it. A narrowed
- * credential receives this; existing refusals keep their own codes.
+ * operation needed and the grant that did not hold it.
  *
  */
 export type GrantForbiddenDetails = {
     /**
      * The permission the operation requires, for example `mail:send`.
      */
-    permission: string;
+    permission: string | null;
     /**
      * The kind of credential that made the request, for example `org_key`.
      */
-    credential_kind: string;
+    credential_kind: string | null;
     /**
      * The grant template, when the credential holds one.
      */
-    grant_template_key?: string;
+    grant_template_key?: string | null;
     /**
      * The concrete grant id, when the credential holds one.
      */
-    credential_grant_id?: string;
+    credential_grant_id?: string | null;
     /**
      * Version of the permission catalog the decision used.
      */
-    catalog_version: string;
+    catalog_version: string | null;
     /**
      * Why the grant did not allow the operation: `permission_missing`,
      * `required_permission_missing`, `mail_scope_requires_org`,
@@ -38,11 +37,11 @@ export type GrantForbiddenDetails = {
      * `unknown_permission`. New reasons may be added.
      *
      */
-    reason: string;
+    reason: string | null;
     /**
      * A further permission the operation also requires, when that is the one missing.
      */
-    missing?: string;
+    missing?: string | null;
     /**
      * The resource the decision was about, when it named one.
      */
@@ -1319,31 +1318,31 @@ export type ErrorResponse = {
             /**
              * Present when `code == grant_forbidden`. The permission the operation requires. See `GrantForbiddenDetails` for the full shape.
              */
-            permission?: string;
+            permission?: string | null;
             /**
              * Present when `code == grant_forbidden`. The kind of credential that was refused.
              */
-            credential_kind?: string;
+            credential_kind?: string | null;
             /**
              * Present when `code == grant_forbidden` and the credential holds a template grant.
              */
-            grant_template_key?: string;
+            grant_template_key?: string | null;
             /**
              * Present when `code == grant_forbidden` and the credential holds a concrete grant.
              */
-            credential_grant_id?: string;
+            credential_grant_id?: string | null;
             /**
              * Present when `code == grant_forbidden`. Version of the permission catalog the decision used.
              */
-            catalog_version?: string;
+            catalog_version?: string | null;
             /**
              * Present when `code == grant_forbidden` (why the grant refused) or `grant_not_available` (why the grant cannot be given).
              */
-            reason?: string;
+            reason?: string | null;
             /**
              * Present when `code == step_up_required`. What the step-up token must be issued for.
              */
-            purpose?: string;
+            purpose?: string | null;
             /**
              * Present when `code == step_up_required`. Dashboard page that issues a step-up token.
              */
@@ -1417,7 +1416,7 @@ export type StartCliLoginInput = {
     login_kind?: 'org' | 'user';
     /**
      * Narrow the login's grant. Only `primitive:api` (the person's own
-     * grant, as when omitted) is accepted for now; anything else answers
+     * grant, as when omitted) is accepted; anything else answers
      * `400 grant_not_available`.
      *
      */

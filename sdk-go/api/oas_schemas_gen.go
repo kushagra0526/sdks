@@ -21763,20 +21763,20 @@ type ErrorResponseErrorDetails struct {
 	ClientIdempotencyKey OptString `json:"client_idempotency_key"`
 	// Present when `code == grant_forbidden`. The permission the operation requires. See
 	// `GrantForbiddenDetails` for the full shape.
-	Permission OptString `json:"permission"`
+	Permission OptNilString `json:"permission"`
 	// Present when `code == grant_forbidden`. The kind of credential that was refused.
-	CredentialKind OptString `json:"credential_kind"`
+	CredentialKind OptNilString `json:"credential_kind"`
 	// Present when `code == grant_forbidden` and the credential holds a template grant.
-	GrantTemplateKey OptString `json:"grant_template_key"`
+	GrantTemplateKey OptNilString `json:"grant_template_key"`
 	// Present when `code == grant_forbidden` and the credential holds a concrete grant.
-	CredentialGrantID OptString `json:"credential_grant_id"`
+	CredentialGrantID OptNilString `json:"credential_grant_id"`
 	// Present when `code == grant_forbidden`. Version of the permission catalog the decision used.
-	CatalogVersion OptString `json:"catalog_version"`
+	CatalogVersion OptNilString `json:"catalog_version"`
 	// Present when `code == grant_forbidden` (why the grant refused) or `grant_not_available` (why the
 	// grant cannot be given).
-	Reason OptString `json:"reason"`
+	Reason OptNilString `json:"reason"`
 	// Present when `code == step_up_required`. What the step-up token must be issued for.
-	Purpose OptString `json:"purpose"`
+	Purpose OptNilString `json:"purpose"`
 	// Present when `code == step_up_required`. Dashboard page that issues a step-up token.
 	StepUpURL       OptNilString `json:"step_up_url"`
 	AdditionalProps ErrorResponseErrorDetailsAdditional
@@ -21808,37 +21808,37 @@ func (s *ErrorResponseErrorDetails) GetClientIdempotencyKey() OptString {
 }
 
 // GetPermission returns the value of Permission.
-func (s *ErrorResponseErrorDetails) GetPermission() OptString {
+func (s *ErrorResponseErrorDetails) GetPermission() OptNilString {
 	return s.Permission
 }
 
 // GetCredentialKind returns the value of CredentialKind.
-func (s *ErrorResponseErrorDetails) GetCredentialKind() OptString {
+func (s *ErrorResponseErrorDetails) GetCredentialKind() OptNilString {
 	return s.CredentialKind
 }
 
 // GetGrantTemplateKey returns the value of GrantTemplateKey.
-func (s *ErrorResponseErrorDetails) GetGrantTemplateKey() OptString {
+func (s *ErrorResponseErrorDetails) GetGrantTemplateKey() OptNilString {
 	return s.GrantTemplateKey
 }
 
 // GetCredentialGrantID returns the value of CredentialGrantID.
-func (s *ErrorResponseErrorDetails) GetCredentialGrantID() OptString {
+func (s *ErrorResponseErrorDetails) GetCredentialGrantID() OptNilString {
 	return s.CredentialGrantID
 }
 
 // GetCatalogVersion returns the value of CatalogVersion.
-func (s *ErrorResponseErrorDetails) GetCatalogVersion() OptString {
+func (s *ErrorResponseErrorDetails) GetCatalogVersion() OptNilString {
 	return s.CatalogVersion
 }
 
 // GetReason returns the value of Reason.
-func (s *ErrorResponseErrorDetails) GetReason() OptString {
+func (s *ErrorResponseErrorDetails) GetReason() OptNilString {
 	return s.Reason
 }
 
 // GetPurpose returns the value of Purpose.
-func (s *ErrorResponseErrorDetails) GetPurpose() OptString {
+func (s *ErrorResponseErrorDetails) GetPurpose() OptNilString {
 	return s.Purpose
 }
 
@@ -21878,37 +21878,37 @@ func (s *ErrorResponseErrorDetails) SetClientIdempotencyKey(val OptString) {
 }
 
 // SetPermission sets the value of Permission.
-func (s *ErrorResponseErrorDetails) SetPermission(val OptString) {
+func (s *ErrorResponseErrorDetails) SetPermission(val OptNilString) {
 	s.Permission = val
 }
 
 // SetCredentialKind sets the value of CredentialKind.
-func (s *ErrorResponseErrorDetails) SetCredentialKind(val OptString) {
+func (s *ErrorResponseErrorDetails) SetCredentialKind(val OptNilString) {
 	s.CredentialKind = val
 }
 
 // SetGrantTemplateKey sets the value of GrantTemplateKey.
-func (s *ErrorResponseErrorDetails) SetGrantTemplateKey(val OptString) {
+func (s *ErrorResponseErrorDetails) SetGrantTemplateKey(val OptNilString) {
 	s.GrantTemplateKey = val
 }
 
 // SetCredentialGrantID sets the value of CredentialGrantID.
-func (s *ErrorResponseErrorDetails) SetCredentialGrantID(val OptString) {
+func (s *ErrorResponseErrorDetails) SetCredentialGrantID(val OptNilString) {
 	s.CredentialGrantID = val
 }
 
 // SetCatalogVersion sets the value of CatalogVersion.
-func (s *ErrorResponseErrorDetails) SetCatalogVersion(val OptString) {
+func (s *ErrorResponseErrorDetails) SetCatalogVersion(val OptNilString) {
 	s.CatalogVersion = val
 }
 
 // SetReason sets the value of Reason.
-func (s *ErrorResponseErrorDetails) SetReason(val OptString) {
+func (s *ErrorResponseErrorDetails) SetReason(val OptNilString) {
 	s.Reason = val
 }
 
 // SetPurpose sets the value of Purpose.
-func (s *ErrorResponseErrorDetails) SetPurpose(val OptString) {
+func (s *ErrorResponseErrorDetails) SetPurpose(val OptNilString) {
 	s.Purpose = val
 }
 
@@ -25892,64 +25892,63 @@ func (s *GrantDescriptionAdditional) init() GrantDescriptionAdditional {
 }
 
 // The `details` of a `403 grant_forbidden`: the permission the
-// operation needed and the grant that did not hold it. A narrowed
-// credential receives this; existing refusals keep their own codes.
+// operation needed and the grant that did not hold it.
 // Ref: #/components/schemas/GrantForbiddenDetails
 type GrantForbiddenDetails struct {
 	// The permission the operation requires, for example `mail:send`.
-	Permission string `json:"permission"`
+	Permission NilString `json:"permission"`
 	// The kind of credential that made the request, for example `org_key`.
-	CredentialKind string `json:"credential_kind"`
+	CredentialKind NilString `json:"credential_kind"`
 	// The grant template, when the credential holds one.
-	GrantTemplateKey OptString `json:"grant_template_key"`
+	GrantTemplateKey OptNilString `json:"grant_template_key"`
 	// The concrete grant id, when the credential holds one.
-	CredentialGrantID OptString `json:"credential_grant_id"`
+	CredentialGrantID OptNilString `json:"credential_grant_id"`
 	// Version of the permission catalog the decision used.
-	CatalogVersion string `json:"catalog_version"`
+	CatalogVersion NilString `json:"catalog_version"`
 	// Why the grant did not allow the operation: `permission_missing`,
 	// `required_permission_missing`, `mail_scope_requires_org`,
 	// `resource_outside_grant`, `credential_expired` or
 	// `unknown_permission`. New reasons may be added.
-	Reason string `json:"reason"`
+	Reason NilString `json:"reason"`
 	// A further permission the operation also requires, when that is the one missing.
-	Missing OptString `json:"missing"`
+	Missing OptNilString `json:"missing"`
 	// The resource the decision was about, when it named one.
 	Resource        OptGrantForbiddenDetailsResource `json:"resource"`
 	AdditionalProps GrantForbiddenDetailsAdditional
 }
 
 // GetPermission returns the value of Permission.
-func (s *GrantForbiddenDetails) GetPermission() string {
+func (s *GrantForbiddenDetails) GetPermission() NilString {
 	return s.Permission
 }
 
 // GetCredentialKind returns the value of CredentialKind.
-func (s *GrantForbiddenDetails) GetCredentialKind() string {
+func (s *GrantForbiddenDetails) GetCredentialKind() NilString {
 	return s.CredentialKind
 }
 
 // GetGrantTemplateKey returns the value of GrantTemplateKey.
-func (s *GrantForbiddenDetails) GetGrantTemplateKey() OptString {
+func (s *GrantForbiddenDetails) GetGrantTemplateKey() OptNilString {
 	return s.GrantTemplateKey
 }
 
 // GetCredentialGrantID returns the value of CredentialGrantID.
-func (s *GrantForbiddenDetails) GetCredentialGrantID() OptString {
+func (s *GrantForbiddenDetails) GetCredentialGrantID() OptNilString {
 	return s.CredentialGrantID
 }
 
 // GetCatalogVersion returns the value of CatalogVersion.
-func (s *GrantForbiddenDetails) GetCatalogVersion() string {
+func (s *GrantForbiddenDetails) GetCatalogVersion() NilString {
 	return s.CatalogVersion
 }
 
 // GetReason returns the value of Reason.
-func (s *GrantForbiddenDetails) GetReason() string {
+func (s *GrantForbiddenDetails) GetReason() NilString {
 	return s.Reason
 }
 
 // GetMissing returns the value of Missing.
-func (s *GrantForbiddenDetails) GetMissing() OptString {
+func (s *GrantForbiddenDetails) GetMissing() OptNilString {
 	return s.Missing
 }
 
@@ -25964,37 +25963,37 @@ func (s *GrantForbiddenDetails) GetAdditionalProps() GrantForbiddenDetailsAdditi
 }
 
 // SetPermission sets the value of Permission.
-func (s *GrantForbiddenDetails) SetPermission(val string) {
+func (s *GrantForbiddenDetails) SetPermission(val NilString) {
 	s.Permission = val
 }
 
 // SetCredentialKind sets the value of CredentialKind.
-func (s *GrantForbiddenDetails) SetCredentialKind(val string) {
+func (s *GrantForbiddenDetails) SetCredentialKind(val NilString) {
 	s.CredentialKind = val
 }
 
 // SetGrantTemplateKey sets the value of GrantTemplateKey.
-func (s *GrantForbiddenDetails) SetGrantTemplateKey(val OptString) {
+func (s *GrantForbiddenDetails) SetGrantTemplateKey(val OptNilString) {
 	s.GrantTemplateKey = val
 }
 
 // SetCredentialGrantID sets the value of CredentialGrantID.
-func (s *GrantForbiddenDetails) SetCredentialGrantID(val OptString) {
+func (s *GrantForbiddenDetails) SetCredentialGrantID(val OptNilString) {
 	s.CredentialGrantID = val
 }
 
 // SetCatalogVersion sets the value of CatalogVersion.
-func (s *GrantForbiddenDetails) SetCatalogVersion(val string) {
+func (s *GrantForbiddenDetails) SetCatalogVersion(val NilString) {
 	s.CatalogVersion = val
 }
 
 // SetReason sets the value of Reason.
-func (s *GrantForbiddenDetails) SetReason(val string) {
+func (s *GrantForbiddenDetails) SetReason(val NilString) {
 	s.Reason = val
 }
 
 // SetMissing sets the value of Missing.
-func (s *GrantForbiddenDetails) SetMissing(val OptString) {
+func (s *GrantForbiddenDetails) SetMissing(val OptNilString) {
 	s.Missing = val
 }
 
@@ -53819,7 +53818,7 @@ type StartCliLoginInput struct {
 	// `400 validation_error`; clients then retry without the field.
 	LoginKind OptStartCliLoginInputLoginKind `json:"login_kind"`
 	// Narrow the login's grant. Only `primitive:api` (the person's own
-	// grant, as when omitted) is accepted for now; anything else answers
+	// grant, as when omitted) is accepted; anything else answers
 	// `400 grant_not_available`.
 	RequestedGrant OptString `json:"requested_grant"`
 }

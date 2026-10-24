@@ -12,6 +12,7 @@ import { getAccount } from "@primitivedotdev/api-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createAuthenticatedCliApiClient } from "../../src/oclif/api-client.js";
 import {
+  acquireCliCredentialsLock,
   credentialsPath,
   loadCliCredentials,
   type StoredCliCredentials,
@@ -499,7 +500,7 @@ describe("CLI login as the person, against a mock server", () => {
     configDir = mkdtempSync(join(tmpdir(), "primitive-user-grant-"));
     vi.stubEnv("PRIMITIVE_CONFIG_DIR", configDir);
     vi.stubEnv("PRIMITIVE_AGENT_PROFILE", "");
-    vi.stubEnv("PRIMITIVE_ORG", "");
+    vi.stubEnv("PRIMITIVE_CLI_ORG", "");
     vi.stubEnv("PRIMITIVE_API_KEY", "");
     vi.stubEnv("PRIMITIVE_API_BASE_URL", "");
   });
@@ -606,7 +607,7 @@ describe("CLI login as the person, against a mock server", () => {
   });
 
   it("logs in as the person end to end and switches with --org after the login", async () => {
-    vi.stubEnv("PRIMITIVE_ORG", "Beta");
+    vi.stubEnv("PRIMITIVE_CLI_ORG", "Beta");
     const result = await capture(() =>
       LoginCommand.run(
         [
@@ -781,12 +782,36 @@ describe("CLI login as the person, against a mock server", () => {
     expect(loadCliCredentials(configDir)?.org_id).toBe(OWNER_ORG);
   });
 
+  it("waits for another command holding the credentials lock, then uses its exchange", async () => {
+    const stale = mock.issueOrgToken(OWNER_ORG);
+    saveCliCredentials(configDir, userLogin(mock, stale));
+    const release = acquireCliCredentialsLock(configDir, {
+      installSignalHandlers: false,
+    });
+    // Another process exchanges while holding the lock, then releases it.
+    const fresh = mock.issueOrgToken(OWNER_ORG);
+    setTimeout(() => {
+      const current = loadCliCredentials(configDir) as StoredCliCredentials;
+      saveCliCredentials(configDir, { ...current, access_token: fresh });
+      release();
+    }, 300);
+    const next = await ensureUserGrantSession({
+      apiBaseUrl: mock.base,
+      configDir,
+      credentials: loadCliCredentials(configDir) as StoredCliCredentials,
+      forceExchange: true,
+      staleToken: stale,
+    });
+    expect(next.access_token).toBe(fresh);
+    expect(mock.exchangeCount).toBe(0);
+  });
+
   it("acts in another organization for one command with --org, by name, and caches its token", async () => {
     saveCliCredentials(
       configDir,
       userLogin(mock, mock.issueOrgToken(OWNER_ORG)),
     );
-    vi.stubEnv("PRIMITIVE_ORG", "beta");
+    vi.stubEnv("PRIMITIVE_CLI_ORG", "beta");
     const first = await createAuthenticatedCliApiClient({ configDir });
     expect(first.auth.credentials?.org_id).toBe(MEMBER_ORG);
     expect(mock.requests).toContain("GET /v1/cli/orgs");
@@ -868,11 +893,11 @@ describe("CLI login as the person, against a mock server", () => {
     saveCliCredentials(configDir, orgBound);
     const plain = await createAuthenticatedCliApiClient({ configDir });
     expect(plain.auth.credentials).toEqual(orgBound);
-    vi.stubEnv("PRIMITIVE_ORG", "acme");
+    vi.stubEnv("PRIMITIVE_CLI_ORG", "acme");
     await expect(
       createAuthenticatedCliApiClient({ configDir }),
     ).resolves.toBeTruthy();
-    vi.stubEnv("PRIMITIVE_ORG", MEMBER_ORG);
+    vi.stubEnv("PRIMITIVE_CLI_ORG", MEMBER_ORG);
     await expect(
       createAuthenticatedCliApiClient({ configDir }),
     ).rejects.toThrow(/bound to organization Acme/);
@@ -880,7 +905,7 @@ describe("CLI login as the person, against a mock server", () => {
   });
 
   it("refuses --org with an API key", async () => {
-    vi.stubEnv("PRIMITIVE_ORG", MEMBER_ORG);
+    vi.stubEnv("PRIMITIVE_CLI_ORG", MEMBER_ORG);
     await expect(
       createAuthenticatedCliApiClient({ apiKey: "prim_key", configDir }),
     ).rejects.toThrow(/An API key belongs to one organization/);

@@ -642,35 +642,56 @@ export const operationManifest: PrimitiveOperationManifest[] = [
             },
             "details": {
               "type": "object",
-              "description": "The `details` of a `403 grant_forbidden`: the permission the\noperation needed and the grant that did not hold it. A narrowed\ncredential receives this; existing refusals keep their own codes.\n",
+              "description": "The `details` of a `403 grant_forbidden`: the permission the\noperation needed and the grant that did not hold it.\n",
               "additionalProperties": true,
               "properties": {
                 "permission": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "The permission the operation requires, for example `mail:send`."
                 },
                 "credential_kind": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "The kind of credential that made the request, for example `org_key`."
                 },
                 "grant_template_key": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "The grant template, when the credential holds one."
                 },
                 "credential_grant_id": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "The concrete grant id, when the credential holds one."
                 },
                 "catalog_version": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "Version of the permission catalog the decision used."
                 },
                 "reason": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "Why the grant did not allow the operation: `permission_missing`,\n`required_permission_missing`, `mail_scope_requires_org`,\n`resource_outside_grant`, `credential_expired` or\n`unknown_permission`. New reasons may be added.\n"
                 },
                 "missing": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "description": "A further permission the operation also requires, when that is the one missing."
                 },
                 "resource": {
@@ -5205,7 +5226,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
         },
         "requested_grant": {
           "type": "string",
-          "description": "Narrow the login's grant. Only `primitive:api` (the person's own\ngrant, as when omitted) is accepted for now; anything else answers\n`400 grant_not_available`.\n"
+          "description": "Narrow the login's grant. Only `primitive:api` (the person's own\ngrant, as when omitted) is accepted; anything else answers\n`400 grant_not_available`.\n"
         }
       }
     },
@@ -16152,7 +16173,7 @@ export const operationManifest: PrimitiveOperationManifest[] = [
     "binaryResponse": false,
     "bodyRequired": true,
     "command": "create-key",
-    "description": "Creates an organization API key with a preset or a custom grant, an\noptional expiry and optional conditions. The secret is returned once,\nin `key`. A person's session may call this directly. An OAuth token\n(such as a CLI login) needs a single-use step-up token from the\ndashboard in the `Primitive-Step-Up` header; without one the answer\nis `403 step_up_required` with `details.step_up_url`. A grant the\ncaller may not give, or one not available yet, answers\n`409 grant_not_available` with a `reason`.\n",
+    "description": "Creates an organization API key with a preset or a custom grant, an\noptional expiry and optional conditions. The secret is returned once,\nin `key`. A person's session may call this directly. An OAuth token\n(such as a CLI login) needs a single-use step-up token from the\ndashboard in the `Primitive-Step-Up` header; without one the answer\nis `403 step_up_required` with `details.step_up_url`. A grant the\ncaller may not give, or one the server does not offer, answers\n`409 grant_not_available` with a `reason`.\n",
     "hasJsonBody": true,
     "method": "POST",
     "operationId": "createKey",

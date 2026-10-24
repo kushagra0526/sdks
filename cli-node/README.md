@@ -236,7 +236,7 @@ primitive org use acme         # switch by name or id
 primitive emails list --org beta   # act in another organization for one command
 ```
 
-`--org` works on every command (set `PRIMITIVE_ORG` for the same effect; `primitive memories` keeps its own `--org` flag for organization-scoped memories). Each organization decides who may use the CLI there; when it refuses, `primitive orgs` and `primitive org use` show the reason (`not_a_member`, `cli_access_disabled_by_org`, `role_insufficient` or `cli_access_revoked`). The CLI keeps a short-lived access token per organization and gets a new one when it expires or is rejected. `primitive logout` signs you out of every organization.
+`--org` works on every command (set `PRIMITIVE_CLI_ORG` for the same effect; `primitive memories` keeps its own `--org` flag for organization-scoped memories). Each organization decides who may use the CLI there; when it refuses, `primitive orgs` and `primitive org use` show the reason (`not_a_member`, `cli_access_disabled_by_org`, `role_insufficient` or `cli_access_revoked`). The CLI keeps a short-lived access token per organization and gets a new one when it expires or is rejected. `primitive logout` signs you out of every organization.
 
 Against a server without organization switching, and for logins saved by earlier CLI versions, the login stays bound to one organization and works as before. `--org` naming a different organization is refused for such a login, for an API key and for a connected agent profile.
 

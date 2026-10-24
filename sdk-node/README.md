@@ -270,7 +270,8 @@ const key = await client.keys.create(
 ```
 
 Managing keys is for people: a dashboard session, or an OAuth token with a
-step-up token from the dashboard. API keys never manage keys.
+step-up token from the dashboard. The server does not let API keys create or
+rotate keys.
 `client.credentials` reads the credential inventory, audit events and policy,
 and `client.roles` reads roles, groups, mailbox access and the access mode.
 Routes a server has not enabled answer `404 feature_disabled`.

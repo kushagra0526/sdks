@@ -34,7 +34,7 @@ class StartCliLoginInput:
                 (see `CliUserLoginPollResult`). Servers without this answer
                 `400 validation_error`; clients then retry without the field.
             requested_grant (str | Unset): Narrow the login's grant. Only `primitive:api` (the person's own
-                grant, as when omitted) is accepted for now; anything else answers
+                grant, as when omitted) is accepted; anything else answers
                 `400 grant_not_available`.
      """
 

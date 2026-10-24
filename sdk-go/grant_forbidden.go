@@ -11,10 +11,9 @@ type GrantForbiddenResource struct {
 	ID   string
 }
 
-// GrantForbiddenError is a 403 grant_forbidden: the credential's grant does
-// not include a permission the operation requires. Only narrowed credentials
-// receive it; refusals that existed before narrowed grants keep their own
-// codes.
+// GrantForbiddenError is a 403 grant_forbidden, returned when the
+// credential's grant does not include a permission the operation requires.
+// Permission and Reason say which one and why.
 //
 // Every [APIError] with this code can be read as a GrantForbiddenError with
 // errors.As, and errors.As with an [APIError] target keeps working:
