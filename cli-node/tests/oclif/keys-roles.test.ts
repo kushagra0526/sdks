@@ -27,7 +27,10 @@ import {
   formatRoles,
   RolesListCommand,
 } from "../../src/oclif/commands/roles.js";
-import { extractGlobalOrgFlag } from "../../src/oclif/global-org-flag.js";
+import {
+  extractGlobalOrgFlag,
+  withoutOrgSelection,
+} from "../../src/oclif/global-org-flag.js";
 import { COMMANDS } from "../../src/oclif/index.js";
 
 const CLI_ROOT = resolve(import.meta.dirname, "../..");
@@ -119,6 +122,9 @@ describe("the global --org flag", () => {
       org: null,
     });
     expect(extractGlobalOrgFlag(["whoami", "--org"]).ok).toBe(false);
+    expect(withoutOrgSelection({ A: "1", PRIMITIVE_CLI_ORG: "beta" })).toEqual({
+      A: "1",
+    });
     expect(extractGlobalOrgFlag(["whoami", "--org", "--json"]).ok).toBe(false);
     expect(extractGlobalOrgFlag(["whoami", "--org="]).ok).toBe(false);
   });

@@ -75,3 +75,13 @@ export function applyGlobalOrgFlag(
   }
   return null;
 }
+
+/**
+ * `env` without an organization selection, for a child that acts as a
+ * connected agent profile: the profile acts in its own organization.
+ */
+export function withoutOrgSelection(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const next = { ...env };
+  delete next[ORG_SELECTION_ENV];
+  return next;
+}
