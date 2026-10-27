@@ -16,4 +16,5 @@ const (
 	whsecPrefix                          = "whsec_"
 	defaultToleranceSeconds        int64 = 5 * 60
 	futureToleranceSeconds         int64 = 60
+	maxSafeInteger                 int64 = 1<<53 - 1 // largest header timestamp the Node SDK accepts
 )

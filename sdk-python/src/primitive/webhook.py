@@ -48,7 +48,9 @@ _WHSEC_PREFIX = "whsec_"
 _BASE64_PATTERN = re.compile(r"^[A-Za-z0-9+/]*={0,2}$")
 DEFAULT_TOLERANCE_SECONDS = 5 * 60
 FUTURE_TOLERANCE_SECONDS = 60
+MAX_SAFE_INTEGER = 2**53 - 1  # largest timestamp the Node SDK accepts
 HEX_PATTERN = re.compile(r"^[0-9a-f]+$", re.IGNORECASE)
+TIMESTAMP_PATTERN = re.compile(r"-?[0-9]+")
 _POSITION_RE = re.compile(r"char\s+(\d+)")
 _PRETTY_PRINTED_JSON_RE = re.compile(r"^\s*\{[\s\S]*\n\s{2,}")
 _UNDEFINED = object()
@@ -194,10 +196,13 @@ def _parse_signature_header(signature_header: str) -> tuple[int, list[str]] | No
         if not key or not value:
             continue
         if key == "t":
-            try:
-                timestamp = int(value)
-            except ValueError:
+            # ASCII digits only (a leading "-" is kept so a negative timestamp is still TIMESTAMP_OUT_OF_RANGE):
+            # int() alone would also take "+5", "1_000" and non-ASCII digits, which the Node SDK rejects.
+            if not TIMESTAMP_PATTERN.fullmatch(value):
                 continue
+            parsed = int(value)
+            if parsed <= MAX_SAFE_INTEGER:
+                timestamp = parsed
         elif key == "v1":
             signatures.append(value)
 

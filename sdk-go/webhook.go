@@ -83,15 +83,20 @@ func parseSignatureHeader(signatureHeader string) (int64, []string, bool) {
 	hasTimestamp := false
 	signatures := []string{}
 	for _, part := range strings.Split(signatureHeader, ",") {
-		part = strings.TrimSpace(part)
 		key, value, found := strings.Cut(part, "=")
-		if !found || value == "" {
+		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
+		if !found || key == "" || value == "" {
 			continue
 		}
 		switch key {
 		case "t":
+			// ASCII digits only (a leading "-" is kept so a negative timestamp is still TIMESTAMP_OUT_OF_RANGE):
+			// ParseInt alone would also take "+5", which the Node SDK rejects.
+			if strings.Trim(strings.TrimPrefix(value, "-"), "0123456789") != "" || value == "-" {
+				continue
+			}
 			t, err := strconv.ParseInt(value, 10, 64)
-			if err == nil {
+			if err == nil && t <= maxSafeInteger {
 				timestamp = t
 				hasTimestamp = true
 			}

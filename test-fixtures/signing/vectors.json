@@ -110,6 +110,60 @@
       "now_seconds": 1797588005,
       "expected_v1": "4f93d0ceb7f6fdd4a71f4d6beb08a5624a753a376841fd4aa93c62ecaa42c9b2",
       "expected_valid": true
+    },
+    {
+      "name": "header_timestamp_with_plus_sign",
+      "raw_body": "{}",
+      "secret": "secret",
+      "timestamp": 1734567890,
+      "now_seconds": 1734567890,
+      "expected_v1": "fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "signature_header": "t=+1734567890,v1=fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "expected_valid": false,
+      "expected_error_code": "INVALID_SIGNATURE_HEADER"
+    },
+    {
+      "name": "header_timestamp_with_underscores",
+      "raw_body": "{}",
+      "secret": "secret",
+      "timestamp": 1734567890,
+      "now_seconds": 1734567890,
+      "expected_v1": "fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "signature_header": "t=1_734_567_890,v1=fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "expected_valid": false,
+      "expected_error_code": "INVALID_SIGNATURE_HEADER"
+    },
+    {
+      "name": "header_timestamp_with_non_ascii_digits",
+      "raw_body": "{}",
+      "secret": "secret",
+      "timestamp": 1734567890,
+      "now_seconds": 1734567890,
+      "expected_v1": "fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "signature_header": "t=\uff11\uff17\uff13\uff14\uff15\uff16\uff17\uff18\uff19\uff10,v1=fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "expected_valid": false,
+      "expected_error_code": "INVALID_SIGNATURE_HEADER"
+    },
+    {
+      "name": "header_timestamp_beyond_safe_integer",
+      "raw_body": "{}",
+      "secret": "secret",
+      "timestamp": 1734567890,
+      "now_seconds": 1734567890,
+      "expected_v1": "fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "signature_header": "t=9007199254740993,v1=fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "expected_valid": false,
+      "expected_error_code": "INVALID_SIGNATURE_HEADER"
+    },
+    {
+      "name": "header_spaces_around_equals",
+      "raw_body": "{}",
+      "secret": "secret",
+      "timestamp": 1734567890,
+      "now_seconds": 1734567890,
+      "expected_v1": "fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c",
+      "signature_header": " t = 1734567890 , v1 = fc532f83b7f866bb42b6552b177c4c803044107b8d97ca545fb29524cfd6116c ",
+      "expected_valid": true
     }
   ]
 }
